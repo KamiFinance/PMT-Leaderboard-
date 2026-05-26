@@ -126,8 +126,10 @@ body {
 }
 
 .stat-card {
-  background: var(--bg1);
-  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius);
   padding: 16px 18px;
   text-align: center;
@@ -150,8 +152,10 @@ body {
 
 /* ── Card / Table ─────────────────────────────────────── */
 .card {
-  background: var(--bg1);
-  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -377,8 +381,10 @@ body {
 
 /* ── Login card ───────────────────────────────────────── */
 .login-card {
-  background: var(--bg1);
-  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: 16px;
   padding: 36px 30px;
   width: 100%;
