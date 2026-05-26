@@ -12,7 +12,7 @@ input{font:inherit}
   --gold-glow:    rgba(255,165,0,0.12);
   --bg:           #0A0A0A;
   --surface:      rgba(255,165,0,0.03);
-  --surface-b:    rgba(255,165,0,0.06);
+  --surface-b:    rgba(255,255,255,0.065);
   --text:         #FFFFFF;
   --text2:        rgba(255,255,255,0.52);
   --text3:        rgba(255,255,255,0.27);
@@ -27,12 +27,8 @@ html,body,#root{height:100%}
 body{
   background: var(--bg);
   background-image:
-    /* top-center warm amber glow — matches image top area */
-    radial-gradient(ellipse 90% 55% at 58% -5%,  rgba(80, 44, 2, 0.95)  0%, rgba(40, 22, 1, 0.6) 40%, transparent 68%),
-    /* top-left warm bleed */
-    radial-gradient(ellipse 50% 35% at 15% 5%,   rgba(55, 30, 2, 0.7)   0%, transparent 55%),
-    /* subtle bottom-right warmth */
-    radial-gradient(ellipse 40% 25% at 88% 95%,  rgba(25, 14, 1, 0.4)   0%, transparent 60%);
+    radial-gradient(ellipse 80% 45% at 65% 0%, rgba(255,165,0,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 25% at 85% 90%, rgba(255,140,0,0.03) 0%, transparent 50%);
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 400;
@@ -195,7 +191,7 @@ body{
 
 .stat-card{
   display:flex;align-items:center;gap:16px;
-  background:rgba(14,10,3,0.88);
+  background:rgba(18,16,10,0.9);
   border:1px solid rgba(255,255,255,0.07);
   border-radius:var(--r);
   padding:20px 18px;
@@ -237,7 +233,7 @@ body{
 
 /* ── Leaderboard container ────────────────────────────────────────────── */
 .lb-wrap{
-  background:rgba(10,8,2,0.82);
+  background:rgba(13,12,8,0.8);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:16px;
   overflow:hidden;
