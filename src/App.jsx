@@ -195,7 +195,7 @@ export default function App() {
       <div className="page">
         <header className="header">
           <div className="header-left">
-            <div className="coin">🪙</div>
+            <img src="./PMT-logo.png" alt="PMT" className="coin-logo" />
             <div>
               <h1 className="site-title">PMT Millionaires Leaderboard</h1>
               <p className="site-sub">Admin — Wallet Manager</p>
@@ -250,7 +250,7 @@ export default function App() {
     <div className="page">
       <header className="header">
         <div className="header-left">
-          <div className="coin">🪙</div>
+          <img src="./PMT-logo.png" alt="PMT" className="coin-logo" />
           <div>
             <h1 className="site-title">PMT Millionaires Leaderboard</h1>
             <p className="site-sub">BNB Smart Chain · Live balances</p>
