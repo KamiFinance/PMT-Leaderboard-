@@ -11,11 +11,17 @@ const RAW_WALLETS_URL = `https://raw.githubusercontent.com/${REPO}/main/${WALLET
 const GITHUB_API_URL  = `https://api.github.com/repos/${REPO}/contents/${WALLETS_FILE}`
 const TOKEN_KEY       = 'pmt_gh_token'
 
-const shortenAddr = (a) => `${a.slice(0,6)}···${a.slice(-4)}`
+const shortenAddr = (a) => `${a.slice(0,6)}...${a.slice(-4)}`
 const fmt = (n) => {
   if (n >= 1e9) return `${(n/1e9).toFixed(2)}B`
   if (n >= 1e6) return `${(n/1e6).toFixed(2)}M`
   return Math.round(n).toLocaleString()
+}
+const fmtUsd = (n, price) => {
+  if (!price || price <= 0) return null
+  const usd = n * price
+  if (usd >= 1e6) return `$${(usd/1e6).toFixed(2)}M USD`
+  return `$${Math.round(usd).toLocaleString()} USD`
 }
 const avatarHue = (addr) => parseInt(addr.slice(2,6),16) % 360
 
@@ -39,7 +45,21 @@ async function fetchBalance(addr,dec) {
     return Number(raw/d)+Number(raw%d)/Number(d)
   } catch { return 0 }
 }
-
+async function fetchBlockNumber() {
+  try {
+    const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_blockNumber',params:[]})})
+    return parseInt((await r.json()).result, 16)
+  } catch { return 0 }
+}
+async function fetchPmtPrice() {
+  try {
+    const r = await fetch(`https://api.pancakeswap.info/api/v2/tokens/${CONTRACT}`)
+    if (!r.ok) return 0
+    const d = await r.json()
+    return parseFloat(d.data?.price) || 0
+  } catch { return 0 }
+}
 async function fetchWalletsFromRepo() {
   try { const r=await fetch(`${RAW_WALLETS_URL}?t=${Date.now()}`); return r.ok?await r.json():[] } catch { return [] }
 }
@@ -53,11 +73,30 @@ async function commitWalletsToRepo(wallets,token) {
   if(!r2.ok){const e=await r2.json().catch(()=>({}));throw new Error(e.message||`Error ${r2.status}`)}
 }
 
-const TIERS = [
-  {label:'ELITE',    roman:'I',   grad:'linear-gradient(135deg,#FFD700,#B8860B)',  glow:'rgba(255,215,0,0.4)',   tc:'#000'},
-  {label:'PLATINUM', roman:'II',  grad:'linear-gradient(135deg,#E8E8E8,#909090)',  glow:'rgba(200,200,200,0.25)',tc:'#111'},
-  {label:'GOLD',     roman:'III', grad:'linear-gradient(135deg,#CD7F32,#7B3F00)',  glow:'rgba(205,127,50,0.3)', tc:'#fff'},
-]
+// ── Icons ──────────────────────────────────────────────────────────────────
+const UsersIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+)
+const WalletIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+  </svg>
+)
+const ChartIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+  </svg>
+)
+const CoinsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+    <path d="M7 6h1v4"/><line x1="16.71" y1="13.88" x2="17" y2="14"/>
+  </svg>
+)
 
 export default function App() {
   const [view,setView]           = useState('leaderboard')
@@ -77,12 +116,19 @@ export default function App() {
   const [saving,setSaving]       = useState(false)
   const [saveMsg,setSaveMsg]     = useState('')
   const [copied,setCopied]       = useState(null)
+  const [pmtPrice,setPmtPrice]   = useState(0)
+  const [blockNum,setBlockNum]   = useState(0)
+  const [showAll,setShowAll]     = useState(false)
   const rRef=useRef(null), cRef=useRef(null)
 
-  const total = lb.reduce((s,r)=>s+r.balance,0)
+  const total      = lb.reduce((s,r)=>s+r.balance,0)
+  const topBalance = lb[0]?.balance || 0
+  const displayLb  = showAll ? lb : lb.slice(0,10)
 
   useEffect(()=>{ fetchWalletsFromRepo().then(setWallets) },[])
   useEffect(()=>{ fetchDecimals().then(setDecimals) },[])
+  useEffect(()=>{ fetchPmtPrice().then(setPmtPrice) },[])
+  useEffect(()=>{ fetchBlockNumber().then(setBlockNum) },[])
 
   const refresh = useCallback(async()=>{
     if(!wallets.length){setLb([]);return}
@@ -91,6 +137,8 @@ export default function App() {
       const rows=await Promise.all(wallets.map(async a=>({address:a,balance:await fetchBalance(a,decimals)})))
       setLb(rows.filter(r=>r.balance>=MIN_TOKENS).sort((a,b)=>b.balance-a.balance))
       setCountdown(60)
+      fetchBlockNumber().then(setBlockNum)
+      fetchPmtPrice().then(setPmtPrice)
     } catch { setFetchErr('Failed to fetch balances — retrying…') }
     finally { setLoading(false) }
   },[wallets,decimals])
@@ -202,118 +250,176 @@ export default function App() {
   return(
     <div className="page">
 
+      {/* ── TOP BAR ── */}
+      <div className="topbar">
+        <div/>
+        <div className="topbar-right">
+          <span className="tb-badge tb-live"><span className="live-dot"/>LIVE</span>
+          <span className="tb-badge">Min {MIN_TOKENS.toLocaleString()} PMT</span>
+          <span className="tb-badge tb-refresh">↺ {countdown}s</span>
+        </div>
+      </div>
+
       {/* ── HERO ── */}
       <header className="hero">
-        <div className="orbital-wrap" aria-hidden="true">
-          <div className="orbit o1"><div className="orb-dot d1"/></div>
-          <div className="orbit o2"><div className="orb-dot d2"/></div>
-          <div className="orbit o3"><div className="orb-dot d3"/></div>
+        <div className="hero-left">
+          <h1 className="hero-title">
+            <span className="hero-gold">PMT</span> Millionaires Club
+          </h1>
+          <p className="hero-sub">The elite holders of the PMT ecosystem.</p>
+          <div className="hero-meta">
+            <span className="meta-pill meta-green"><span className="live-dot-sm"/>LIVE ON BNB SMART CHAIN</span>
+            {blockNum>0&&<span className="meta-pill">BLOCK #{blockNum.toLocaleString()}</span>}
+          </div>
         </div>
-        <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="hero-logo"/>
-        <div className="hero-eyebrow">
-          <span className="live-pulse"/>BNB SMART CHAIN &nbsp;·&nbsp; LIVE &nbsp;·&nbsp; ↺ {countdown}s
+        <div className="hero-visual" aria-hidden="true">
+          <div className="orb-wrap">
+            <div className="orb-ring r1">
+              <div className="orb-dot od1"/>
+            </div>
+            <div className="orb-ring r2">
+              <div className="orb-dot od2"/>
+            </div>
+            <div className="orb-ring r3">
+              <div className="orb-dot od3"/>
+            </div>
+            <div className="orb-center">
+              <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="orb-logo"/>
+            </div>
+          </div>
         </div>
-        <h1 className="hero-title">PMT Millionaires Club</h1>
-        <p className="hero-sub">The elite holders of the PMT ecosystem</p>
       </header>
 
       {/* ── STATS ── */}
       <section className="stats-grid">
         {[
-          {label:'Millionaire Holders',      val:lb.length,  suf:''},
-          {label:'Top Balance',              val:lb[0]?fmt(lb[0].balance):'—',   suf:lb[0]?' PMT':''},
-          {label:'Wallets Tracked',          val:wallets.length,                  suf:''},
-          {label:'Total Tracked Balance',    val:fmt(total),                      suf:' PMT'},
-        ].map(s=>(
-          <div key={s.label} className="stat-card">
-            <div className="stat-val">{s.val}<span className="stat-suf">{s.suf}</span></div>
-            <div className="stat-label">{s.label}</div>
+          {Icon:UsersIcon,  val:lb.length,                       label:'Millionaire Holders',   sub:null},
+          {Icon:WalletIcon, val:lb[0]?fmt(lb[0].balance):'—',   label:'Top Balance',           sub:lb[0]&&pmtPrice?fmtUsd(lb[0].balance,pmtPrice):null},
+          {Icon:ChartIcon,  val:wallets.length,                  label:'Wallets Tracked',       sub:null},
+          {Icon:CoinsIcon,  val:fmt(total),                      label:'Total Tracked Balance', sub:pmtPrice&&total>0?fmtUsd(total,pmtPrice):null},
+        ].map(({Icon,val,label,sub})=>(
+          <div key={label} className="stat-card">
+            <div className="stat-icon"><Icon/></div>
+            <div className="stat-body">
+              <div className="stat-val">{val}</div>
+              <div className="stat-label">{label.toUpperCase()}</div>
+              {sub&&<div className="stat-sub">{sub}</div>}
+            </div>
           </div>
         ))}
       </section>
 
-      {/* ── MEMBERS ── */}
-      <section className="members-list">
+      {/* ── LEADERBOARD ── */}
+      <section className="lb-section">
+        <div className="lb-header-row">
+          <span className="lb-head-title">Top Millionaire Holders</span>
+          <span className="lb-head-bal">PMT Balance</span>
+        </div>
+
         {fetchErr&&<div className="fetch-err">{fetchErr}</div>}
+
         {loading&&lb.length===0?(
           <div className="lb-empty"><span className="spinner"/>Fetching live balances…</div>
         ):lb.length===0?(
-          <div className="lb-empty">{wallets.length===0?'No wallets tracked yet — open admin to add wallets':'No wallets currently hold ≥ 1,000,000 PMT'}</div>
-        ):lb.map((row,i)=>{
-          const tier   = TIERS[i]
-          const isTop  = i<3
-          const hue    = avatarHue(row.address)
-          const share  = total>0?(row.balance/total*100):0
-          const barCol = i===0?'linear-gradient(90deg,#B8860B,#FFD700)'
-                        :i===1?'linear-gradient(90deg,#888,#E0E0E0)'
-                        :i===2?'linear-gradient(90deg,#7B3F00,#CD7F32)'
-                        :'rgba(255,255,255,0.12)'
-          return(
-            <article key={row.address}
-              className={`member-row ${i===0?'m-first':i===1?'m-second':i===2?'m-third':''}`}
-              style={i===0?{'--glow':TIERS[0].glow}:{}}
-            >
-              {i===0&&<div className="sweep"/>}
+          <div className="lb-empty">
+            {wallets.length===0?'No wallets tracked yet — open admin panel to add wallets':'No wallets currently hold ≥ 1,000,000 PMT'}
+          </div>
+        ):(
+          <div className="lb-list">
+            {displayLb.map((row,i)=>{
+              const isFirst = i===0
+              const isTop3  = i<3
+              const hue     = avatarHue(row.address)
+              const share   = total>0?(row.balance/total*100):0
+              const relW    = topBalance>0?Math.max((row.balance/topBalance)*100,2):2
+              const barCol  = i===0?'linear-gradient(90deg,#9A6700,#FFD700)'
+                            : i===1?'linear-gradient(90deg,#555,#C0C0C0)'
+                            : i===2?'linear-gradient(90deg,#6B3800,#CD7F32)'
+                            : 'rgba(255,255,255,0.18)'
+              const rankCol = i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'rgba(255,255,255,0.35)'
+              const balCol  = i===0?'#FFD700':i===1?'#E0E0E0':i===2?'#CD7F32':'#FFFFFF'
 
-              {/* Rank */}
-              <div className="m-rank">
-                <div className="rank-circle"
-                  style={{background:isTop?tier.grad:'rgba(255,255,255,0.06)',
-                          boxShadow:isTop?`0 0 18px ${tier.glow}`:'none',
-                          color:isTop?tier.tc:'rgba(255,255,255,0.4)'}}>
-                  {isTop?tier.roman:i+1}
-                </div>
-                {isTop&&<div className="tier-tag"
-                  style={{color:i===0?'#FFD700':i===1?'#C0C0C0':'#CD7F32',
-                          borderColor:i===0?'rgba(255,215,0,0.25)':i===1?'rgba(200,200,200,0.2)':'rgba(205,127,50,0.25)'}}>
-                  {tier.label}
-                </div>}
-              </div>
+              return(
+                <article key={row.address} className={`lb-row${isFirst?' row-first':isTop3?' row-top3':''}`}>
+                  {isFirst&&<div className="row-sweep"/>}
 
-              {/* Avatar */}
-              <div className="m-avatar"
-                style={{background:`hsl(${hue},45%,14%)`,border:`1.5px solid hsl(${hue},55%,28%)`}}>
-                <span style={{color:`hsl(${hue},75%,68%)`}}>{row.address.slice(2,4).toUpperCase()}</span>
-              </div>
+                  {/* Rank */}
+                  <div className="row-rank">
+                    {isFirst&&<span className="crown-icon">♛</span>}
+                    <div className="rank-num" style={{color:rankCol,borderColor:isTop3?rankCol:'rgba(255,255,255,0.1)'}}>
+                      {i+1}
+                    </div>
+                  </div>
 
-              {/* Info */}
-              <div className="m-info">
-                <div className="m-addr-row">
-                  <span className="m-addr">{shortenAddr(row.address)}</span>
-                  <button className="copy-btn" onClick={()=>copyAddr(row.address)}
-                    title="Copy address">{copied===row.address?'✓':'⧉'}</button>
-                </div>
-                <div className="m-bar-wrap">
-                  <div className="m-bar-fill" style={{width:`${Math.max(share,0.5)}%`,background:barCol}}/>
-                </div>
-                <div className="m-share">{share.toFixed(1)}% of total tracked</div>
-              </div>
+                  {/* Avatar */}
+                  <div className="row-avatar" style={{
+                    background:`radial-gradient(circle at 38% 32%, hsl(${hue},25%,38%), hsl(${hue},35%,14%) 55%, hsl(${hue},40%,8%))`,
+                    border:`1.5px solid hsl(${hue},35%,26%)`,
+                    boxShadow:`0 0 14px hsl(${hue},50%,15%)`
+                  }}>
+                    <span style={{color:`hsl(${hue},65%,72%)`}}>{row.address.slice(2,4).toUpperCase()}</span>
+                  </div>
 
-              {/* Balance */}
-              <div className="m-balance">
-                <div className="m-bal-val"
-                  style={{color:i===0?'#FFD700':i===1?'#E0E0E0':i===2?'#CD7F32':'#fff'}}>
-                  {fmt(row.balance)}
-                </div>
-                <div className="m-bal-cur">PMT</div>
-              </div>
+                  {/* Info */}
+                  <div className="row-info">
+                    <div className="row-addr-line">
+                      <span className="row-addr">{shortenAddr(row.address)}</span>
+                      <button className="copy-btn" onClick={()=>copyAddr(row.address)} title="Copy address">
+                        {copied===row.address?'✓':'⧉'}
+                      </button>
+                    </div>
+                    <div className="row-badges">
+                      <span className="holder-badge" style={{
+                        color:isFirst?'#FFD700':isTop3?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.4)',
+                        borderColor:isFirst?'rgba(255,215,0,0.35)':isTop3?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.08)'
+                      }}>
+                        {isFirst?'Crown Holder':'Elite Holder'}
+                      </span>
+                      {isTop3&&(
+                        <span className="act-status">
+                          <span className="act-dot"/>
+                          <span>Active now</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-              {/* Status */}
-              <div className="m-status">
-                <span className={`act-dot ${i===0?'dot-gold':isTop?'dot-silver':''}`}/>
-                {isTop&&<span className="mbr-badge"
-                  style={{color:i===0?'#FFD700':i===1?'#C0C0C0':'#CD7F32',
-                          borderColor:i===0?'rgba(255,215,0,0.2)':i===1?'rgba(200,200,200,0.15)':'rgba(205,127,50,0.2)'}}>
-                  MEMBER
-                </span>}
-              </div>
-            </article>
-          )
-        })}
+                  {/* Holding share bar */}
+                  <div className="row-share">
+                    <div className="share-lbl">Holding Share</div>
+                    <div className="share-track">
+                      <div className="share-fill" style={{width:`${relW}%`,background:barCol}}/>
+                    </div>
+                    <div className="share-pct">{share.toFixed(2)}%</div>
+                  </div>
+
+                  {/* Balance */}
+                  <div className="row-balance">
+                    <div className="bal-main" style={{color:balCol}}>
+                      {fmt(row.balance)}<span className="bal-pmt"> PMT</span>
+                    </div>
+                    {pmtPrice>0&&<div className="bal-usd">{fmtUsd(row.balance,pmtPrice)}</div>}
+                  </div>
+
+                  {/* Chevron */}
+                  <div className="row-chevron">›</div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+
+        {lb.length>10&&(
+          <button className="view-all-btn" onClick={()=>setShowAll(s=>!s)}>
+            {showAll?'Show Less  ∧':'View Full Leaderboard  ∨'}
+          </button>
+        )}
       </section>
 
       <p className="footer-note">
-        Only wallets holding ≥ 1,000,000 PMT are shown · Contract: <span className="mono">{CONTRACT.slice(0,10)}…</span>
+        Only wallets holding ≥ {MIN_TOKENS.toLocaleString()} PMT are shown&nbsp;·&nbsp;
+        Contract: <span className="mono">{CONTRACT.slice(0,10)}…</span>
+        {loading&&<span className="refreshing-note"> · Refreshing…</span>}
       </p>
     </div>
   )
