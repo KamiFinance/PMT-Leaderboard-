@@ -159,7 +159,7 @@ body{
 /* ── David statue hero image ─────────────────────────────────────────── */
 .hero-orb{
   flex-shrink:0;
-  width:360px;
+  width:260px;
 }
 .david-img{
   width:100%;
