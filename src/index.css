@@ -28,11 +28,7 @@ html, body, #root {
 }
 
 body {
-  background-color: var(--bg);
-  background-image: url('./background.png');
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
+  background: var(--bg);
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -553,4 +549,32 @@ body {
   color: var(--text3);
   font-size: 12px;
   font-weight: 500;
+}
+
+/* ── Admin extras ─────────────────────────────────────── */
+.label-hint {
+  font-size: 10px;
+  color: var(--text3);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+
+.save-ok {
+  color: var(--green);
+  font-size: 12px;
+  padding: 9px 13px;
+  background: #091209;
+  border: 1px solid #1a3a1a;
+  border-radius: 8px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--gold);
 }
