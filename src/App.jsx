@@ -1,32 +1,31 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-// ── Config ───────────────────────────────────────────────────────────────────
-const CONTRACT      = '0x68Ae2F202799be2008c89e2100257e66F77DA1f3'
-const RPC_URL       = 'https://bsc-dataseed.binance.org/'
-// Password is stored as a SHA-256 hash — never in plain text
-const ADMIN_PASSWORD_HASH = '8d87d4f9560d31f5cc6090b758b1be34ed707bd2bd275ead3ef7797fdd6e86c1'
+// ── Config ────────────────────────────────────────────────────────────────────
+const CONTRACT           = '0x68Ae2F202799be2008c89e2100257e66F77DA1f3'
+const RPC_URL            = 'https://bsc-dataseed.binance.org/'
+const ADMIN_HASH         = '8d87d4f9560d31f5cc6090b758b1be34ed707bd2bd275ead3ef7797fdd6e86c1'
+const MIN_TOKENS         = 1_000_000
+const REFRESH_MS         = 60_000
+const REPO               = 'KamiFinance/PMT-Leaderboard-'
+const WALLETS_FILE       = 'public/wallets.json'
+const RAW_WALLETS_URL    = `https://raw.githubusercontent.com/${REPO}/main/${WALLETS_FILE}`
+const GITHUB_API_URL     = `https://api.github.com/repos/${REPO}/contents/${WALLETS_FILE}`
+const TOKEN_KEY          = 'pmt_gh_token'
 
-async function verifyPassword(input) {
-  const encoded = new TextEncoder().encode(input)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
-  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
-  return hashHex === ADMIN_PASSWORD_HASH
-}
-
-const MIN_TOKENS    = 1_000_000
-const REFRESH_MS    = 60_000
-const STORAGE_KEY   = 'pmt_wallets'
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-const shortenAddr = (a) => `${a.slice(0, 6)}...${a.slice(-4)}`
-
+const shortenAddr  = (a)  => `${a.slice(0, 6)}...${a.slice(-4)}`
 const formatBalance = (n) => {
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`
   if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`
   return Math.round(n).toLocaleString()
 }
 
-// ── BNB Smart Chain RPC ───────────────────────────────────────────────────────
+async function verifyPassword(input) {
+  const encoded   = new TextEncoder().encode(input)
+  const hashBuf   = await crypto.subtle.digest('SHA-256', encoded)
+  const hashHex   = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex === ADMIN_HASH
+}
+
 async function ethCall(data) {
   const res = await fetch(RPC_URL, {
     method: 'POST',
@@ -35,60 +34,107 @@ async function ethCall(data) {
   })
   return (await res.json()).result
 }
-
 async function fetchDecimals() {
-  try { return parseInt(await ethCall('0x313ce567'), 16) || 18 }
-  catch { return 18 }
+  try { return parseInt(await ethCall('0x313ce567'), 16) || 18 } catch { return 18 }
 }
-
 async function fetchTokenBalance(address, decimals) {
   try {
     const padded = address.toLowerCase().replace('0x', '').padStart(64, '0')
-    const raw = BigInt(await ethCall('0x70a08231' + padded) || '0x0')
-    const div = BigInt(10) ** BigInt(decimals)
+    const raw    = BigInt(await ethCall('0x70a08231' + padded) || '0x0')
+    const div    = BigInt(10) ** BigInt(decimals)
     return Number(raw / div) + Number(raw % div) / Number(div)
   } catch { return 0 }
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
-export default function App() {
-  const [view, setView]             = useState('leaderboard')
-  const [wallets, setWallets]       = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [] }
-    catch { return [] }
-  })
-  const [leaderboard, setLeaderboard] = useState([])
-  const [decimals, setDecimals]       = useState(18)
-  const [loading, setLoading]         = useState(false)
-  const [countdown, setCountdown]     = useState(60)
-  const [password, setPassword]       = useState('')
-  const [showPwd, setShowPwd]         = useState(false)
-  const [loginError, setLoginError]   = useState('')
-  const [newAddr, setNewAddr]         = useState('')
-  const [addError, setAddError]       = useState('')
-  const [copied, setCopied]           = useState(null)
-  const [fetchError, setFetchError]   = useState('')
+async function fetchWalletsFromRepo() {
+  try {
+    const res = await fetch(`${RAW_WALLETS_URL}?t=${Date.now()}`)
+    if (!res.ok) return []
+    return await res.json()
+  } catch { return [] }
+}
 
+async function getFileSha(token) {
+  const res = await fetch(GITHUB_API_URL, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+  })
+  if (!res.ok) throw new Error(`GitHub API error ${res.status}`)
+  return (await res.json()).sha
+}
+
+async function commitWalletsToRepo(wallets, token) {
+  const sha     = await getFileSha(token)
+  const content = btoa(JSON.stringify(wallets, null, 2))
+  const res = await fetch(GITHUB_API_URL, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message: 'Update wallet list via admin panel', content, sha }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || `GitHub API error ${res.status}`)
+  }
+}
+
+const CrownIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10" style={{ verticalAlign: 'middle' }}>
+    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm2 3a1 1 0 0 0 1 1h8a1 1 0 0 0 0-2H8a1 1 0 0 0-1 1z" />
+  </svg>
+)
+
+export default function App() {
+  const [view, setView]           = useState('leaderboard')
+  const [wallets, setWallets]     = useState([])
+  const [leaderboard, setLB]      = useState([])
+  const [decimals, setDecimals]   = useState(18)
+  const [loading, setLoading]     = useState(false)
+  const [countdown, setCountdown] = useState(60)
+  const [fetchError, setFetchError] = useState('')
+  const [password, setPassword]   = useState('')
+  const [showPwd, setShowPwd]     = useState(false)
+  const [loginError, setLoginError] = useState('')
+  const [newAddr, setNewAddr]     = useState('')
+  const [addrError, setAddrError] = useState('')
+  const [token, setToken]         = useState(() => localStorage.getItem(TOKEN_KEY) || '')
+  const [showToken, setShowToken] = useState(false)
+  const [saving, setSaving]       = useState(false)
+  const [saveMsg, setSaveMsg]     = useState('')
+  const [copied, setCopied]       = useState(null)
   const refreshRef   = useRef(null)
   const countdownRef = useRef(null)
 
+  useEffect(() => {
+    const base = import.meta.env.BASE_URL
+    document.body.style.backgroundImage     = `url('${base}background.png')`
+    document.body.style.backgroundAttachment = 'fixed'
+    document.body.style.backgroundSize      = 'cover'
+    document.body.style.backgroundPosition  = 'center'
+    return () => {
+      document.body.style.backgroundImage = ''
+      document.body.style.backgroundAttachment = ''
+      document.body.style.backgroundSize  = ''
+      document.body.style.backgroundPosition = ''
+    }
+  }, [])
+
+  useEffect(() => { fetchWalletsFromRepo().then(setWallets) }, [])
   useEffect(() => { fetchDecimals().then(setDecimals) }, [])
 
   const refresh = useCallback(async () => {
-    if (!wallets.length) { setLeaderboard([]); return }
-    setLoading(true)
-    setFetchError('')
+    if (!wallets.length) { setLB([]); return }
+    setLoading(true); setFetchError('')
     try {
       const rows = await Promise.all(
-        wallets.map(async (addr) => ({ address: addr, balance: await fetchTokenBalance(addr, decimals) }))
+        wallets.map(async addr => ({ address: addr, balance: await fetchTokenBalance(addr, decimals) }))
       )
-      setLeaderboard(rows.filter((r) => r.balance >= MIN_TOKENS).sort((a, b) => b.balance - a.balance))
+      setLB(rows.filter(r => r.balance >= MIN_TOKENS).sort((a, b) => b.balance - a.balance))
       setCountdown(60)
-    } catch {
-      setFetchError('Failed to fetch balances. Retrying in 60s…')
-    } finally {
-      setLoading(false)
-    }
+    } catch { setFetchError('Failed to fetch balances — retrying in 60s') }
+    finally { setLoading(false) }
   }, [wallets, decimals])
 
   useEffect(() => {
@@ -100,146 +146,140 @@ export default function App() {
 
   useEffect(() => {
     clearInterval(countdownRef.current)
-    countdownRef.current = setInterval(() => setCountdown((c) => (c <= 1 ? 60 : c - 1)), 1000)
+    countdownRef.current = setInterval(() => setCountdown(c => c <= 1 ? 60 : c - 1), 1000)
     return () => clearInterval(countdownRef.current)
   }, [])
 
-  // Secret keyboard shortcut: Ctrl+Shift+A opens admin login
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        e.preventDefault()
-        setView((v) => v === 'leaderboard' ? 'login' : v)
-      }
+    const onKey = e => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); setView(v => v === 'leaderboard' ? 'login' : v) }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const saveWallets = (updated) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    setWallets(updated)
+  const handleLogin = async () => {
+    if (await verifyPassword(password)) { setView('admin'); setLoginError(''); setPassword('') }
+    else setLoginError('Incorrect password')
   }
 
   const addWallet = () => {
     const addr = newAddr.trim()
-    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { setAddError('Invalid address — must be a 42-char hex string starting with 0x'); return }
-    if (wallets.includes(addr.toLowerCase())) { setAddError('This address is already being tracked'); return }
-    setAddError('')
-    saveWallets([...wallets, addr.toLowerCase()])
-    setNewAddr('')
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { setAddrError('Invalid address format'); return }
+    if (wallets.map(w => w.toLowerCase()).includes(addr.toLowerCase())) { setAddrError('Address already tracked'); return }
+    setAddrError(''); setWallets(prev => [...prev, addr.toLowerCase()]); setNewAddr(''); setSaveMsg('')
   }
 
-  const removeWallet = (addr) => saveWallets(wallets.filter((w) => w !== addr))
+  const removeWallet = addr => { setWallets(prev => prev.filter(w => w !== addr)); setSaveMsg('') }
 
-  const handleLogin = async () => {
-    const ok = await verifyPassword(password)
-    if (ok) { setView('admin'); setLoginError(''); setPassword('') }
-    else { setLoginError('Incorrect password — try again') }
+  const saveToRepo = async () => {
+    if (!token) { setSaveMsg('error:Enter a GitHub token first'); return }
+    setSaving(true); setSaveMsg('')
+    try {
+      await commitWalletsToRepo(wallets, token)
+      localStorage.setItem(TOKEN_KEY, token)
+      setSaveMsg('success:Saved! Site will redeploy in ~1 minute.')
+    } catch (e) { setSaveMsg(`error:${e.message}`) }
+    finally { setSaving(false) }
   }
 
-  const copyAddress = (addr) => {
+  const copyAddress = addr => {
     navigator.clipboard.writeText(addr)
     setCopied(addr)
     setTimeout(() => setCopied(null), 1500)
   }
 
-  const CrownIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10" style={{verticalAlign:'middle'}}>
-      <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm2 3a1 1 0 0 0 1 1h8a1 1 0 0 0 0-2H8a1 1 0 0 0-1 1z"/>
-    </svg>
+  const Header = ({ subtitle, actions }) => (
+    <header className="header">
+      <div className="header-left">
+        <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="coin-logo" />
+        <div>
+          <h1 className="site-title">PMT Millionaires Leaderboard</h1>
+          <p className="site-sub">{subtitle}</p>
+        </div>
+      </div>
+      <div className="header-right">{actions}</div>
+    </header>
   )
 
-  // ── Login view ───────────────────────────────────────────────────────────────
-  if (view === 'login') {
-    return (
-      <div className="page center">
-        <div className="login-card">
-          <div className="login-icon">🔐</div>
-          <h2 className="login-title">Admin Access</h2>
-          <p className="login-sub">Enter your password to manage wallets</p>
-          <div className="input-row">
-            <input className="text-input" type={showPwd ? 'text' : 'password'} placeholder="Password"
-              value={password} onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()} autoFocus />
-            <button className="icon-btn" onClick={() => setShowPwd(!showPwd)} title="Toggle visibility">
-              {showPwd ? '🙈' : '👁'}
-            </button>
-          </div>
-          {loginError && <p className="error-msg">{loginError}</p>}
-          <button className="btn-gold" onClick={handleLogin}>Sign In</button>
-          <button className="btn-ghost" onClick={() => setView('leaderboard')}>← Back to leaderboard</button>
+  if (view === 'login') return (
+    <div className="page center">
+      <div className="login-card">
+        <div className="login-icon">🔐</div>
+        <h2 className="login-title">Admin Access</h2>
+        <p className="login-sub">Enter your password to manage wallets</p>
+        <div className="input-row">
+          <input className="text-input" type={showPwd ? 'text' : 'password'} placeholder="Password"
+            value={password} onChange={e => setPassword(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleLogin()} autoFocus />
+          <button className="icon-btn" onClick={() => setShowPwd(s => !s)}>{showPwd ? '🙈' : '👁'}</button>
         </div>
+        {loginError && <p className="error-msg">{loginError}</p>}
+        <button className="btn-gold" onClick={handleLogin}>Sign In</button>
+        <button className="btn-ghost" onClick={() => setView('leaderboard')}>← Back</button>
       </div>
-    )
-  }
+    </div>
+  )
 
-  // ── Admin view ───────────────────────────────────────────────────────────────
-  if (view === 'admin') {
-    return (
-      <div className="page">
-        <header className="header">
-          <div className="header-left">
-            <img src="./PMT-logo.png" alt="PMT" className="coin-logo" />
-            <div>
-              <h1 className="site-title">PMT Millionaires Leaderboard</h1>
-              <p className="site-sub">Admin — Wallet Manager</p>
-            </div>
-          </div>
-          <div className="header-right">
-            <button className="btn-ghost sm" onClick={() => setView('leaderboard')}>← Leaderboard</button>
-            <button className="btn-ghost sm danger" onClick={() => setView('leaderboard')}>Log out</button>
-          </div>
-        </header>
-        <main className="main">
-          <div className="section-label">Add wallet address</div>
-          <div className="add-row">
-            <input className="text-input mono" placeholder="0x... wallet address" value={newAddr}
-              onChange={(e) => { setNewAddr(e.target.value); setAddError('') }}
-              onKeyDown={(e) => e.key === 'Enter' && addWallet()} />
-            <button className="btn-gold sm" onClick={addWallet}>+ Add</button>
-          </div>
-          {addError && <p className="error-msg">{addError}</p>}
-          <div className="section-label" style={{ marginTop: '20px' }}>
-            Tracked wallets <span className="count-badge">{wallets.length}</span>
-          </div>
-          <div className="card">
-            {wallets.length === 0 ? (
-              <div className="empty">No wallets added yet — add one above</div>
-            ) : (
-              wallets.map((addr, i) => (
-                <div className="wallet-row" key={addr}>
-                  <span className="wallet-num">{i + 1}</span>
-                  <span className="wallet-addr mono">{addr}</span>
-                  <button className="del-btn" onClick={() => removeWallet(addr)}>Remove</button>
-                </div>
-              ))
-            )}
-          </div>
-          <p className="footer-note">Wallets with &lt; 1,000,000 PMT will not appear on the leaderboard</p>
-        </main>
-      </div>
-    )
-  }
+  if (view === 'admin') return (
+    <div className="page">
+      <Header subtitle="Admin — Wallet Manager" actions={<>
+        <button className="btn-ghost sm" onClick={() => setView('leaderboard')}>← Leaderboard</button>
+        <button className="btn-ghost sm danger" onClick={() => setView('leaderboard')}>Log out</button>
+      </>} />
+      <main className="main">
+        <div className="section-label">GitHub token <span className="label-hint">(needed to save changes)</span></div>
+        <div className="add-row" style={{ marginBottom: 16 }}>
+          <input className="text-input mono" type={showToken ? 'text' : 'password'}
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            value={token} onChange={e => setToken(e.target.value)} />
+          <button className="icon-btn" onClick={() => setShowToken(s => !s)}>{showToken ? '🙈' : '👁'}</button>
+        </div>
+        <div className="section-label">Add wallet address</div>
+        <div className="add-row">
+          <input className="text-input mono" placeholder="0x..." value={newAddr}
+            onChange={e => { setNewAddr(e.target.value); setAddrError('') }}
+            onKeyDown={e => e.key === 'Enter' && addWallet()} />
+          <button className="btn-gold sm" onClick={addWallet}>+ Add</button>
+        </div>
+        {addrError && <p className="error-msg" style={{ marginBottom: 12 }}>{addrError}</p>}
+        <div className="section-label" style={{ marginTop: 20 }}>
+          Tracked wallets <span className="count-badge">{wallets.length}</span>
+        </div>
+        <div className="card" style={{ marginBottom: 16 }}>
+          {wallets.length === 0
+            ? <div className="empty">No wallets yet — add one above</div>
+            : wallets.map((addr, i) => (
+              <div className="wallet-row" key={addr}>
+                <span className="wallet-num">{i + 1}</span>
+                <span className="wallet-addr mono">{addr}</span>
+                <button className="del-btn" onClick={() => removeWallet(addr)}>Remove</button>
+              </div>
+            ))}
+        </div>
+        <button className="btn-gold" onClick={saveToRepo} disabled={saving}>
+          {saving ? 'Saving…' : '💾 Save to GitHub'}
+        </button>
+        {saveMsg && (
+          <p className={saveMsg.startsWith('success:') ? 'save-ok' : 'error-msg'} style={{ marginTop: 10 }}>
+            {saveMsg.replace(/^(success|error):/, '')}
+          </p>
+        )}
+        <p className="footer-note" style={{ marginTop: 16 }}>
+          Wallets are stored in the GitHub repo — never lost when clearing browser cache.
+          A GitHub token with <code>public_repo</code> scope is required to save.
+        </p>
+      </main>
+    </div>
+  )
 
-  // ── Leaderboard view ─────────────────────────────────────────────────────────
   return (
     <div className="page">
-      <header className="header">
-        <div className="header-left">
-          <img src="./PMT-logo.png" alt="PMT" className="coin-logo" />
-          <div>
-            <h1 className="site-title">PMT Millionaires Leaderboard</h1>
-            <p className="site-sub">BNB Smart Chain · Live balances</p>
-          </div>
-        </div>
-        <div className="header-right">
-          <div className="badge live">● Live</div>
-          <div className="badge">Min 1,000,000 PMT</div>
-          <div className="badge muted">↺ {countdown}s</div>
-          {/* Admin accessible via Ctrl+Shift+A */}
-        </div>
-      </header>
+      <Header subtitle="BNB Smart Chain · Live balances" actions={<>
+        <div className="badge live">● Live</div>
+        <div className="badge">Min 1,000,000 PMT</div>
+        <div className="badge muted">↺ {countdown}s</div>
+      </>} />
       <main className="main">
         <div className="stats-row">
           <div className="stat-card"><div className="stat-val">{leaderboard.length}</div><div className="stat-label">Millionaire holders</div></div>
@@ -247,35 +287,30 @@ export default function App() {
           <div className="stat-card"><div className="stat-val">{wallets.length}</div><div className="stat-label">Wallets tracked</div></div>
         </div>
         <div className="card">
-          <div className="table-head">
-            <span>Rank</span><span>Wallet</span><span className="right">PMT Balance</span>
-          </div>
+          <div className="table-head"><span>Rank</span><span>Wallet</span><span className="right">PMT Balance</span></div>
           {fetchError && <div className="error-row">{fetchError}</div>}
-          {loading && leaderboard.length === 0 ? (
-            <div className="loading"><span className="spinner" /> Fetching live balances…</div>
-          ) : leaderboard.length === 0 ? (
-            <div className="empty">
-              {wallets.length === 0 ? 'No wallets tracked yet — go to Admin to add wallets' : 'No wallets currently hold 1,000,000+ PMT'}
-            </div>
-          ) : (
-            leaderboard.map((row, i) => (
-              <div key={row.address} className={`lb-row ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}`}>
-                <span className={`rank-badge ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
-                  {i < 3 && <CrownIcon />}{i + 1}
-                </span>
-                <span className="addr-cell">
-                  <span className="mono addr">{shortenAddr(row.address)}</span>
-                  <button className="copy-btn" onClick={() => copyAddress(row.address)} title="Copy full address">
-                    {copied === row.address ? '✓' : '⧉'}
-                  </button>
-                </span>
-                <span className="balance">{formatBalance(row.balance)} <small>PMT</small></span>
-              </div>
-            ))
-          )}
+          {loading && leaderboard.length === 0
+            ? <div className="loading"><span className="spinner" /> Fetching live balances…</div>
+            : leaderboard.length === 0
+              ? <div className="empty">{wallets.length === 0 ? 'No wallets tracked yet' : 'No wallets currently hold 1,000,000+ PMT'}</div>
+              : leaderboard.map((row, i) => (
+                <div key={row.address} className={`lb-row ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}`}>
+                  <span className={`rank-badge ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
+                    {i < 3 && <CrownIcon />}{i + 1}
+                  </span>
+                  <span className="addr-cell">
+                    <span className="mono addr">{shortenAddr(row.address)}</span>
+                    <button className="copy-btn" onClick={() => copyAddress(row.address)} title="Copy full address">
+                      {copied === row.address ? '✓' : '⧉'}
+                    </button>
+                  </span>
+                  <span className="balance">{formatBalance(row.balance)} <small>PMT</small></span>
+                </div>
+              ))
+          }
         </div>
         <p className="footer-note">
-          Only wallets holding ≥ 1,000,000 PMT are displayed · Contract: <span className="mono">{CONTRACT.slice(0, 10)}…</span>
+          Only wallets holding ≥ 1,000,000 PMT are shown · Contract: <span className="mono">{CONTRACT.slice(0, 10)}…</span>
         </p>
       </main>
     </div>
