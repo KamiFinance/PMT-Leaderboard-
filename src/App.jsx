@@ -53,10 +53,8 @@ async function fetchBlockNumber() {
   } catch { return 0 }
 }
 async function fetchPmtPrice() {
-  // PancakeSwap V2 Router: getAmountsOut(1e18, [PMT, WBNB, BUSD])
   const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
   const WBNB   = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
-  const BUSD   = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
   const USDT   = '0x55d398326f99059fF775485246999027B3197955'
   const RPCS   = [
     'https://bsc-dataseed.binance.org/',
@@ -65,27 +63,28 @@ async function fetchPmtPrice() {
     'https://rpc.ankr.com/bsc',
   ]
   const encode = (path) => {
-    const sel  = 'd06ca61f'
-    const ain  = '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
-    const off  = (64).toString(16).padStart(64,'0')
-    const n    = path.length.toString(16).padStart(64,'0')
+    const sel   = 'd06ca61f'
+    const ain   = '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
+    const off   = (64).toString(16).padStart(64,'0')
+    const n     = path.length.toString(16).padStart(64,'0')
     const addrs = path.map(a=>a.slice(2).toLowerCase().padStart(64,'0')).join('')
     return '0x'+sel+ain+off+n+addrs
   }
-  const call = async (rpc, data) => {
+  const call = async (rpc, calldata) => {
     const r = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:ROUTER,data},'latest']})})
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:ROUTER,data:calldata},'latest']})})
     const j = await r.json()
     if(!j.result||j.result==='0x'||j.error) return 0
     return Number(BigInt('0x'+j.result.slice(-64)))/1e18
   }
-  // Try PMT → WBNB → BUSD, then PMT → WBNB → USDT as fallback
   for(const rpc of RPCS){
     try{
-      let price = await call(rpc, encode([CONTRACT,WBNB,BUSD]))
-      if(price>0) return price
-      price = await call(rpc, encode([CONTRACT,WBNB,USDT]))
-      if(price>0) return price
+      // Try 1: direct PMT → USDT
+      let p = await call(rpc, encode([CONTRACT, USDT]))
+      if(p>0) return p
+      // Try 2: PMT → WBNB → USDT
+      p = await call(rpc, encode([CONTRACT, WBNB, USDT]))
+      if(p>0) return p
     }catch{}
   }
   return 0
