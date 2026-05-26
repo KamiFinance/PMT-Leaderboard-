@@ -53,41 +53,17 @@ async function fetchBlockNumber() {
   } catch { return 0 }
 }
 async function fetchPmtPrice() {
-  const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
-  const WBNB   = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
-  const USDT   = '0x55d398326f99059fF775485246999027B3197955'
-  const RPCS   = [
-    'https://bsc-dataseed.binance.org/',
-    'https://bsc-dataseed1.binance.org/',
-    'https://bsc-dataseed2.defibit.io/',
-    'https://rpc.ankr.com/bsc',
-  ]
-  const encode = (path) => {
-    const sel   = 'd06ca61f'
-    const ain   = '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
-    const off   = (64).toString(16).padStart(64,'0')
-    const n     = path.length.toString(16).padStart(64,'0')
-    const addrs = path.map(a=>a.slice(2).toLowerCase().padStart(64,'0')).join('')
-    return '0x'+sel+ain+off+n+addrs
-  }
-  const call = async (rpc, calldata) => {
-    const r = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:ROUTER,data:calldata},'latest']})})
-    const j = await r.json()
-    if(!j.result||j.result==='0x'||j.error) return 0
-    return Number(BigInt('0x'+j.result.slice(-64)))/1e18
-  }
-  for(const rpc of RPCS){
-    try{
-      // Try 1: direct PMT → USDT
-      let p = await call(rpc, encode([CONTRACT, USDT]))
-      if(p>0) return p
-      // Try 2: PMT → WBNB → USDT
-      p = await call(rpc, encode([CONTRACT, WBNB, USDT]))
-      if(p>0) return p
-    }catch{}
-  }
-  return 0
+  try {
+    // DexScreener — CORS-enabled, returns live USD price for any token
+    const r = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CONTRACT}`)
+    if(!r.ok) return 0
+    const d = await r.json()
+    const pairs = (d.pairs||[]).filter(p=>p.chainId==='bsc'&&parseFloat(p.priceUsd||0)>0)
+    if(!pairs.length) return 0
+    // Pick pair with most liquidity
+    pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))
+    return parseFloat(pairs[0].priceUsd)||0
+  } catch { return 0 }
 }
 async function fetchWalletsFromRepo() {
   try { const r=await fetch(`${RAW_WALLETS_URL}?t=${Date.now()}`); return r.ok?await r.json():[] } catch { return [] }
