@@ -130,10 +130,10 @@ body {
 }
 
 .stat-card {
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,229,0,0.12);
   border-radius: var(--radius);
   padding: 16px 18px;
   text-align: center;
@@ -156,10 +156,10 @@ body {
 
 /* ── Card / Table ─────────────────────────────────────── */
 .card {
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,229,0,0.12);
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -184,7 +184,7 @@ body {
   display: grid;
   grid-template-columns: 52px 1fr 160px;
   padding: 15px 18px;
-  border-bottom: 1px solid #0d0d0d;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   align-items: center;
   transition: background 0.1s;
 }
