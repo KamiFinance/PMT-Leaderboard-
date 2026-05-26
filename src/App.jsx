@@ -327,7 +327,7 @@ export default function App() {
               const isTop3    = i<3
 
               const accentCol = i===0?'#FFD700': i===1?'#C8C8C8': i===2?'#CD7F32': 'rgba(255,255,255,0.22)'
-              const balCol    = i===0?'#FFD700': i===1?'#E0E0E0': i===2?'#D4924A': '#FFFFFF'
+              const balCol    = i===0?'#FFD700': '#FFFFFF'
               const barGrad   = i===0?'linear-gradient(90deg,#9A6500,#FFD700,#FFF0A0)'
                               : i===1?'linear-gradient(90deg,#555,#C0C0C0)'
                               : i===2?'linear-gradient(90deg,#6B3500,#CD7F32)'
