@@ -53,24 +53,42 @@ async function fetchBlockNumber() {
   } catch { return 0 }
 }
 async function fetchPmtPrice() {
-  try {
-    // On-chain price via PancakeSwap V2 Router getAmountsOut(1 PMT → BUSD)
-    const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
-    const BUSD   = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
-    const pmt    = CONTRACT.slice(2).toLowerCase().padStart(64,'0')
-    const busd   = BUSD.slice(2).toLowerCase().padStart(64,'0')
-    const data   = '0xd06ca61f'
-      + '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
-      + '0000000000000000000000000000000000000000000000000000000000000040'
-      + '0000000000000000000000000000000000000000000000000000000000000002'
-      + pmt + busd
-    const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+  // PancakeSwap V2 Router: getAmountsOut(1e18, [PMT, WBNB, BUSD])
+  const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
+  const WBNB   = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
+  const BUSD   = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
+  const USDT   = '0x55d398326f99059fF775485246999027B3197955'
+  const RPCS   = [
+    'https://bsc-dataseed.binance.org/',
+    'https://bsc-dataseed1.binance.org/',
+    'https://bsc-dataseed2.defibit.io/',
+    'https://rpc.ankr.com/bsc',
+  ]
+  const encode = (path) => {
+    const sel  = 'd06ca61f'
+    const ain  = '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
+    const off  = (64).toString(16).padStart(64,'0')
+    const n    = path.length.toString(16).padStart(64,'0')
+    const addrs = path.map(a=>a.slice(2).toLowerCase().padStart(64,'0')).join('')
+    return '0x'+sel+ain+off+n+addrs
+  }
+  const call = async (rpc, data) => {
+    const r = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:ROUTER,data},'latest']})})
-    const res = await r.json()
-    if(!res.result||res.result==='0x') return 0
-    const busdOut = BigInt('0x'+res.result.slice(-64))
-    return Number(busdOut)/1e18
-  } catch { return 0 }
+    const j = await r.json()
+    if(!j.result||j.result==='0x'||j.error) return 0
+    return Number(BigInt('0x'+j.result.slice(-64)))/1e18
+  }
+  // Try PMT → WBNB → BUSD, then PMT → WBNB → USDT as fallback
+  for(const rpc of RPCS){
+    try{
+      let price = await call(rpc, encode([CONTRACT,WBNB,BUSD]))
+      if(price>0) return price
+      price = await call(rpc, encode([CONTRACT,WBNB,USDT]))
+      if(price>0) return price
+    }catch{}
+  }
+  return 0
 }
 async function fetchWalletsFromRepo() {
   try { const r=await fetch(`${RAW_WALLETS_URL}?t=${Date.now()}`); return r.ok?await r.json():[] } catch { return [] }
