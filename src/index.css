@@ -5,14 +5,14 @@ button{cursor:pointer;background:none;border:none;font:inherit}
 input{font:inherit}
 
 :root{
-  --gold:         #FFD700;
-  --gold-hi:      #FFE966;
-  --gold-dim:     rgba(255,215,0,0.08);
-  --gold-border:  rgba(255,215,0,0.25);
-  --gold-glow:    rgba(255,215,0,0.12);
+  --gold:         #FFA500;
+  --gold-hi:      #FFC043;
+  --gold-dim:     rgba(255,165,0,0.08);
+  --gold-border:  rgba(255,165,0,0.25);
+  --gold-glow:    rgba(255,165,0,0.12);
   --bg:           #0A0A0A;
-  --surface:      rgba(255,200,80,0.03);
-  --surface-b:    rgba(255,200,80,0.06);
+  --surface:      rgba(255,165,0,0.03);
+  --surface-b:    rgba(255,165,0,0.06);
   --text:         #FFFFFF;
   --text2:        rgba(255,255,255,0.52);
   --text3:        rgba(255,255,255,0.27);
@@ -44,7 +44,7 @@ body{
 /* ── Scrollbar ───────────────────────────────────────────────────────── */
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.15);border-radius:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,165,0,0.15);border-radius:3px}
 
 /* ── Page wrapper ────────────────────────────────────────────────────── */
 .page{
@@ -169,7 +169,7 @@ body{
 }
 .david-bg{
   position:absolute;
-  top:-35%;
+  top:-24%;
   right:18%;
   width:58%;
   height:auto;
@@ -201,14 +201,14 @@ body{
   padding:20px 18px;
   transition:border-color .2s;
 }
-.stat-card:hover{border-color:rgba(255,215,0,0.14)}
+.stat-card:hover{border-color:rgba(255,165,0,0.14)}
 
 .stat-icon-wrap{
   width:48px;height:48px;
   border-radius:11px;
-  background:rgba(255,215,0,0.07);
-  border:1px solid rgba(255,215,0,0.12);
-  color:rgba(255,215,0,0.8);
+  background:rgba(255,165,0,0.07);
+  border:1px solid rgba(255,165,0,0.12);
+  color:rgba(255,165,0,0.8);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
@@ -284,18 +284,18 @@ body{
 
 /* ── Row #1 ── */
 .lb-row--first{
-  background:rgba(255,215,0,0.04) !important;
-  border:1px solid rgba(255,215,0,0.22) !important;
+  background:rgba(255,165,0,0.04) !important;
+  border:1px solid rgba(255,165,0,0.22) !important;
   border-radius:10px;
   margin:8px 12px;
   padding:20px 20px !important;
 }
-.lb-row--first:hover{background:rgba(255,215,0,0.06) !important}
+.lb-row--first:hover{background:rgba(255,165,0,0.06) !important}
 
 /* shimmer sweep on #1 */
 .row-shimmer{
   position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:linear-gradient(110deg,transparent 20%,rgba(255,229,0,0.05) 50%,transparent 80%);
+  background:linear-gradient(110deg,transparent 20%,rgba(255,165,0,0.05) 50%,transparent 80%);
   animation:shimmer 5s ease-in-out infinite;
 }
 @keyframes shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(220%)}}
@@ -313,7 +313,7 @@ body{
 .crown{
   font-size:15px;line-height:1;
   color:var(--gold);
-  filter:drop-shadow(0 0 6px rgba(255,215,0,0.65));
+  filter:drop-shadow(0 0 6px rgba(255,165,0,0.65));
 }
 .rank-badge{
   width:34px;height:34px;
@@ -428,19 +428,19 @@ body{
   margin-top:28px;
   text-align:center;
   font-size:11px;
-  color:rgba(255,215,0,0.3);
+  color:rgba(255,165,0,0.3);
 }
 .page-footer code{
   font-family:var(--mono);font-size:10px;
-  background:rgba(255,215,0,0.07);
-  color:rgba(255,215,0,0.5);
+  background:rgba(255,165,0,0.07);
+  color:rgba(255,165,0,0.5);
   border-radius:4px;padding:1px 5px;
 }
 
 /* ── Spinner ─────────────────────────────────────────────────────────── */
 .spinner{
   display:inline-block;width:14px;height:14px;
-  border:2px solid rgba(255,215,0,0.18);
+  border:2px solid rgba(255,165,0,0.18);
   border-top-color:var(--gold);
   border-radius:50%;
   animation:spin 0.8s linear infinite;
@@ -466,7 +466,7 @@ body{
   color:var(--text);font-size:13px;
   outline:none;transition:border-color .15s;
 }
-.field:focus{border-color:rgba(255,215,0,0.38)}
+.field:focus{border-color:rgba(255,165,0,0.38)}
 .field::placeholder{color:var(--text3)}
 .field.mono{font-family:var(--mono);font-size:12px}
 .field-toggle{color:var(--text2);padding:10px;border-radius:8px;transition:color .15s}
@@ -511,7 +511,7 @@ body{
 
 .err-msg{font-size:12px;color:var(--red);padding:9px 13px;background:rgba(231,76,60,0.07);border:1px solid rgba(231,76,60,0.2);border-radius:7px;margin-top:6px}
 .ok-msg{font-size:12px;color:var(--green);padding:9px 13px;background:rgba(61,186,82,0.06);border:1px solid rgba(61,186,82,0.2);border-radius:7px}
-.footer-note{text-align:center;font-size:11px;color:rgba(255,215,0,0.35);margin-top:24px}
+.footer-note{text-align:center;font-size:11px;color:rgba(255,165,0,0.35);margin-top:24px}
 
 /* ── Login card ──────────────────────────────────────────────────────── */
 .login-card{
