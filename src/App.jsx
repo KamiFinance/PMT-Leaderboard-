@@ -277,15 +277,13 @@ export default function App() {
           </div>
         </div>
 
-        {/* Statue / orb centerpiece */}
+        {/* David statue centerpiece */}
         <div className="hero-orb" aria-hidden="true">
-          <div className="orb-ring or1"><div className="orb-node on1"/></div>
-          <div className="orb-ring or2"><div className="orb-node on2"/></div>
-          <div className="orb-ring or3"><div className="orb-node on3"/></div>
-          <div className="orb-core">
-            <div className="orb-glow"/>
-            <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="orb-img"/>
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}david.png`}
+            alt="PMT Millionaires"
+            className="david-img"
+          />
         </div>
       </header>
 
