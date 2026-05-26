@@ -372,13 +372,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* avatar */}
-                  <div className="col-avatar">
-                    <div className="avatar" style={{background:av.bg,border:`1.5px solid ${av.border}`}}>
-                      <span style={{color:av.text}}>{row.address.slice(2,4).toUpperCase()}</span>
-                    </div>
-                  </div>
-
                   {/* address + badge */}
                   <div className="col-info">
                     <div className="addr-row">
