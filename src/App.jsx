@@ -20,17 +20,23 @@ const fmt = (n) => {
 const fmtUsd = (n, price) => {
   if (!price || price <= 0) return null
   const usd = n * price
-  if (usd >= 1e6) return `$${(usd/1e6).toFixed(2)}M USD`
+  if (usd >= 1e6) return `$${(usd/1e6).toFixed(3)}M USD`
   return `$${Math.round(usd).toLocaleString()} USD`
 }
-const avatarHue = (addr) => parseInt(addr.slice(2,6),16) % 360
+const avatarGrad = (addr) => {
+  const hue = parseInt(addr.slice(2,6),16) % 360
+  return {
+    bg: `radial-gradient(circle at 40% 35%, hsl(${hue},20%,40%) 0%, hsl(${hue},30%,18%) 40%, hsl(${hue},35%,10%) 100%)`,
+    border: `hsl(${hue},30%,30%)`,
+    text: `hsl(${hue},55%,72%)`
+  }
+}
 
 async function verifyPassword(input) {
   const enc = new TextEncoder().encode(input)
   const buf = await crypto.subtle.digest('SHA-256', enc)
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('') === ADMIN_HASH
 }
-
 async function ethCall(data) {
   const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:CONTRACT,data},'latest']})})
@@ -47,17 +53,17 @@ async function fetchBalance(addr,dec) {
 }
 async function fetchBlockNumber() {
   try {
-    const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_blockNumber',params:[]})})
-    return parseInt((await r.json()).result, 16)
+    return parseInt((await r.json()).result,16)
   } catch { return 0 }
 }
 async function fetchPmtPrice() {
   try {
-    const r = await fetch(`https://api.pancakeswap.info/api/v2/tokens/${CONTRACT}`)
-    if (!r.ok) return 0
-    const d = await r.json()
-    return parseFloat(d.data?.price) || 0
+    const r=await fetch(`https://api.pancakeswap.info/api/v2/tokens/${CONTRACT}`)
+    if(!r.ok) return 0
+    const d=await r.json()
+    return parseFloat(d.data?.price)||0
   } catch { return 0 }
 }
 async function fetchWalletsFromRepo() {
@@ -73,30 +79,19 @@ async function commitWalletsToRepo(wallets,token) {
   if(!r2.ok){const e=await r2.json().catch(()=>({}));throw new Error(e.message||`Error ${r2.status}`)}
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────
-const UsersIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-)
-const WalletIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-  </svg>
-)
-const ChartIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-  </svg>
-)
-const CoinsIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
-    <path d="M7 6h1v4"/><line x1="16.71" y1="13.88" x2="17" y2="14"/>
-  </svg>
-)
+// ── Stat Icons (inline SVG) ────────────────────────────────────────────────
+function IconPeople() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+}
+function IconWallet() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12a2 2 0 0 0 0 4h4v-4Z"/><path d="M2 10h20"/></svg>
+}
+function IconTrend() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+}
+function IconCoins() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="9" cy="9" r="7"/><path d="M15.7 15.7a7 7 0 1 0-9.9-9.9"/></svg>
+}
 
 export default function App() {
   const [view,setView]           = useState('leaderboard')
@@ -122,7 +117,7 @@ export default function App() {
   const rRef=useRef(null), cRef=useRef(null)
 
   const total      = lb.reduce((s,r)=>s+r.balance,0)
-  const topBalance = lb[0]?.balance || 0
+  const topBalance = lb[0]?.balance||0
   const displayLb  = showAll ? lb : lb.slice(0,10)
 
   useEffect(()=>{ fetchWalletsFromRepo().then(setWallets) },[])
@@ -186,16 +181,16 @@ export default function App() {
   if(view==='login') return(
     <div className="page-center">
       <div className="login-card">
-        <div className="login-glyph">🔐</div>
+        <div className="login-icon">🔐</div>
         <h2 className="login-title">Admin Access</h2>
         <p className="login-sub">Authorised personnel only</p>
-        <div className="input-row">
-          <input className="text-input" type={showPwd?'text':'password'} placeholder="Password"
+        <div className="field-row">
+          <input className="field" type={showPwd?'text':'password'} placeholder="Password"
             value={pwd} onChange={e=>setPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleLogin()} autoFocus/>
-          <button className="icon-btn" onClick={()=>setShowPwd(s=>!s)}>{showPwd?'🙈':'👁'}</button>
+          <button className="field-toggle" onClick={()=>setShowPwd(s=>!s)}>{showPwd?'🙈':'👁'}</button>
         </div>
-        {loginErr&&<p className="error-msg">{loginErr}</p>}
-        <button className="btn-gold" onClick={handleLogin}>Sign In</button>
+        {loginErr&&<p className="err-msg">{loginErr}</p>}
+        <button className="btn-primary" onClick={handleLogin}>Sign In</button>
         <button className="btn-ghost" onClick={()=>setView('leaderboard')}>← Back</button>
       </div>
     </div>
@@ -204,44 +199,46 @@ export default function App() {
   // ── ADMIN ──────────────────────────────────────────────────────────────────
   if(view==='admin') return(
     <div className="page">
-      <header className="admin-header">
-        <span className="admin-header-title">PMT Millionaires Club</span>
-        <div className="admin-header-actions">
+      <header className="admin-bar">
+        <span className="admin-bar-title">PMT Millionaires Club — Admin</span>
+        <div style={{display:'flex',gap:8}}>
           <button className="btn-ghost sm" onClick={()=>setView('leaderboard')}>← Leaderboard</button>
           <button className="btn-ghost sm danger" onClick={()=>setView('leaderboard')}>Log out</button>
         </div>
       </header>
-      <main className="admin-main">
-        <div className="section-label">GitHub Token <span className="label-hint">(required to save)</span></div>
-        <div className="add-row" style={{marginBottom:16}}>
-          <input className="text-input mono" type={showToken?'text':'password'} placeholder="ghp_…"
+      <main style={{maxWidth:580}}>
+        <p className="field-label">GitHub Token <span className="field-hint">(required to save)</span></p>
+        <div className="field-row" style={{marginBottom:16}}>
+          <input className="field mono" type={showToken?'text':'password'} placeholder="ghp_…"
             value={token} onChange={e=>setToken(e.target.value)}/>
-          <button className="icon-btn" onClick={()=>setShowToken(s=>!s)}>{showToken?'🙈':'👁'}</button>
+          <button className="field-toggle" onClick={()=>setShowToken(s=>!s)}>{showToken?'🙈':'👁'}</button>
         </div>
-        <div className="section-label">Add Wallet Address</div>
-        <div className="add-row">
-          <input className="text-input mono" placeholder="0x…" value={newAddr}
+        <p className="field-label">Add Wallet Address</p>
+        <div className="field-row">
+          <input className="field mono" placeholder="0x…" value={newAddr}
             onChange={e=>{setNewAddr(e.target.value);setAddrErr('')}}
             onKeyDown={e=>e.key==='Enter'&&addWallet()}/>
-          <button className="btn-gold sm" onClick={addWallet}>+ Add</button>
+          <button className="btn-primary sm" onClick={addWallet}>+ Add</button>
         </div>
-        {addrErr&&<p className="error-msg">{addrErr}</p>}
-        <div className="section-label" style={{marginTop:20}}>
-          Tracked Wallets <span className="count-badge">{wallets.length}</span>
-        </div>
-        <div className="admin-card">
-          {wallets.length===0?<div className="empty">No wallets added yet</div>
+        {addrErr&&<p className="err-msg">{addrErr}</p>}
+        <p className="field-label" style={{marginTop:20}}>
+          Tracked Wallets <span className="badge-count">{wallets.length}</span>
+        </p>
+        <div className="wallet-list">
+          {wallets.length===0?<div className="empty-state">No wallets added yet</div>
             :wallets.map((a,i)=>(
-              <div className="wallet-row" key={a}>
-                <span className="wallet-num">{i+1}</span>
-                <span className="wallet-addr mono">{a}</span>
+              <div className="wallet-item" key={a}>
+                <span className="wallet-n">{i+1}</span>
+                <span className="wallet-a mono">{a}</span>
                 <button className="del-btn" onClick={()=>removeWallet(a)}>Remove</button>
               </div>
             ))}
         </div>
-        <button className="btn-gold" onClick={saveToRepo} disabled={saving}>{saving?'Saving…':'💾 Save to GitHub'}</button>
-        {saveMsg&&<p className={saveMsg.startsWith('success:')?'save-ok':'error-msg'} style={{marginTop:10}}>{saveMsg.replace(/^(success|error):/,'')}</p>}
-        <p className="footer-note" style={{marginTop:20}}>Wallets stored in GitHub repo — never lost on cache clear.</p>
+        <button className="btn-primary" onClick={saveToRepo} disabled={saving}>{saving?'Saving…':'💾 Save to GitHub'}</button>
+        {saveMsg&&<p className={saveMsg.startsWith('success:')?'ok-msg':'err-msg'} style={{marginTop:10}}>
+          {saveMsg.replace(/^(success|error):/,'')}
+        </p>}
+        <p className="footer-note" style={{marginTop:20}}>Wallets stored in GitHub — never lost on cache clear.</p>
       </main>
     </div>
   )
@@ -250,59 +247,61 @@ export default function App() {
   return(
     <div className="page">
 
-      {/* ── TOP BAR ── */}
-      <div className="topbar">
-        <div/>
-        <div className="topbar-right">
-          <span className="tb-badge tb-live"><span className="live-dot"/>LIVE</span>
-          <span className="tb-badge">Min {MIN_TOKENS.toLocaleString()} PMT</span>
-          <span className="tb-badge tb-refresh">↺ {countdown}s</span>
+      {/* ── STATUS BAR ── */}
+      <div className="status-bar">
+        <div className="status-left"/>
+        <div className="status-right">
+          <span className="status-chip live-chip">
+            <span className="pulse-dot"/>LIVE
+          </span>
+          <span className="status-chip">Min {MIN_TOKENS.toLocaleString()} PMT</span>
+          <span className="status-chip refresh-chip">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            {countdown}s
+          </span>
         </div>
       </div>
 
       {/* ── HERO ── */}
       <header className="hero">
-        <div className="hero-left">
-          <h1 className="hero-title">
-            <span className="hero-gold">PMT</span> Millionaires Club
+        <div className="hero-text">
+          <h1 className="hero-h1">
+            <span className="gold-word">PMT</span> Millionaires Club
           </h1>
-          <p className="hero-sub">The elite holders of the PMT ecosystem.</p>
-          <div className="hero-meta">
-            <span className="meta-pill meta-green"><span className="live-dot-sm"/>LIVE ON BNB SMART CHAIN</span>
-            {blockNum>0&&<span className="meta-pill">BLOCK #{blockNum.toLocaleString()}</span>}
+          <p className="hero-tagline">The elite holders of the PMT ecosystem.</p>
+          <div className="hero-chips">
+            <span className="chain-chip">
+              <span className="pulse-dot"/>LIVE ON BNB SMART CHAIN
+            </span>
+            {blockNum>0&&<span className="chain-chip block-chip">BLOCK #{blockNum.toLocaleString()}</span>}
           </div>
         </div>
-        <div className="hero-visual" aria-hidden="true">
-          <div className="orb-wrap">
-            <div className="orb-ring r1">
-              <div className="orb-dot od1"/>
-            </div>
-            <div className="orb-ring r2">
-              <div className="orb-dot od2"/>
-            </div>
-            <div className="orb-ring r3">
-              <div className="orb-dot od3"/>
-            </div>
-            <div className="orb-center">
-              <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="orb-logo"/>
-            </div>
+
+        {/* Statue / orb centerpiece */}
+        <div className="hero-orb" aria-hidden="true">
+          <div className="orb-ring or1"><div className="orb-node on1"/></div>
+          <div className="orb-ring or2"><div className="orb-node on2"/></div>
+          <div className="orb-ring or3"><div className="orb-node on3"/></div>
+          <div className="orb-core">
+            <div className="orb-glow"/>
+            <img src={`${import.meta.env.BASE_URL}PMT-logo.png`} alt="PMT" className="orb-img"/>
           </div>
         </div>
       </header>
 
-      {/* ── STATS ── */}
-      <section className="stats-grid">
+      {/* ── STAT CARDS ── */}
+      <section className="stats-row">
         {[
-          {Icon:UsersIcon,  val:lb.length,                       label:'Millionaire Holders',   sub:null},
-          {Icon:WalletIcon, val:lb[0]?fmt(lb[0].balance):'—',   label:'Top Balance',           sub:lb[0]&&pmtPrice?fmtUsd(lb[0].balance,pmtPrice):null},
-          {Icon:ChartIcon,  val:wallets.length,                  label:'Wallets Tracked',       sub:null},
-          {Icon:CoinsIcon,  val:fmt(total),                      label:'Total Tracked Balance', sub:pmtPrice&&total>0?fmtUsd(total,pmtPrice):null},
-        ].map(({Icon,val,label,sub})=>(
-          <div key={label} className="stat-card">
-            <div className="stat-icon"><Icon/></div>
-            <div className="stat-body">
-              <div className="stat-val">{val}</div>
-              <div className="stat-label">{label.toUpperCase()}</div>
+          { Icon:IconPeople, n: lb.length,                       label:'Millionaire Holders',   sub:null },
+          { Icon:IconWallet, n: lb[0]?fmt(lb[0].balance):'—',   label:'Top Balance',           sub:lb[0]&&pmtPrice?fmtUsd(lb[0].balance,pmtPrice):null },
+          { Icon:IconTrend,  n: wallets.length,                  label:'Wallets Tracked',       sub:null },
+          { Icon:IconCoins,  n: fmt(total),                      label:'Total Tracked Balance', sub:pmtPrice&&total>0?fmtUsd(total,pmtPrice):null },
+        ].map(({Icon,n,label,sub},i)=>(
+          <div className="stat-card" key={label}>
+            <div className="stat-icon-wrap"><Icon/></div>
+            <div className="stat-text">
+              <div className="stat-n">{n}</div>
+              <div className="stat-lbl">{label.toUpperCase()}</div>
               {sub&&<div className="stat-sub">{sub}</div>}
             </div>
           </div>
@@ -310,116 +309,120 @@ export default function App() {
       </section>
 
       {/* ── LEADERBOARD ── */}
-      <section className="lb-section">
-        <div className="lb-header-row">
-          <span className="lb-head-title">Top Millionaire Holders</span>
-          <span className="lb-head-bal">PMT Balance</span>
+      <section className="lb-wrap">
+        {/* header bar */}
+        <div className="lb-head">
+          <span className="lb-head-l">TOP MILLIONAIRE HOLDERS</span>
+          <span className="lb-head-r">PMT BALANCE</span>
         </div>
 
-        {fetchErr&&<div className="fetch-err">{fetchErr}</div>}
+        {fetchErr&&<div className="lb-err">{fetchErr}</div>}
 
         {loading&&lb.length===0?(
           <div className="lb-empty"><span className="spinner"/>Fetching live balances…</div>
         ):lb.length===0?(
           <div className="lb-empty">
-            {wallets.length===0?'No wallets tracked yet — open admin panel to add wallets':'No wallets currently hold ≥ 1,000,000 PMT'}
+            {wallets.length===0
+              ?'No wallets tracked yet — open admin panel to add wallets'
+              :'No wallets currently hold ≥ 1,000,000 PMT'}
           </div>
         ):(
-          <div className="lb-list">
+          <>
             {displayLb.map((row,i)=>{
-              const isFirst = i===0
-              const isTop3  = i<3
-              const hue     = avatarHue(row.address)
-              const share   = total>0?(row.balance/total*100):0
-              const relW    = topBalance>0?Math.max((row.balance/topBalance)*100,2):2
-              const barCol  = i===0?'linear-gradient(90deg,#9A6700,#FFD700)'
-                            : i===1?'linear-gradient(90deg,#555,#C0C0C0)'
-                            : i===2?'linear-gradient(90deg,#6B3800,#CD7F32)'
-                            : 'rgba(255,255,255,0.18)'
-              const rankCol = i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'rgba(255,255,255,0.35)'
-              const balCol  = i===0?'#FFD700':i===1?'#E0E0E0':i===2?'#CD7F32':'#FFFFFF'
+              const av        = avatarGrad(row.address)
+              const share     = total>0?(row.balance/total*100):0
+              const relW      = topBalance>0?Math.max((row.balance/topBalance)*100,3):3
+              const isFirst   = i===0
+              const isTop3    = i<3
+
+              const accentCol = i===0?'#FFD700': i===1?'#C8C8C8': i===2?'#CD7F32': 'rgba(255,255,255,0.22)'
+              const balCol    = i===0?'#FFD700': i===1?'#E0E0E0': i===2?'#D4924A': '#FFFFFF'
+              const barGrad   = i===0?'linear-gradient(90deg,#9A6500,#FFD700,#FFF0A0)'
+                              : i===1?'linear-gradient(90deg,#555,#C0C0C0)'
+                              : i===2?'linear-gradient(90deg,#6B3500,#CD7F32)'
+                              : 'rgba(255,255,255,0.15)'
 
               return(
-                <article key={row.address} className={`lb-row${isFirst?' row-first':isTop3?' row-top3':''}`}>
-                  {isFirst&&<div className="row-sweep"/>}
+                <div key={row.address} className={`lb-row${isFirst?' lb-row--first':isTop3?' lb-row--top':''}`}>
+                  {isFirst&&<div className="row-shimmer"/>}
 
-                  {/* Rank */}
-                  <div className="row-rank">
-                    {isFirst&&<span className="crown-icon">♛</span>}
-                    <div className="rank-num" style={{color:rankCol,borderColor:isTop3?rankCol:'rgba(255,255,255,0.1)'}}>
+                  {/* rank */}
+                  <div className="col-rank">
+                    {isFirst&&<span className="crown">♛</span>}
+                    <div className="rank-badge" style={{color:accentCol,borderColor:accentCol,opacity:isTop3?1:0.5}}>
                       {i+1}
                     </div>
                   </div>
 
-                  {/* Avatar */}
-                  <div className="row-avatar" style={{
-                    background:`radial-gradient(circle at 38% 32%, hsl(${hue},25%,38%), hsl(${hue},35%,14%) 55%, hsl(${hue},40%,8%))`,
-                    border:`1.5px solid hsl(${hue},35%,26%)`,
-                    boxShadow:`0 0 14px hsl(${hue},50%,15%)`
-                  }}>
-                    <span style={{color:`hsl(${hue},65%,72%)`}}>{row.address.slice(2,4).toUpperCase()}</span>
+                  {/* avatar */}
+                  <div className="col-avatar">
+                    <div className="avatar" style={{background:av.bg,border:`1.5px solid ${av.border}`}}>
+                      <span style={{color:av.text}}>{row.address.slice(2,4).toUpperCase()}</span>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="row-info">
-                    <div className="row-addr-line">
-                      <span className="row-addr">{shortenAddr(row.address)}</span>
-                      <button className="copy-btn" onClick={()=>copyAddr(row.address)} title="Copy address">
+                  {/* address + badge */}
+                  <div className="col-info">
+                    <div className="addr-row">
+                      <span className="addr-text">{shortenAddr(row.address)}</span>
+                      <button className="copy-btn" onClick={()=>copyAddr(row.address)} title="Copy">
                         {copied===row.address?'✓':'⧉'}
                       </button>
                     </div>
-                    <div className="row-badges">
-                      <span className="holder-badge" style={{
-                        color:isFirst?'#FFD700':isTop3?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.4)',
-                        borderColor:isFirst?'rgba(255,215,0,0.35)':isTop3?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.08)'
+                    <div className="badges-row">
+                      <span className="holder-tag" style={{
+                        color: isFirst?'#FFD700':'rgba(255,255,255,0.45)',
+                        borderColor: isFirst?'rgba(255,215,0,0.4)':'rgba(255,255,255,0.1)',
+                        background: isFirst?'rgba(255,215,0,0.07)':'transparent',
                       }}>
-                        {isFirst?'Crown Holder':'Elite Holder'}
+                        {isFirst?'CROWN HOLDER':'ELITE HOLDER'}
                       </span>
                       {isTop3&&(
-                        <span className="act-status">
-                          <span className="act-dot"/>
-                          <span>Active now</span>
+                        <span className="active-tag">
+                          <span className="green-dot"/>Active now
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Holding share bar */}
-                  <div className="row-share">
-                    <div className="share-lbl">Holding Share</div>
-                    <div className="share-track">
-                      <div className="share-fill" style={{width:`${relW}%`,background:barCol}}/>
+                  {/* holding share */}
+                  <div className="col-share">
+                    <div className="share-label">HOLDING SHARE</div>
+                    <div className="share-bar">
+                      <div className="share-fill" style={{width:`${relW}%`,background:barGrad}}/>
                     </div>
                     <div className="share-pct">{share.toFixed(2)}%</div>
                   </div>
 
-                  {/* Balance */}
-                  <div className="row-balance">
-                    <div className="bal-main" style={{color:balCol}}>
-                      {fmt(row.balance)}<span className="bal-pmt"> PMT</span>
+                  {/* balance */}
+                  <div className="col-balance">
+                    <div className="bal-num" style={{color:balCol}}>
+                      {fmt(row.balance)}<span className="bal-unit"> PMT</span>
                     </div>
                     {pmtPrice>0&&<div className="bal-usd">{fmtUsd(row.balance,pmtPrice)}</div>}
                   </div>
 
-                  {/* Chevron */}
-                  <div className="row-chevron">›</div>
-                </article>
+                  {/* arrow */}
+                  <div className="col-arrow">›</div>
+                </div>
               )
             })}
-          </div>
-        )}
 
-        {lb.length>10&&(
-          <button className="view-all-btn" onClick={()=>setShowAll(s=>!s)}>
-            {showAll?'Show Less  ∧':'View Full Leaderboard  ∨'}
-          </button>
+            {lb.length>10&&(
+              <button className="view-more-btn" onClick={()=>setShowAll(s=>!s)}>
+                {showAll
+                  ?<>SHOW LESS <span style={{fontSize:14}}>∧</span></>
+                  :<>VIEW FULL LEADERBOARD <span style={{fontSize:14}}>∨</span></>}
+              </button>
+            )}
+          </>
         )}
       </section>
 
-      <p className="footer-note">
+      <p className="page-footer">
         Only wallets holding ≥ {MIN_TOKENS.toLocaleString()} PMT are shown&nbsp;·&nbsp;
-        Contract: <span className="mono">{CONTRACT.slice(0,10)}…</span>
-        {loading&&<span className="refreshing-note"> · Refreshing…</span>}
+        Contract:&nbsp;<code>{CONTRACT.slice(0,10)}…</code>
+        {loading&&<>&nbsp;·&nbsp;<span style={{color:'rgba(255,255,255,0.25)'}}>Refreshing…</span></>}
       </p>
     </div>
   )
