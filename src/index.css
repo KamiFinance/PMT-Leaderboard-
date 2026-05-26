@@ -159,18 +159,19 @@ body{
 
 /* ── David statue hero image ─────────────────────────────────────────── */
 .hero-orb{
-  width:420px;
+  width:340px;
+  height:340px;
   flex-shrink:0;
   position:relative;
+  overflow:hidden;
 }
 .david-img{
   width:100%;
-  height:auto;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
   display:block;
-  object-fit:contain;
-  /* subtle gold glow to blend with page */
-  filter:drop-shadow(0 0 40px rgba(255,185,0,0.25));
-  border-radius:12px;
+  filter:drop-shadow(0 0 40px rgba(255,185,0,0.3));
 }
 
 /* ── Stats row ───────────────────────────────────────────────────────── */
@@ -520,7 +521,7 @@ body{
 @media(max-width:800px){
   .page{padding:0 18px 60px}
   .hero{flex-direction:column-reverse;align-items:flex-start;gap:20px;padding:24px 0 32px}
-  .hero-orb{width:260px;align-self:center}
+  .hero-orb{width:220px;height:220px;align-self:center}
   .lb-row{grid-template-columns:52px 42px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
