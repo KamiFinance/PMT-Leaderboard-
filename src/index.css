@@ -108,15 +108,13 @@ body{
 /* ── Hero ────────────────────────────────────────────────────────────── */
 .hero{
   position:relative;
-  min-height:220px;
-  padding:36px 0 40px;
-  /* text floats left naturally, image is absolute */
+  padding:20px 0 36px;
 }
 
 .hero-text{
   position:relative;
   z-index:2;
-  max-width:420px;
+  max-width:460px;
 }
 
 .hero-h1{
@@ -156,23 +154,31 @@ body{
   font-size:10px;
 }
 
-/* ── David statue hero image ─────────────────────────────────────────── */
-.hero-orb{
+/* ── David statue background ─────────────────────────────────────────── */
+.page-top{
+  position:relative;
+  overflow:hidden;
+  /* bottom fade into page bg */
+  -webkit-mask-image:linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image:linear-gradient(to bottom, black 60%, transparent 100%);
+  margin-bottom:-20px;
+}
+.david-bg{
   position:absolute;
-  /* centered on page: starts at 38%, image is 380px wide, center ~57% */
-  left:38%;
-  top:-10px;
-  width:400px;
-  z-index:1;
-  /* fade left edge so text bleeds through naturally */
-  -webkit-mask-image:linear-gradient(to right, transparent 0%, black 22%);
-  mask-image:linear-gradient(to right, transparent 0%, black 22%);
-}
-.david-img{
-  width:100%;
+  top:-5%;
+  right:-2%;
+  width:58%;
   height:auto;
-  display:block;
+  z-index:0;
+  opacity:0.95;
+  /* fade left edge so title text stays readable */
+  -webkit-mask-image:linear-gradient(to right, transparent 0%, black 30%);
+  mask-image:linear-gradient(to right, transparent 0%, black 30%);
+  pointer-events:none;
 }
+/* status-bar and hero sit on top */
+.status-bar{position:relative;z-index:5}
+.hero{position:relative;z-index:5;padding:16px 0 36px}
 
 /* ── Stats row ───────────────────────────────────────────────────────── */
 .stats-row{
@@ -521,7 +527,7 @@ body{
 @media(max-width:800px){
   .page{padding:0 18px 60px}
   .hero{flex-direction:column-reverse;align-items:flex-start;gap:20px;padding:24px 0 32px}
-  .hero-orb{left:50%;transform:translateX(-50%);top:auto;width:260px;-webkit-mask-image:none;mask-image:none}
+  .david-bg{width:100%;top:auto;bottom:0;right:-5%;opacity:0.5}
   .lb-row{grid-template-columns:52px 42px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
