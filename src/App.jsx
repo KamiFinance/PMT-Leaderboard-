@@ -23,13 +23,6 @@ const fmtUsd = (n, price) => {
   if (usd >= 1e6) return `$${(usd/1e6).toFixed(3)}M USD`
   return `$${Math.round(usd).toLocaleString()} USD`
 }
-const avatarGrad = (addr, rank) => {
-  // Metallic sphere look matching the reference — dark chrome with subtle rank tint
-  if (rank === 0) return {
-    bg: 'radial-gradient(circle at 38% 32%, #5a4a1a, #2a2008 50%, #0e0b02)',
-    border: '#6b5a20',
-    text: '#FFA500'
-  }
   if (rank === 1) return {
     bg: 'radial-gradient(circle at 38% 32%, #3a3a3a, #1a1a1a 50%, #080808)',
     border: '#4a4a4a',
@@ -347,7 +340,6 @@ export default function App() {
         ):(
           <>
             {displayLb.map((row,i)=>{
-              const av        = avatarGrad(row.address)
               const share     = total>0?(row.balance/total*100):0
               const relW      = topBalance>0?Math.max((row.balance/topBalance)*100,3):3
               const isFirst   = i===0
