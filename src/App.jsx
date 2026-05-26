@@ -107,19 +107,7 @@ export default function App() {
   const refreshRef   = useRef(null)
   const countdownRef = useRef(null)
 
-  useEffect(() => {
-    const base = import.meta.env.BASE_URL
-    document.body.style.backgroundImage     = `url('${base}background.png')`
-    document.body.style.backgroundAttachment = 'fixed'
-    document.body.style.backgroundSize      = 'cover'
-    document.body.style.backgroundPosition  = 'center'
-    return () => {
-      document.body.style.backgroundImage = ''
-      document.body.style.backgroundAttachment = ''
-      document.body.style.backgroundSize  = ''
-      document.body.style.backgroundPosition = ''
-    }
-  }, [])
+  // background handled by CSS body rule
 
   useEffect(() => { fetchWalletsFromRepo().then(setWallets) }, [])
   useEffect(() => { fetchDecimals().then(setDecimals) }, [])
