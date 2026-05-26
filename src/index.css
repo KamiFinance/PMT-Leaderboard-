@@ -157,59 +157,20 @@ body{
   font-size:10px;
 }
 
-/* ── Orbital orb ─────────────────────────────────────────────────────── */
+/* ── David statue hero image ─────────────────────────────────────────── */
 .hero-orb{
-  width:300px;height:300px;
-  position:relative;
+  width:420px;
   flex-shrink:0;
+  position:relative;
 }
-
-.orb-ring{
-  position:absolute;
-  border-radius:50%;
-  border:1px solid rgba(255,215,0,0.14);
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-}
-.or1{width:284px;height:284px;animation:spin 34s linear infinite}
-.or2{width:200px;height:200px;animation:spin 22s linear infinite reverse;border-color:rgba(255,215,0,0.09)}
-.or3{width:128px;height:128px;animation:spin 14s linear infinite;border-color:rgba(255,215,0,0.06)}
-
-@keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-
-.orb-node{
-  position:absolute;
-  top:-4px;left:50%;
-  transform:translateX(-50%);
-  border-radius:50%;
-}
-.on1{width:8px;height:8px;background:var(--gold);box-shadow:0 0 12px 4px rgba(255,215,0,0.75)}
-.on2{width:6px;height:6px;background:#999;box-shadow:0 0 8px 2px rgba(180,180,180,0.45)}
-.on3{width:5px;height:5px;background:#CD7F32;box-shadow:0 0 8px 2px rgba(205,127,50,0.5)}
-
-.orb-core{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:88px;height:88px;
-  border-radius:50%;
-  border:1px solid rgba(255,215,0,0.3);
-  background:radial-gradient(circle at 40% 38%, rgba(255,215,0,0.22), rgba(255,185,0,0.06) 55%, transparent);
-  box-shadow:0 0 50px rgba(255,215,0,0.14),inset 0 1px 0 rgba(255,215,0,0.22);
-  display:flex;align-items:center;justify-content:center;
-  z-index:2;
-}
-.orb-glow{
-  position:absolute;inset:-20px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
-  pointer-events:none;
-}
-.orb-img{
-  width:52px;height:52px;
+.david-img{
+  width:100%;
+  height:auto;
+  display:block;
   object-fit:contain;
-  filter:drop-shadow(0 0 16px rgba(255,215,0,0.6));
-  position:relative;z-index:1;
+  /* subtle gold glow to blend with page */
+  filter:drop-shadow(0 0 40px rgba(255,185,0,0.25));
+  border-radius:12px;
 }
 
 /* ── Stats row ───────────────────────────────────────────────────────── */
@@ -559,12 +520,7 @@ body{
 @media(max-width:800px){
   .page{padding:0 18px 60px}
   .hero{flex-direction:column-reverse;align-items:flex-start;gap:20px;padding:24px 0 32px}
-  .hero-orb{width:180px;height:180px;align-self:center}
-  .or1{width:172px;height:172px}
-  .or2{width:120px;height:120px}
-  .or3{width:78px;height:78px}
-  .orb-core{width:64px;height:64px}
-  .orb-img{width:38px;height:38px}
+  .hero-orb{width:260px;align-self:center}
   .lb-row{grid-template-columns:52px 42px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
