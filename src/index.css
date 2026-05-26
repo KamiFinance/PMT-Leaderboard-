@@ -186,21 +186,21 @@ body {
 }
 
 .lb-row:hover {
-  background: #0e0e0e;
+  background: rgba(255,229,0,0.05);
 }
 
 .lb-row.gold {
-  background: #0d0b00;
+  background: rgba(255,229,0,0.09);
   border-left: 3px solid var(--gold);
 }
 
 .lb-row.silver {
-  background: #0a0a0a;
+    background: rgba(200,200,200,0.06);
   border-left: 3px solid var(--silver);
 }
 
 .lb-row.bronze {
-  background: #0a0700;
+  background: rgba(205,127,50,0.09);
   border-left: 3px solid var(--bronze);
 }
 
