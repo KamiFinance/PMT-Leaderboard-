@@ -47,7 +47,7 @@ async function fetchTokenBalance(address, decimals) {
 
 // ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [view, setView]             = useState('leaderboard') // 'leaderboard' | 'login' | 'admin'
+  const [view, setView]             = useState('leaderboard')
   const [wallets, setWallets]       = useState(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [] }
     catch { return [] }
@@ -67,12 +67,8 @@ export default function App() {
   const refreshRef   = useRef(null)
   const countdownRef = useRef(null)
 
-  // Fetch token decimals once on mount
-  useEffect(() => {
-    fetchDecimals().then(setDecimals)
-  }, [])
+  useEffect(() => { fetchDecimals().then(setDecimals) }, [])
 
-  // Fetch leaderboard data
   const refresh = useCallback(async () => {
     if (!wallets.length) { setLeaderboard([]); return }
     setLoading(true)
@@ -85,9 +81,7 @@ export default function App() {
         }))
       )
       setLeaderboard(
-        rows
-          .filter((r) => r.balance >= MIN_TOKENS)
-          .sort((a, b) => b.balance - a.balance)
+        rows.filter((r) => r.balance >= MIN_TOKENS).sort((a, b) => b.balance - a.balance)
       )
       setCountdown(60)
     } catch {
@@ -104,58 +98,44 @@ export default function App() {
     return () => clearInterval(refreshRef.current)
   }, [refresh])
 
-  // Countdown timer
   useEffect(() => {
     clearInterval(countdownRef.current)
-    countdownRef.current = setInterval(
-      () => setCountdown((c) => (c <= 1 ? 60 : c - 1)),
-      1000
-    )
+    countdownRef.current = setInterval(() => setCountdown((c) => (c <= 1 ? 60 : c - 1)), 1000)
     return () => clearInterval(countdownRef.current)
   }, [])
 
-  // Persist wallets
   const saveWallets = (updated) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     setWallets(updated)
   }
 
-  // Admin: add wallet
   const addWallet = () => {
     const addr = newAddr.trim()
-    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
-      setAddError('Invalid address — must be a 42-char hex string starting with 0x')
-      return
-    }
-    if (wallets.includes(addr.toLowerCase())) {
-      setAddError('This address is already being tracked')
-      return
-    }
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { setAddError('Invalid address — must be a 42-char hex string starting with 0x'); return }
+    if (wallets.includes(addr.toLowerCase())) { setAddError('This address is already being tracked'); return }
     setAddError('')
     saveWallets([...wallets, addr.toLowerCase()])
     setNewAddr('')
   }
 
-  // Admin: remove wallet
   const removeWallet = (addr) => saveWallets(wallets.filter((w) => w !== addr))
 
-  // Login
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setView('admin')
-      setLoginError('')
-      setPassword('')
-    } else {
-      setLoginError('Incorrect password — try again')
-    }
+    if (password === ADMIN_PASSWORD) { setView('admin'); setLoginError(''); setPassword('') }
+    else { setLoginError('Incorrect password — try again') }
   }
 
-  // Copy address
   const copyAddress = (addr) => {
     navigator.clipboard.writeText(addr)
     setCopied(addr)
     setTimeout(() => setCopied(null), 1500)
   }
+
+  const CrownIcon = () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style={{marginRight:'3px',verticalAlign:'middle'}}>
+      <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm2 3a1 1 0 0 0 1 1h8a1 1 0 0 0 0-2H8a1 1 0 0 0-1 1z"/>
+    </svg>
+  )
 
   // ── Login view ───────────────────────────────────────────────────────────────
   if (view === 'login') {
@@ -165,7 +145,6 @@ export default function App() {
           <div className="login-icon">🔐</div>
           <h2 className="login-title">Admin Access</h2>
           <p className="login-sub">Enter your password to manage wallets</p>
-
           <div className="input-row">
             <input
               className="text-input"
@@ -180,7 +159,6 @@ export default function App() {
               {showPwd ? '🙈' : '👁'}
             </button>
           </div>
-
           {loginError && <p className="error-msg">{loginError}</p>}
           <button className="btn-gold" onClick={handleLogin}>Sign In</button>
           <button className="btn-ghost" onClick={() => setView('leaderboard')}>← Back to leaderboard</button>
@@ -206,21 +184,15 @@ export default function App() {
             <button className="btn-ghost sm danger" onClick={() => setView('leaderboard')}>Log out</button>
           </div>
         </header>
-
         <main className="main">
           <div className="section-label">Add wallet address</div>
           <div className="add-row">
-            <input
-              className="text-input mono"
-              placeholder="0x... wallet address"
-              value={newAddr}
+            <input className="text-input mono" placeholder="0x... wallet address" value={newAddr}
               onChange={(e) => { setNewAddr(e.target.value); setAddError('') }}
-              onKeyDown={(e) => e.key === 'Enter' && addWallet()}
-            />
+              onKeyDown={(e) => e.key === 'Enter' && addWallet()} />
             <button className="btn-gold sm" onClick={addWallet}>+ Add</button>
           </div>
           {addError && <p className="error-msg">{addError}</p>}
-
           <div className="section-label" style={{ marginTop: '20px' }}>
             Tracked wallets <span className="count-badge">{wallets.length}</span>
           </div>
@@ -237,15 +209,13 @@ export default function App() {
               ))
             )}
           </div>
-          <p className="footer-note">
-            Wallets with &lt; 1,000,000 PMT will not appear on the leaderboard
-          </p>
+          <p className="footer-note">Wallets with &lt; 1,000,000 PMT will not appear on the leaderboard</p>
         </main>
       </div>
     )
   }
 
-  // ── Leaderboard view (default) ───────────────────────────────────────────────
+  // ── Leaderboard view ─────────────────────────────────────────────────────────
   return (
     <div className="page">
       <header className="header">
@@ -263,78 +233,42 @@ export default function App() {
           <button className="btn-ghost sm" onClick={() => setView('login')}>⚙ Admin</button>
         </div>
       </header>
-
       <main className="main">
-        {/* Stats */}
         <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-val">{leaderboard.length}</div>
-            <div className="stat-label">Millionaire holders</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-val">
-              {leaderboard.length > 0 ? formatBalance(leaderboard[0].balance) : '—'}
-            </div>
-            <div className="stat-label">Top balance</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-val">{wallets.length}</div>
-            <div className="stat-label">Wallets tracked</div>
-          </div>
+          <div className="stat-card"><div className="stat-val">{leaderboard.length}</div><div className="stat-label">Millionaire holders</div></div>
+          <div className="stat-card"><div className="stat-val">{leaderboard.length > 0 ? formatBalance(leaderboard[0].balance) : '—'}</div><div className="stat-label">Top balance</div></div>
+          <div className="stat-card"><div className="stat-val">{wallets.length}</div><div className="stat-label">Wallets tracked</div></div>
         </div>
-
-        {/* Table */}
         <div className="card">
           <div className="table-head">
-            <span>Rank</span>
-            <span>Wallet</span>
-            <span className="right">PMT Balance</span>
+            <span>Rank</span><span>Wallet</span><span className="right">PMT Balance</span>
           </div>
-
-          {fetchError && (
-            <div className="error-row">{fetchError}</div>
-          )}
-
+          {fetchError && <div className="error-row">{fetchError}</div>}
           {loading && leaderboard.length === 0 ? (
-            <div className="loading">
-              <span className="spinner" /> Fetching live balances…
-            </div>
+            <div className="loading"><span className="spinner" /> Fetching live balances…</div>
           ) : leaderboard.length === 0 ? (
             <div className="empty">
-              {wallets.length === 0
-                ? 'No wallets tracked yet — go to Admin to add wallets'
-                : 'No wallets currently hold 1,000,000+ PMT'}
+              {wallets.length === 0 ? 'No wallets tracked yet — go to Admin to add wallets' : 'No wallets currently hold 1,000,000+ PMT'}
             </div>
           ) : (
             leaderboard.map((row, i) => (
-              <div
-                key={row.address}
-                className={`lb-row ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}`}
-              >
-                <span className="rank">
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+              <div key={row.address} className={`lb-row ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}`}>
+                <span className={`rank-badge ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-default'}`}>
+                  {i < 3 && <CrownIcon />}{i + 1}
                 </span>
                 <span className="addr-cell">
                   <span className="mono addr">{shortenAddr(row.address)}</span>
-                  <button
-                    className="copy-btn"
-                    onClick={() => copyAddress(row.address)}
-                    title="Copy full address"
-                  >
+                  <button className="copy-btn" onClick={() => copyAddress(row.address)} title="Copy full address">
                     {copied === row.address ? '✓' : '⧉'}
                   </button>
                 </span>
-                <span className="balance">
-                  {formatBalance(row.balance)} <small>PMT</small>
-                </span>
+                <span className="balance">{formatBalance(row.balance)} <small>PMT</small></span>
               </div>
             ))
           )}
         </div>
-
         <p className="footer-note">
-          Only wallets holding ≥ 1,000,000 PMT are displayed · Contract:{' '}
-          <span className="mono">{CONTRACT.slice(0, 10)}…</span>
+          Only wallets holding ≥ 1,000,000 PMT are displayed · Contract: <span className="mono">{CONTRACT.slice(0, 10)}…</span>
         </p>
       </main>
     </div>
