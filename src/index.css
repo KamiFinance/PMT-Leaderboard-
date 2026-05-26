@@ -28,7 +28,11 @@ html, body, #root {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: url('/PMT-Leaderboard-/background.png');
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
