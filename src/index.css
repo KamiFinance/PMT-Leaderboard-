@@ -260,7 +260,7 @@ body{
 /* ── Leaderboard rows ────────────────────────────────────────────────── */
 .lb-row{
   display:grid;
-  grid-template-columns: 64px 52px 1fr 200px 160px 30px;
+  grid-template-columns: 64px 1fr 200px 160px 30px;
   align-items:center;
   gap:16px;
   padding:16px 24px;
@@ -522,12 +522,12 @@ body{
   .page{padding:0 18px 60px}
   .hero{flex-direction:column-reverse;align-items:flex-start;gap:20px;padding:24px 0 32px}
   .david-bg{width:100%;top:auto;bottom:0;right:-5%;opacity:0.5}
-  .lb-row{grid-template-columns:52px 42px 1fr 120px 30px;gap:10px;padding:14px 16px}
+  .lb-row{grid-template-columns:52px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
 }
 @media(max-width:500px){
-  .lb-row{grid-template-columns:44px 36px 1fr auto;gap:8px;padding:12px 14px}
+  .lb-row{grid-template-columns:44px 1fr auto;gap:8px;padding:12px 14px}
   .col-arrow{display:none}
   .status-chip:nth-child(2){display:none}
   .bal-num{font-size:15px}
