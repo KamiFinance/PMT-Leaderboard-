@@ -107,16 +107,16 @@ body{
 
 /* ── Hero ────────────────────────────────────────────────────────────── */
 .hero{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  padding:36px 0 32px;
   position:relative;
+  min-height:220px;
+  padding:36px 0 40px;
+  /* text floats left naturally, image is absolute */
 }
 
 .hero-text{
-  flex:1;
-  z-index:1;
+  position:relative;
+  z-index:2;
+  max-width:420px;
 }
 
 .hero-h1{
@@ -158,17 +158,20 @@ body{
 
 /* ── David statue hero image ─────────────────────────────────────────── */
 .hero-orb{
-  flex-shrink:0;
-  width:340px;
-  /* fade left edge into dark bg */
-  -webkit-mask-image:linear-gradient(to right, transparent 0%, black 18%);
-  mask-image:linear-gradient(to right, transparent 0%, black 18%);
+  position:absolute;
+  /* centered on page: starts at 38%, image is 380px wide, center ~57% */
+  left:38%;
+  top:-10px;
+  width:400px;
+  z-index:1;
+  /* fade left edge so text bleeds through naturally */
+  -webkit-mask-image:linear-gradient(to right, transparent 0%, black 22%);
+  mask-image:linear-gradient(to right, transparent 0%, black 22%);
 }
 .david-img{
   width:100%;
   height:auto;
   display:block;
-  /* image is already on black bg — blends naturally */
 }
 
 /* ── Stats row ───────────────────────────────────────────────────────── */
@@ -518,7 +521,7 @@ body{
 @media(max-width:800px){
   .page{padding:0 18px 60px}
   .hero{flex-direction:column-reverse;align-items:flex-start;gap:20px;padding:24px 0 32px}
-  .hero-orb{width:200px;align-self:center;-webkit-mask-image:none;mask-image:none}
+  .hero-orb{left:50%;transform:translateX(-50%);top:auto;width:260px;-webkit-mask-image:none;mask-image:none}
   .lb-row{grid-template-columns:52px 42px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
