@@ -220,7 +220,7 @@ export default function App() {
       {/* ── STATS ── */}
       <section className="stats-grid">
         {[
-          {label:'Millionaire Holders',      val:leaderboard.length||lb.length,  suf:''},
+          {label:'Millionaire Holders',      val:lb.length,  suf:''},
           {label:'Top Balance',              val:lb[0]?fmt(lb[0].balance):'—',   suf:lb[0]?' PMT':''},
           {label:'Wallets Tracked',          val:wallets.length,                  suf:''},
           {label:'Total Tracked Balance',    val:fmt(total),                      suf:' PMT'},
