@@ -180,6 +180,7 @@ export default function App() {
   const [belowBal,setBelowBal]       = useState({})
   const [loadingBelow,setLoadingBelow] = useState(false)
   const [showBelow,setShowBelow]     = useState(false)
+  const [dupAddr,setDupAddr]         = useState('')
   const rRef=useRef(null), cRef=useRef(null)
 
   const total      = lb.reduce((s,r)=>s+r.balance,0)
@@ -239,9 +240,14 @@ export default function App() {
   }
   const addWallet=()=>{
     const a=newAddr.trim()
-    if(!/^0x[0-9a-fA-F]{40}$/.test(a)){setAddrErr('Invalid address');return}
-    if(wallets.map(w=>w.toLowerCase()).includes(a.toLowerCase())){setAddrErr('Already tracked');return}
-    setAddrErr('');setWallets(p=>[...p,a.toLowerCase()]);setNewAddr('');setSaveMsg('')
+    if(!/^0x[0-9a-fA-F]{40}$/.test(a)){setAddrErr('Invalid address');setDupAddr('');return}
+    if(wallets.map(w=>w.toLowerCase()).includes(a.toLowerCase())){
+      setAddrErr('⚠ This address is already being tracked');
+      setDupAddr(a.toLowerCase())
+      setTimeout(()=>setDupAddr(''),3000)
+      return
+    }
+    setAddrErr('');setDupAddr('');setWallets(p=>[...p,a.toLowerCase()]);setNewAddr('');setSaveMsg('')
   }
   const removeWallet=a=>{setWallets(p=>p.filter(w=>w!==a));setSaveMsg('')}
   const saveToRepo=async()=>{
@@ -303,9 +309,15 @@ export default function App() {
         <div className="wallet-list">
           {wallets.length===0?<div className="empty-state">No wallets added yet</div>
             :wallets.map((a,i)=>(
-              <div className="wallet-item" key={a}>
+              <div className="wallet-item" key={a} style={{
+                background: dupAddr===a ? 'rgba(231,76,60,0.12)' : 'transparent',
+                border: dupAddr===a ? '1px solid rgba(231,76,60,0.4)' : '1px solid transparent',
+                borderRadius: dupAddr===a ? 6 : 0,
+                transition: 'all 0.3s'
+              }}>
                 <span className="wallet-n">{i+1}</span>
-                <span className="wallet-a mono">{a}</span>
+                <span className="wallet-a mono" style={{color: dupAddr===a ? 'var(--red)' : ''}}>{a}</span>
+                {dupAddr===a && <span style={{fontSize:10,color:'var(--red)',marginRight:6}}>duplicate</span>}
                 <button className="del-btn" onClick={()=>removeWallet(a)}>Remove</button>
               </div>
             ))}
