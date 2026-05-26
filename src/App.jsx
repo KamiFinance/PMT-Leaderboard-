@@ -26,6 +26,26 @@ const fmtUsd = (n, price) => {
   return `$${usd.toFixed(2)}`
 }
 
+async function fetchLastActivity(addr) {
+  try {
+    const r = await fetch(
+      `https://api.bscscan.com/api?module=account&action=txlist&address=${addr}&sort=desc&page=1&offset=1&apikey=YourApiKeyToken`
+    )
+    const d = await r.json()
+    if(d.status==='1' && d.result?.length>0) return parseInt(d.result[0].timeStamp)
+    return null
+  } catch { return null }
+}
+function timeAgo(ts) {
+  if(!ts) return null
+  const diff = Math.floor(Date.now()/1000) - ts
+  if(diff < 60)        return 'just now'
+  if(diff < 3600)      return `${Math.floor(diff/60)}m ago`
+  if(diff < 86400)     return `${Math.floor(diff/3600)}h ago`
+  if(diff < 86400*30)  return `${Math.floor(diff/86400)}d ago`
+  return `${Math.floor(diff/86400/30)}mo ago`
+}
+
 async function verifyPassword(input) {
   const enc = new TextEncoder().encode(input)
   const buf = await crypto.subtle.digest('SHA-256', enc)
@@ -113,6 +133,7 @@ export default function App() {
   const [pmtPrice,setPmtPrice]   = useState(0)
   const [blockNum,setBlockNum]   = useState(0)
   const [showAll,setShowAll]     = useState(false)
+  const [activity,setActivity]   = useState({})
   const rRef=useRef(null), cRef=useRef(null)
 
   const total      = lb.reduce((s,r)=>s+r.balance,0)
@@ -123,6 +144,16 @@ export default function App() {
   useEffect(()=>{ fetchDecimals().then(setDecimals) },[])
   useEffect(()=>{ fetchPmtPrice().then(setPmtPrice) },[])
   useEffect(()=>{ fetchBlockNumber().then(setBlockNum) },[])
+  useEffect(()=>{
+    if(!lb.length) return
+    lb.forEach((row,i)=>{
+      setTimeout(()=>{
+        fetchLastActivity(row.address).then(ts=>{
+          if(ts) setActivity(prev=>({...prev,[row.address]:ts}))
+        })
+      }, i*400)
+    })
+  },[lb])
 
   const refresh = useCallback(async()=>{
     if(!wallets.length){setLb([]);return}
@@ -375,9 +406,19 @@ export default function App() {
                       }}>
                         {isFirst?'CROWN HOLDER':i===1?'SILVER HOLDER':i===2?'BRONZE HOLDER':'ELITE HOLDER'}
                       </span>
-                      {isTop3&&(
-                        <span className="active-tag">
-                          <span className="green-dot"/>Active now
+                      {(activity[row.address]||isTop3)&&(
+                        <span className="active-tag" style={{
+                          color: activity[row.address]
+                            ? (Math.floor(Date.now()/1000)-activity[row.address]<3600 ? 'var(--green)' : 'rgba(255,255,255,0.4)')
+                            : 'var(--green)'
+                        }}>
+                          <span style={{
+                            display:'inline-block',width:5,height:5,borderRadius:'50%',flexShrink:0,
+                            background: activity[row.address]
+                              ? (Math.floor(Date.now()/1000)-activity[row.address]<3600 ? 'var(--green)' : 'rgba(255,255,255,0.3)')
+                              : 'var(--green)'
+                          }}/>
+                          {activity[row.address] ? timeAgo(activity[row.address]) : 'Active now'}
                         </span>
                       )}
                     </div>
