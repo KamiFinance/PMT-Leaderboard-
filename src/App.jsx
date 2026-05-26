@@ -20,8 +20,10 @@ const fmt = (n) => {
 const fmtUsd = (n, price) => {
   if (!price || price <= 0) return null
   const usd = n * price
-  if (usd >= 1e6) return `$${(usd/1e6).toFixed(3)}M USD`
-  return `$${Math.round(usd).toLocaleString()} USD`
+  if (usd >= 1e9) return `$${(usd/1e9).toFixed(2)}B`
+  if (usd >= 1e6) return `$${(usd/1e6).toFixed(2)}M`
+  if (usd >= 1e3) return `$${(usd/1e3).toFixed(1)}K`
+  return `$${usd.toFixed(2)}`
 }
 
 async function verifyPassword(input) {
@@ -52,10 +54,22 @@ async function fetchBlockNumber() {
 }
 async function fetchPmtPrice() {
   try {
-    const r=await fetch(`https://api.pancakeswap.info/api/v2/tokens/${CONTRACT}`)
-    if(!r.ok) return 0
-    const d=await r.json()
-    return parseFloat(d.data?.price)||0
+    // On-chain price via PancakeSwap V2 Router getAmountsOut(1 PMT → BUSD)
+    const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
+    const BUSD   = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
+    const pmt    = CONTRACT.slice(2).toLowerCase().padStart(64,'0')
+    const busd   = BUSD.slice(2).toLowerCase().padStart(64,'0')
+    const data   = '0xd06ca61f'
+      + '0000000000000000000000000000000000000000000000000de0b6b3a7640000'
+      + '0000000000000000000000000000000000000000000000000000000000000040'
+      + '0000000000000000000000000000000000000000000000000000000000000002'
+      + pmt + busd
+    const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:ROUTER,data},'latest']})})
+    const res = await r.json()
+    if(!res.result||res.result==='0x') return 0
+    const busdOut = BigInt('0x'+res.result.slice(-64))
+    return Number(busdOut)/1e18
   } catch { return 0 }
 }
 async function fetchWalletsFromRepo() {
