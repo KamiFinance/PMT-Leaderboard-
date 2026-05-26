@@ -145,7 +145,7 @@ export default function App() {
   }
 
   const CrownIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style={{marginRight:'3px',verticalAlign:'middle'}}>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10" style={{verticalAlign:'middle'}}>
       <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm2 3a1 1 0 0 0 1 1h8a1 1 0 0 0 0-2H8a1 1 0 0 0-1 1z"/>
     </svg>
   )
