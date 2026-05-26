@@ -368,9 +368,10 @@ export default function App() {
                     </div>
                     <div className="badges-row">
                       <span className="holder-tag" style={{
-                        color: isFirst?'#FFD700':'rgba(255,255,255,0.45)',
-                        borderColor: isFirst?'rgba(255,215,0,0.4)':'rgba(255,255,255,0.1)',
-                        background: isFirst?'rgba(255,215,0,0.07)':'transparent',
+                        color: isFirst?'#FFD700': i===1?'#D8D8D8': i===2?'#CD7F32':'rgba(255,255,255,0.45)',
+                        borderColor: isFirst?'rgba(255,215,0,0.4)': i===1?'rgba(210,210,210,0.3)': i===2?'rgba(205,127,50,0.3)':'rgba(255,255,255,0.1)',
+                        background: isFirst?'rgba(255,215,0,0.07)': i===1?'rgba(210,210,210,0.05)': i===2?'rgba(205,127,50,0.05)':'transparent',
+                        textShadow: i===1?'0 0 8px rgba(220,220,220,0.6)': i===2?'0 0 8px rgba(205,127,50,0.6)':'none',
                       }}>
                         {isFirst?'CROWN HOLDER':i===1?'SILVER HOLDER':i===2?'BRONZE HOLDER':'ELITE HOLDER'}
                       </span>
