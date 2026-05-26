@@ -165,8 +165,6 @@ body{
   width:72%;
   height:auto;
   z-index:0;
-  /* screen blend: black=0 → 1-(1-0)(1-bg)=bg → invisible on any bg color */
-  mix-blend-mode:screen;
   pointer-events:none;
 }
 /* status-bar and hero sit on top */
