@@ -370,6 +370,8 @@ export default function App() {
                       ? <img src={`${import.meta.env.BASE_URL}1st_place.svg`} alt="1st" className="rank-svg-first"/>
                       : i===1
                       ? <img src={`${import.meta.env.BASE_URL}2nd_place.svg`} alt="2nd" className="rank-svg-second"/>
+                      : i===2
+                      ? <img src={`${import.meta.env.BASE_URL}3rd_place.svg`} alt="3rd" className="rank-svg-third"/>
                       : <div className="rank-badge" style={{color:accentCol,borderColor:accentCol,opacity:isTop3?1:0.5}}>
                           {i+1}
                         </div>
