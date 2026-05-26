@@ -121,6 +121,13 @@ async function fetchPmtPrice() {
     return parseFloat(pairs[0].priceUsd)||0
   } catch { return 0 }
 }
+async function fetchBelowThreshold(wallets, decimals) {
+  const rows = await Promise.all(
+    wallets.map(async a => ({ address: a, balance: await fetchBalance(a, decimals) }))
+  )
+  return rows.filter(r => r.balance < MIN_TOKENS).sort((a,b) => b.balance - a.balance)
+}
+
 async function fetchWalletsFromRepo() {
   try { const r=await fetch(`${RAW_WALLETS_URL}?t=${Date.now()}`); return r.ok?await r.json():[] } catch { return [] }
 }
@@ -168,8 +175,11 @@ export default function App() {
   const [copied,setCopied]       = useState(null)
   const [pmtPrice,setPmtPrice]   = useState(0)
   const [blockNum,setBlockNum]   = useState(0)
-  const [showAll,setShowAll]     = useState(false)
-  const [activity,setActivity]   = useState({})
+  const [showAll,setShowAll]        = useState(false)
+  const [activity,setActivity]      = useState({})
+  const [belowBal,setBelowBal]       = useState({})
+  const [loadingBelow,setLoadingBelow] = useState(false)
+  const [showBelow,setShowBelow]     = useState(false)
   const rRef=useRef(null), cRef=useRef(null)
 
   const total      = lb.reduce((s,r)=>s+r.balance,0)
@@ -300,6 +310,45 @@ export default function App() {
               </div>
             ))}
         </div>
+
+        {/* ── Below Threshold Section ── */}
+        <div style={{marginTop:24,marginBottom:8,display:'flex',alignItems:'center',gap:12}}>
+          <p className="field-label" style={{margin:0}}>
+            Wallets Below 1,000,000 PMT
+            {Object.keys(belowBal).length>0&&<span className="badge-count">{Object.keys(belowBal).length}</span>}
+          </p>
+          <button className="btn-primary sm" onClick={async()=>{
+            setLoadingBelow(true)
+            const rows = await fetchBelowThreshold(wallets, decimals)
+            const map = {}
+            rows.forEach(r => { map[r.address] = r.balance })
+            setBelowBal(map)
+            setShowBelow(true)
+            setLoadingBelow(false)
+          }} disabled={loadingBelow||wallets.length===0}>
+            {loadingBelow ? 'Loading…' : 'Check Now'}
+          </button>
+          {showBelow&&Object.keys(belowBal).length>0&&(
+            <button className="btn-ghost sm" onClick={()=>setShowBelow(false)}>Hide</button>
+          )}
+        </div>
+
+        {showBelow&&(
+          <div className="wallet-list">
+            {Object.keys(belowBal).length===0
+              ? <div className="empty-state" style={{color:'var(--green)'}}>✓ All wallets hold ≥ 1,000,000 PMT</div>
+              : Object.entries(belowBal).map(([addr, bal])=>(
+                <div className="wallet-item" key={addr} style={{borderLeft:'2px solid rgba(231,76,60,0.4)'}}>
+                  <span className="wallet-a mono" style={{flex:1}}>{addr}</span>
+                  <span style={{fontSize:12,color:'var(--red)',fontWeight:600,marginRight:8,whiteSpace:'nowrap'}}>
+                    {fmt(bal)} PMT
+                  </span>
+                  <button className="del-btn" onClick={()=>{removeWallet(addr);const nb={...belowBal};delete nb[addr];setBelowBal(nb)}}>Remove</button>
+                </div>
+              ))
+            }
+          </div>
+        )}
         <button className="btn-primary" onClick={saveToRepo} disabled={saving}>{saving?'Saving…':'💾 Save to GitHub'}</button>
         {saveMsg&&<p className={saveMsg.startsWith('success:')?'ok-msg':'err-msg'} style={{marginTop:10}}>
           {saveMsg.replace(/^(success|error):/,'')}
