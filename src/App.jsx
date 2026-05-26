@@ -23,25 +23,6 @@ const fmtUsd = (n, price) => {
   if (usd >= 1e6) return `$${(usd/1e6).toFixed(3)}M USD`
   return `$${Math.round(usd).toLocaleString()} USD`
 }
-  if (rank === 1) return {
-    bg: 'radial-gradient(circle at 38% 32%, #3a3a3a, #1a1a1a 50%, #080808)',
-    border: '#4a4a4a',
-    text: '#C0C0C0'
-  }
-  if (rank === 2) return {
-    bg: 'radial-gradient(circle at 38% 32%, #3d2a10, #1e1408 50%, #0a0602)',
-    border: '#4a3218',
-    text: '#CD7F32'
-  }
-  // all others: dark slate metallic
-  const seed = parseInt(addr.slice(2,4),16) % 3
-  const bgs = [
-    'radial-gradient(circle at 38% 32%, #252525, #131313 50%, #070707)',
-    'radial-gradient(circle at 38% 32%, #1e1e24, #101015 50%, #060608)',
-    'radial-gradient(circle at 38% 32%, #1f1f1f, #111111 50%, #060606)',
-  ]
-  return { bg: bgs[seed], border: '#2a2a2a', text: 'rgba(255,255,255,0.45)' }
-}
 
 async function verifyPassword(input) {
   const enc = new TextEncoder().encode(input)
