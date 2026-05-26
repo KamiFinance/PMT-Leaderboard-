@@ -143,7 +143,7 @@ async function commitWalletsToRepo(wallets,token) {
 
 // ── Stat Icons (inline SVG) ────────────────────────────────────────────────
 function IconPeople() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  return <img src={`${import.meta.env.BASE_URL}holders.png`} alt="Millionaire Holders" style={{width:28,height:28,objectFit:'contain'}}/>
 }
 function IconWallet() {
   return <img src={`${import.meta.env.BASE_URL}trophy.png`} alt="Top Balance" style={{width:28,height:28,objectFit:'contain'}}/>
