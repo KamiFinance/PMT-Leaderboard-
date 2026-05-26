@@ -372,7 +372,7 @@ export default function App() {
                         borderColor: isFirst?'rgba(255,215,0,0.4)':'rgba(255,255,255,0.1)',
                         background: isFirst?'rgba(255,215,0,0.07)':'transparent',
                       }}>
-                        {isFirst?'CROWN HOLDER':'ELITE HOLDER'}
+                        {isFirst?'CROWN HOLDER':i===1?'SILVER HOLDER':i===2?'BRONZE HOLDER':'ELITE HOLDER'}
                       </span>
                       {isTop3&&(
                         <span className="active-tag">
