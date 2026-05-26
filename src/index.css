@@ -130,10 +130,8 @@ body {
 }
 
 .stat-card {
-  background: rgba(0,0,0,0.15);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,229,0,0.15);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255,229,0,0.18);
   border-radius: var(--radius);
   padding: 16px 18px;
   text-align: center;
@@ -156,10 +154,8 @@ body {
 
 /* ── Card / Table ─────────────────────────────────────── */
 .card {
-  background: rgba(0,0,0,0.15);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,229,0,0.15);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255,229,0,0.18);
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -184,7 +180,7 @@ body {
   display: grid;
   grid-template-columns: 52px 1fr 160px;
   padding: 15px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   align-items: center;
   transition: background 0.1s;
 }
