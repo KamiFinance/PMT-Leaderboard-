@@ -247,45 +247,47 @@ export default function App() {
   return(
     <div className="page">
 
-      {/* ── STATUS BAR ── */}
-      <div className="status-bar">
-        <div className="status-left"/>
-        <div className="status-right">
-          <span className="status-chip live-chip">
-            <span className="pulse-dot"/>LIVE
-          </span>
-          <span className="status-chip">Min {MIN_TOKENS.toLocaleString()} PMT</span>
-          <span className="status-chip refresh-chip">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            {countdown}s
-          </span>
-        </div>
-      </div>
+      {/* ── TOP SECTION: status bar + hero with David background ── */}
+      <div className="page-top">
+        {/* David image — full background layer */}
+        <img
+          src={`${import.meta.env.BASE_URL}david.png`}
+          alt=""
+          aria-hidden="true"
+          className="david-bg"
+        />
 
-      {/* ── HERO ── */}
-      <header className="hero">
-        <div className="hero-text">
-          <h1 className="hero-h1">
-            <span className="gold-word">PMT</span> Millionaires Club
-          </h1>
-          <p className="hero-tagline">The elite holders of the PMT ecosystem.</p>
-          <div className="hero-chips">
-            <span className="chain-chip">
-              <span className="pulse-dot"/>LIVE ON BNB SMART CHAIN
+        {/* STATUS BAR — floats on top */}
+        <div className="status-bar">
+          <div className="status-left"/>
+          <div className="status-right">
+            <span className="status-chip live-chip">
+              <span className="pulse-dot"/>LIVE
             </span>
-            {blockNum>0&&<span className="chain-chip block-chip">BLOCK #{blockNum.toLocaleString()}</span>}
+            <span className="status-chip">Min {MIN_TOKENS.toLocaleString()} PMT</span>
+            <span className="status-chip refresh-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+              {countdown}s
+            </span>
           </div>
         </div>
 
-        {/* David statue centerpiece */}
-        <div className="hero-orb" aria-hidden="true">
-          <img
-            src={`${import.meta.env.BASE_URL}david.png`}
-            alt="PMT Millionaires"
-            className="david-img"
-          />
-        </div>
-      </header>
+        {/* HERO TEXT — floats on top */}
+        <header className="hero">
+          <div className="hero-text">
+            <h1 className="hero-h1">
+              <span className="gold-word">PMT</span> Millionaires Club
+            </h1>
+            <p className="hero-tagline">The elite holders of the PMT ecosystem.</p>
+            <div className="hero-chips">
+              <span className="chain-chip">
+                <span className="pulse-dot"/>LIVE ON BNB SMART CHAIN
+              </span>
+              {blockNum>0&&<span className="chain-chip block-chip">BLOCK #{blockNum.toLocaleString()}</span>}
+            </div>
+          </div>
+        </header>
+      </div>
 
       {/* ── STAT CARDS ── */}
       <section className="stats-row">
