@@ -368,6 +368,8 @@ export default function App() {
                   <div className="col-rank">
                     {isFirst
                       ? <img src={`${import.meta.env.BASE_URL}1st_place.svg`} alt="1st" className="rank-svg-first"/>
+                      : i===1
+                      ? <img src={`${import.meta.env.BASE_URL}2nd_place.svg`} alt="2nd" className="rank-svg-second"/>
                       : <div className="rank-badge" style={{color:accentCol,borderColor:accentCol,opacity:isTop3?1:0.5}}>
                           {i+1}
                         </div>
