@@ -28,11 +28,31 @@ const fmtUsd = (n, price) => {
 
 async function fetchLastActivity(addr) {
   try {
-    const r = await fetch(
-      `https://api.bscscan.com/api?module=account&action=txlist&address=${addr}&sort=desc&page=1&offset=1&apikey=YourApiKeyToken`
-    )
-    const d = await r.json()
-    if(d.status==='1' && d.result?.length>0) return parseInt(d.result[0].timeStamp)
+    // Use BSC RPC eth_getLogs — no API key needed, same RPC already in use
+    // Search last 500k blocks (~7 days on BSC) for any ERC-20 Transfer from this wallet
+    const currentHex = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_blockNumber',params:[]})})
+      .then(r=>r.json()).then(d=>d.result)
+    const current = parseInt(currentHex,16)
+    const fromBlock = '0x'+Math.max(0, current-500000).toString(16)
+    const padded = '0x000000000000000000000000'+addr.slice(2).toLowerCase()
+    const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+
+    // Search as sender first, then receiver
+    for(const topics of [[TRANSFER_TOPIC,padded],[TRANSFER_TOPIC,null,padded]]){
+      const r = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getLogs',
+          params:[{fromBlock,toBlock:'latest',topics}]})})
+      const d = await r.json()
+      if(d.result?.length>0){
+        const last = d.result[d.result.length-1]
+        const br = await fetch(RPC_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBlockByNumber',
+            params:[last.blockNumber,false]})})
+        const bd = await br.json()
+        return parseInt(bd.result?.timestamp,16)||null
+      }
+    }
     return null
   } catch { return null }
 }
