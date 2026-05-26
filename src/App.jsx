@@ -27,19 +27,50 @@ const fmtUsd = (n, price) => {
 }
 
 async function fetchLastActivity(addr) {
-  try {
-    // BscScan free API — no key needed, CORS enabled, returns last tx timestamp
-    const url = `https://api.bscscan.com/api?module=account&action=txlist&address=${addr}&sort=desc&page=1&offset=1`
-    const r = await fetch(url)
+  // Query PMT contract Transfer logs for this wallet via BSC RPC
+  // Try progressively larger ranges until we find activity
+  const TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+  const padded   = '0x000000000000000000000000'+addr.slice(2).toLowerCase()
+  const RPCS = [
+    'https://bsc-dataseed1.binance.org/',
+    'https://bsc-dataseed2.defibit.io/',
+    'https://bsc-dataseed.bnbchain.org',
+  ]
+  const getLogs = async (rpc, fromBlock, topics) => {
+    const r = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getLogs',
+        params:[{address:CONTRACT,fromBlock,toBlock:'latest',topics}]})})
     const d = await r.json()
-    if(d.status==='1' && d.result?.length>0) return parseInt(d.result[0].timeStamp)
-    // fallback: check internal transactions too
-    const url2 = `https://api.bscscan.com/api?module=account&action=tokentx&address=${addr}&sort=desc&page=1&offset=1`
-    const r2 = await fetch(url2)
-    const d2 = await r2.json()
-    if(d2.status==='1' && d2.result?.length>0) return parseInt(d2.result[0].timeStamp)
-    return null
-  } catch { return null }
+    return d.result||[]
+  }
+  const getTs = async (rpc, blockHex) => {
+    const r = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBlockByNumber',params:[blockHex,false]})})
+    const d = await r.json()
+    return parseInt(d.result?.timestamp,16)||null
+  }
+  // Try ranges: 5k, 50k, 500k blocks
+  for(const rpc of RPCS){
+    try{
+      const curHex = await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_blockNumber',params:[]})})
+        .then(r=>r.json()).then(d=>d.result)
+      const cur = parseInt(curHex,16)
+      for(const range of [5000,50000,500000]){
+        const from = '0x'+(Math.max(0,cur-range)).toString(16)
+        // check as sender
+        let logs = await getLogs(rpc, from, [TRANSFER,padded])
+        if(!logs.length) logs = await getLogs(rpc, from, [TRANSFER,null,padded]) // as receiver
+        if(logs.length){
+          const last = logs[logs.length-1]
+          const ts = await getTs(rpc, last.blockNumber)
+          if(ts) return ts
+        }
+      }
+      break // if RPC worked (no error) but found nothing, stop
+    }catch{ continue }
+  }
+  return null
 }
 function timeAgo(ts) {
   if(!ts) return null
@@ -411,19 +442,17 @@ export default function App() {
                       }}>
                         {isFirst?'CROWN HOLDER':i===1?'SILVER HOLDER':i===2?'BRONZE HOLDER':'ELITE HOLDER'}
                       </span>
-                      {(activity[row.address]||isTop3)&&(
+                      {activity[row.address]&&(
                         <span className="active-tag" style={{
-                          color: activity[row.address]
-                            ? (Math.floor(Date.now()/1000)-activity[row.address]<3600 ? 'var(--green)' : 'rgba(255,255,255,0.4)')
-                            : 'var(--green)'
+                          color: Math.floor(Date.now()/1000)-activity[row.address]<3600
+                            ? 'var(--green)' : 'rgba(255,255,255,0.4)'
                         }}>
                           <span style={{
                             display:'inline-block',width:5,height:5,borderRadius:'50%',flexShrink:0,
-                            background: activity[row.address]
-                              ? (Math.floor(Date.now()/1000)-activity[row.address]<3600 ? 'var(--green)' : 'rgba(255,255,255,0.3)')
-                              : 'var(--green)'
+                            background: Math.floor(Date.now()/1000)-activity[row.address]<3600
+                              ? 'var(--green)' : 'rgba(255,255,255,0.3)'
                           }}/>
-                          {activity[row.address] ? timeAgo(activity[row.address]) : 'Active now'}
+                          {timeAgo(activity[row.address])}
                         </span>
                       )}
                     </div>
