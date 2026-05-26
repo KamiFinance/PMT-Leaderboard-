@@ -3,7 +3,16 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 // ── Config ───────────────────────────────────────────────────────────────────
 const CONTRACT      = '0x68Ae2F202799be2008c89e2100257e66F77DA1f3'
 const RPC_URL       = 'https://bsc-dataseed.binance.org/'
-const ADMIN_PASSWORD = 'Kr62032980+'
+// Password is stored as a SHA-256 hash — never in plain text
+const ADMIN_PASSWORD_HASH = '8d87d4f9560d31f5cc6090b758b1be34ed707bd2bd275ead3ef7797fdd6e86c1'
+
+async function verifyPassword(input) {
+  const encoded = new TextEncoder().encode(input)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
+  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex === ADMIN_PASSWORD_HASH
+}
+
 const MIN_TOKENS    = 1_000_000
 const REFRESH_MS    = 60_000
 const STORAGE_KEY   = 'pmt_wallets'
@@ -22,11 +31,7 @@ async function ethCall(data) {
   const res = await fetch(RPC_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0', id: 1,
-      method: 'eth_call',
-      params: [{ to: CONTRACT, data }, 'latest'],
-    }),
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: CONTRACT, data }, 'latest'] }),
   })
   return (await res.json()).result
 }
@@ -75,14 +80,9 @@ export default function App() {
     setFetchError('')
     try {
       const rows = await Promise.all(
-        wallets.map(async (addr) => ({
-          address: addr,
-          balance: await fetchTokenBalance(addr, decimals),
-        }))
+        wallets.map(async (addr) => ({ address: addr, balance: await fetchTokenBalance(addr, decimals) }))
       )
-      setLeaderboard(
-        rows.filter((r) => r.balance >= MIN_TOKENS).sort((a, b) => b.balance - a.balance)
-      )
+      setLeaderboard(rows.filter((r) => r.balance >= MIN_TOKENS).sort((a, b) => b.balance - a.balance))
       setCountdown(60)
     } catch {
       setFetchError('Failed to fetch balances. Retrying in 60s…')
@@ -104,6 +104,18 @@ export default function App() {
     return () => clearInterval(countdownRef.current)
   }, [])
 
+  // Secret keyboard shortcut: Ctrl+Shift+A opens admin login
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault()
+        setView((v) => v === 'leaderboard' ? 'login' : v)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const saveWallets = (updated) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     setWallets(updated)
@@ -120,8 +132,9 @@ export default function App() {
 
   const removeWallet = (addr) => saveWallets(wallets.filter((w) => w !== addr))
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) { setView('admin'); setLoginError(''); setPassword('') }
+  const handleLogin = async () => {
+    const ok = await verifyPassword(password)
+    if (ok) { setView('admin'); setLoginError(''); setPassword('') }
     else { setLoginError('Incorrect password — try again') }
   }
 
@@ -146,15 +159,9 @@ export default function App() {
           <h2 className="login-title">Admin Access</h2>
           <p className="login-sub">Enter your password to manage wallets</p>
           <div className="input-row">
-            <input
-              className="text-input"
-              type={showPwd ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              autoFocus
-            />
+            <input className="text-input" type={showPwd ? 'text' : 'password'} placeholder="Password"
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()} autoFocus />
             <button className="icon-btn" onClick={() => setShowPwd(!showPwd)} title="Toggle visibility">
               {showPwd ? '🙈' : '👁'}
             </button>
@@ -230,7 +237,7 @@ export default function App() {
           <div className="badge live">● Live</div>
           <div className="badge">Min 1,000,000 PMT</div>
           <div className="badge muted">↺ {countdown}s</div>
-          <button className="btn-ghost sm" onClick={() => setView('login')}>⚙ Admin</button>
+          {/* Admin accessible via Ctrl+Shift+A */}
         </div>
       </header>
       <main className="main">
