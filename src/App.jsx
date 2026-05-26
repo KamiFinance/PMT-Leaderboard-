@@ -149,7 +149,7 @@ function IconWallet() {
   return <img src={`${import.meta.env.BASE_URL}trophy.png`} alt="Top Balance" style={{width:28,height:28,objectFit:'contain'}}/>
 }
 function IconTrend() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+  return <img src={`${import.meta.env.BASE_URL}wallet.png`} alt="Wallets Tracked" style={{width:28,height:28,objectFit:'contain'}}/>
 }
 function IconCoins() {
   return <img src={`${import.meta.env.BASE_URL}token.png`} alt="Total Balance" style={{width:28,height:28,objectFit:'contain'}}/>
