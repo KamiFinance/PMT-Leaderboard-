@@ -761,7 +761,7 @@ body{
 .lp-network-photo:hover img { filter: grayscale(0%); }
 
 /* Events */
-.lp-events-placeholder { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lp-events-placeholder { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
 .lp-event-card {
   background: rgba(18,16,10,.9); border: 1px solid rgba(255,255,255,.07);
   border-radius: 12px; overflow: hidden; transition: border-color .2s;
