@@ -170,9 +170,9 @@ body{
 }
 .david-bg{
   position:absolute;
-  top:-38%;
+  top:-26%;
   left:18%;
-  width:72%;
+  width:88%;
   height:auto;
   z-index:0;
   pointer-events:none;
