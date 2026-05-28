@@ -17,114 +17,115 @@ const WALLETS = [
   { id:'walletconnect', name:'WalletConnect',   icon:WC_ICON,        desc:'Any mobile wallet — scan QR' },
 ]
 
-const checkAccess = async (address) => {
-  const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
-  const list = await res.json()
-  return list.map(w => w.toLowerCase()).includes(address.toLowerCase())
+const DOWNLOAD = {
+  metamask: 'https://metamask.io/download/',
+  trust:    'https://trustwallet.com/download',
+  coinbase: 'https://www.coinbase.com/wallet/downloads',
 }
 
 export default function WalletModal({ onSuccess, onClose }) {
-  const [status, setStatus]     = useState('idle')
-  const [addr, setAddr]         = useState('')
-  const [errMsg, setErrMsg]     = useState('')
-  const [walletId, setWalletId] = useState('')
-  const wcRef                   = useRef(null)
+  const [status, setStatus]   = useState('idle')
+  const [addr, setAddr]       = useState('')
+  const [errMsg, setErrMsg]   = useState('')
+  const [isWC, setIsWC]       = useState(false)
+  const wcRef                 = useRef(null)
 
   useEffect(() => {
-    const fn = (e) => { if(e.key==='Escape') onClose() }
+    const fn = e => { if(e.key==='Escape') onClose() }
     window.addEventListener('keydown', fn)
-    return () => { window.removeEventListener('keydown', fn) }
+    return () => window.removeEventListener('keydown', fn)
   }, [onClose])
 
-  const finish = async (address) => {
-    const allowed = await checkAccess(address)
+  const handleResult = (address, allowed) => {
     setAddr(address)
-    if(allowed){ setStatus('success'); setTimeout(()=>onSuccess(), 1200) }
+    if(allowed){ setStatus('success'); setTimeout(onSuccess, 1200) }
     else setStatus('denied')
   }
 
-  const connect = async (walletId) => {
-    setWalletId(walletId)
+  const handleError = (err) => {
+    if(err.code===4001 || err.message?.includes('reject') || err.message?.includes('denied')){
+      setErrMsg('Connection rejected. Please try again.')
+    } else if(err.message?.includes('closed')||err.message?.includes('close')){
+      setStatus('idle'); return
+    } else {
+      setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
+    }
+    setStatus('error')
+  }
 
-    // ── Browser extension wallets (MetaMask, Trust, Coinbase) ──────────────
-    if(walletId !== 'walletconnect') {
-      if(!window.ethereum) {
-        const links = {
-          metamask: 'https://metamask.io/download/',
-          trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
-          coinbase: 'https://www.coinbase.com/wallet/downloads',
-        }
-        window.open(links[walletId]||links.metamask, '_blank')
-        setStatus('noWallet')
-        return
-      }
+  // Non-async click handler — window.ethereum.request() called synchronously
+  // so MetaMask receives it within the user gesture context
+  const connect = (walletId) => {
+    setIsWC(walletId==='walletconnect')
 
-      // IMPORTANT: call eth_requestAccounts FIRST — before any state updates
-      // so MetaMask receives it within the user-gesture context and opens its popup
-      let accountsPromise
-      try {
-        accountsPromise = window.ethereum.request({ method: 'eth_requestAccounts' })
-      } catch(e) {
-        setErrMsg('Could not reach wallet. Please try again.')
-        setStatus('error')
-        return
-      }
-
+    if(walletId === 'walletconnect'){
       setStatus('connecting')
-
-      try {
-        const accounts = await accountsPromise
-        if(!accounts?.[0]) throw new Error('No account returned')
-        await finish(accounts[0])
-      } catch(err) {
-        if(err.code===4001||err.message?.includes('rejected')||err.message?.includes('denied')){
-          setErrMsg('Connection rejected. Please try again.')
-        } else {
-          setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
-        }
-        setStatus('error')
-      }
+      import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
+        .then(({ EthereumProvider }) => EthereumProvider.init({
+          projectId: PROJECT_ID,
+          chains: [56],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+            themeVariables: { '--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09' }
+          },
+          metadata: {
+            name: 'PMT Millionaires Club',
+            description: 'The elite holders of the PMT ecosystem.',
+            url: window.location.origin,
+            icons: [window.location.origin+'/PMT-logo.png']
+          }
+        }))
+        .then(provider => {
+          wcRef.current = provider
+          return provider.connect().then(() => provider.request({ method:'eth_accounts' }))
+        })
+        .then(async accounts => {
+          const address = accounts?.[0]
+          if(!address) throw new Error('No account')
+          const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
+          const list = await res.json()
+          handleResult(address, list.map(w=>w.toLowerCase()).includes(address.toLowerCase()))
+        })
+        .catch(handleError)
       return
     }
 
-    // ── WalletConnect ───────────────────────────────────────────────────────
-    setStatus('connecting')
-    try {
-      const { EthereumProvider } = await import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
-      const provider = await EthereumProvider.init({
-        projectId: PROJECT_ID,
-        chains: [56],
-        showQrModal: true,
-        qrModalOptions: {
-          themeMode: 'dark',
-          themeVariables: { '--wcm-accent-color': '#FFD700', '--wcm-background-color': '#0e0d09' }
-        },
-        metadata: {
-          name: 'PMT Millionaires Club',
-          description: 'The elite holders of the PMT ecosystem.',
-          url: window.location.origin,
-          icons: [`${window.location.origin}/PMT-logo.png`]
-        }
-      })
-      wcRef.current = provider
-      await provider.connect()
-      const accounts = await provider.request({ method: 'eth_accounts' })
-      if(!accounts?.[0]) throw new Error('No account')
-      await finish(accounts[0])
-    } catch(err) {
-      if(err.message?.includes('Modal closed')||err.message?.includes('User closed')||err.message?.includes('close')){
-        setStatus('idle'); return
-      }
-      setErrMsg('WalletConnect failed: ' + (err.message||'Unknown error'))
-      setStatus('error')
+    // Browser extension wallets — no window.ethereum means not installed
+    if(!window.ethereum){
+      window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask, '_blank')
+      setStatus('noWallet')
+      return
     }
+
+    // KEY FIX: call request() synchronously here — no await, no async wrapper
+    // This keeps us inside the browser's user-gesture context so MetaMask opens
+    setStatus('connecting')
+    window.ethereum.request({ method:'eth_requestAccounts' })
+      .then(async accounts => {
+        const address = accounts?.[0]
+        if(!address) throw new Error('No account')
+        const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
+        const list = await res.json()
+        handleResult(address, list.map(w=>w.toLowerCase()).includes(address.toLowerCase()))
+      })
+      .catch(handleError)
   }
 
-  const isWCConnecting = walletId==='walletconnect' && status==='connecting'
+  const hideOverlay = isWC && status==='connecting'
 
   return (
-    <div className="wm-overlay" style={{background:isWCConnecting?'transparent':'rgba(0,0,0,.75)',backdropFilter:isWCConnecting?'none':'blur(6px)',WebkitBackdropFilter:isWCConnecting?'none':'blur(6px)',pointerEvents:isWCConnecting?'none':'auto'}} onClick={(e)=>e.target.classList.contains('wm-overlay')&&!isWCConnecting&&onClose()}>
-      <div className="wm-modal" style={{display:isWCConnecting?'none':'block'}}>
+    <div
+      className="wm-overlay"
+      style={{
+        background: hideOverlay ? 'transparent':'rgba(0,0,0,.75)',
+        backdropFilter: hideOverlay ? 'none':'blur(6px)',
+        WebkitBackdropFilter: hideOverlay ? 'none':'blur(6px)',
+        pointerEvents: hideOverlay ? 'none':'auto'
+      }}
+      onClick={e=>e.target.classList.contains('wm-overlay')&&!hideOverlay&&onClose()}
+    >
+      <div className="wm-modal" style={{display:hideOverlay?'none':'block'}}>
 
         <div className="wm-header">
           <div className="wm-title">
@@ -132,7 +133,7 @@ export default function WalletModal({ onSuccess, onClose }) {
             {status==='connecting'&&'Connecting…'}
             {status==='success'&&'✓ Access Granted'}
             {status==='denied'&&'🚫 Members Only'}
-            {(status==='error'||status==='noWallet')&&'Connection Error'}
+            {(status==='error'||status==='noWallet')&&'Error'}
           </div>
           <button className="wm-close" onClick={onClose}>✕</button>
         </div>
@@ -187,9 +188,11 @@ export default function WalletModal({ onSuccess, onClose }) {
         {(status==='error'||status==='noWallet')&&(
           <div className="wm-body wm-centered">
             <div className="wm-denied-icon">⚠</div>
-            <p className="wm-subtitle">{status==='noWallet'?'No wallet detected':'Something went wrong'}</p>
+            <p className="wm-subtitle">{status==='noWallet'?'Wallet not installed':'Something went wrong'}</p>
             <p className="wm-note" style={{textAlign:'center',lineHeight:1.6,maxWidth:280}}>
-              {status==='noWallet'?'Opening wallet app… Install MetaMask or Trust Wallet if nothing happened.':errMsg}
+              {status==='noWallet'
+                ? 'Opening download page… Install the wallet app and try again.'
+                : errMsg}
             </p>
             <button className="wm-btn-retry" onClick={()=>setStatus('idle')}>Try again</button>
           </div>
