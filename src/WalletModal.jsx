@@ -57,14 +57,33 @@ export default function WalletModal({ onSuccess, onClose }) {
   }
 
   const connectBrowser = (provider) => {
-    // wallet_requestPermissions always forces the wallet popup open — works locked or unlocked
+    // Try wallet_requestPermissions first (forces popup on modern MetaMask)
+    // Fall back to eth_requestAccounts if not supported
+    const tryAccounts = () =>
+      provider.request({ method:'eth_requestAccounts' })
+        .then(accounts => {
+          if(!accounts?.[0]) throw new Error('No account returned')
+          return handleResult(accounts[0])
+        })
+        .catch(handleError)
+
     provider.request({ method:'wallet_requestPermissions', params:[{eth_accounts:{}}] })
       .then(() => provider.request({ method:'eth_accounts' }))
       .then(accounts => {
-        if(!accounts?.[0]) throw new Error('No account returned')
+        if(!accounts?.[0]) return tryAccounts()
         return handleResult(accounts[0])
       })
-      .catch(handleError)
+      .catch(err => {
+        // wallet_requestPermissions not supported — fall back
+        if(err.code===-32601 || err.code===4200 ||
+           err.message?.includes('not supported') ||
+           err.message?.includes('not found') ||
+           err.message?.includes('does not exist')) {
+          tryAccounts()
+        } else {
+          handleError(err)
+        }
+      })
   }
 
   const connect = (walletId) => {
