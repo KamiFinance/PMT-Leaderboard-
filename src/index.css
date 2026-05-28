@@ -171,9 +171,9 @@ body{
 }
 .david-bg{
   position:absolute;
-  top:-36%;
+  top:-48%;
   left:-2%;
-  width:100%;
+  width:82%;
   height:auto;
   z-index:0;
   pointer-events:none;
@@ -427,7 +427,7 @@ body{
 
 /* ── View more button ────────────────────────────────────────────────── */
 .view-more-btn{
-  width:100%;
+  width:82%;
   padding:16px;
   display:flex;align-items:center;justify-content:center;gap:8px;
   font-size:11px;font-weight:600;
@@ -536,7 +536,7 @@ body{
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:20px;padding:40px 36px;
-  width:100%;max-width:380px;
+  width:82%;max-width:380px;
   display:flex;flex-direction:column;gap:12px;
   box-shadow:0 32px 64px rgba(0,0,0,0.7);
 }
