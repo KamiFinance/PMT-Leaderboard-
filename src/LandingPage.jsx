@@ -107,11 +107,17 @@ export default function LandingPage({ onNavigate }) {
           <h2 className="lp-section-title">What is the <span className="gold">PMT Millionaires Club?</span></h2>
           <p className="lp-section-desc">An exclusively limited club of visionary personalities who position themselves innovatively and future-oriented — to secure the benefits of a strong international network and access to unique privileges.</p>
           <div className="lp-three-cols">
-            {[['100','Max Members','Only the first 100 wallets qualify'],['1,000,000','PMT Required','Minimum holding to enter'],['PMT Chain','Blockchain','Fully on-chain & verifiable']].map(([n,l,d])=>(
+            {[['100','Max Members',null],['1,000,000','PMT Required','Minimum holding to enter'],['PMT Chain','Blockchain','Fully on-chain & verifiable']].map(([n,l,d])=>(
               <div key={l} className="lp-info-card">
                 <div className="lp-info-n">{n}</div>
                 <div className="lp-info-l">{l}</div>
-                <div className="lp-info-d">{d}</div>
+                <div className="lp-info-d">
+                  {d===null ? (
+                    memberCount!==null
+                      ? <><span style={{color:'#FFD700',fontWeight:600}}>{memberCount}</span><span style={{color:'rgba(255,255,255,.35)'}}> / 100 joined</span></>
+                      : <span style={{color:'rgba(255,255,255,.25)'}}>Loading…</span>
+                  ) : d}
+                </div>
               </div>
             ))}
           </div>
