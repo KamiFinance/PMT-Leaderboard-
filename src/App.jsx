@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import LandingPage from './LandingPage.jsx'
 
 const CONTRACT        = '0x68Ae2F202799be2008c89e2100257e66F77DA1f3'
 const RPC_URL         = 'https://bsc-dataseed.binance.org/'
@@ -156,7 +157,7 @@ function IconCoins() {
 }
 
 export default function App() {
-  const [view,setView]           = useState('leaderboard')
+  const [view,setView]           = useState('landing')
   const [wallets,setWallets]     = useState([])
   const [lb,setLb]               = useState([])
   const [decimals,setDecimals]   = useState(18)
@@ -229,7 +230,7 @@ export default function App() {
   },[])
 
   useEffect(()=>{
-    const k=e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();setView(v=>v==='leaderboard'?'login':v)}}
+    const k=e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();setView(v=>(v==='leaderboard'||v==='landing')?'login':v)}}
     window.addEventListener('keydown',k)
     return()=>window.removeEventListener('keydown',k)
   },[])
@@ -258,6 +259,11 @@ export default function App() {
     finally{setSaving(false)}
   }
   const copyAddr=a=>{navigator.clipboard.writeText(a);setCopied(a);setTimeout(()=>setCopied(null),1500)}
+
+  // ── LANDING ───────────────────────────────────────────────────────────────
+  if(view==='landing') return(
+    <LandingPage onNavigate={(v)=>setView(v)}/>
+  )
 
   // ── LOGIN ──────────────────────────────────────────────────────────────────
   if(view==='login') return(
@@ -386,7 +392,11 @@ export default function App() {
 
         {/* STATUS BAR — floats on top */}
         <div className="status-bar">
-          <div className="status-left"/>
+          <div className="status-left">
+          <button onClick={()=>setView('landing')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(255,255,255,0.45)',fontSize:12,display:'flex',alignItems:'center',gap:6,padding:'4px 0'}}>
+            ← Home
+          </button>
+        </div>
           <div className="status-right">
             <span className="status-chip live-chip">
               <span className="pulse-dot"/>LIVE
