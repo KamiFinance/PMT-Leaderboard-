@@ -166,9 +166,13 @@ export default function LandingPage({ onNavigate }) {
             ))}
           </div>
           <div style={{textAlign:'center',marginTop:32}}>
-            <button className="lp-btn-primary lp-btn-lg" onClick={()=>scrollTo('join')}>
-              Request a Spot — info@publicmasterpiece.com
-            </button>
+            <a
+              href="mailto:info@publicmasterpiece.com?subject=PMT%20Millionaires%20Club%20%E2%80%94%20Spot%20Request&body=Hi%20PMT%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20spot%20in%20the%20Millionaires%20Club.%0A%0AWallet%20Address%3A%20%0ATelegram%20%40%3A%20%0A%0AAbout%20me%3A%20"
+              className="lp-btn-primary lp-btn-lg"
+              style={{display:'inline-block',textDecoration:'none'}}
+            >
+              ✉ Request a Spot
+            </a>
           </div>
         </div>
       </section>
