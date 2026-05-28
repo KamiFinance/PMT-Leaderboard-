@@ -45,38 +45,10 @@ export default function WalletModal({ onSuccess, onClose }) {
 
   const connect = async (walletId) => {
     setWalletId(walletId)
-    setStatus('connecting')
-    try {
-      if(walletId === 'walletconnect'){
-        // Lazy-load WalletConnect from CDN — no npm install needed
-        const { EthereumProvider } = await import(
-          'https://esm.sh/@walletconnect/ethereum-provider@2.17.0'
-        )
-        const provider = await EthereumProvider.init({
-          projectId: PROJECT_ID,
-          chains: [56],
-          showQrModal: true,
-          qrModalOptions: {
-            themeMode: 'dark',
-            themeVariables: { '--wcm-accent-color': '#FFD700', '--wcm-background-color': '#0e0d09' }
-          },
-          metadata: {
-            name: 'PMT Millionaires Club',
-            description: 'The elite holders of the PMT ecosystem.',
-            url: window.location.origin,
-            icons: [`${window.location.origin}/PMT-logo.png`]
-          }
-        })
-        wcRef.current = provider
-        await provider.connect()
-        const accounts = await provider.request({ method: 'eth_accounts' })
-        if(!accounts[0]) throw new Error('No account')
-        await finish(accounts[0])
-        return
-      }
 
-      // Browser extension wallets
-      if(!window.ethereum){
+    // ── Browser extension wallets (MetaMask, Trust, Coinbase) ──────────────
+    if(walletId !== 'walletconnect') {
+      if(!window.ethereum) {
         const links = {
           metamask: 'https://metamask.io/download/',
           trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
@@ -87,18 +59,63 @@ export default function WalletModal({ onSuccess, onClose }) {
         return
       }
 
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      if(!accounts[0]) throw new Error('No account')
-      await finish(accounts[0])
-
-    } catch(err) {
-      if(err.code===4001||err.message?.includes('rejected')||err.message?.includes('denied')){
-        setErrMsg('Connection rejected. Please try again.')
-      } else if(err.message?.includes('Modal closed')||err.message?.includes('User closed')){
-        setStatus('idle'); return
-      } else {
-        setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
+      // IMPORTANT: call eth_requestAccounts FIRST — before any state updates
+      // so MetaMask receives it within the user-gesture context and opens its popup
+      let accountsPromise
+      try {
+        accountsPromise = window.ethereum.request({ method: 'eth_requestAccounts' })
+      } catch(e) {
+        setErrMsg('Could not reach wallet. Please try again.')
+        setStatus('error')
+        return
       }
+
+      setStatus('connecting')
+
+      try {
+        const accounts = await accountsPromise
+        if(!accounts?.[0]) throw new Error('No account returned')
+        await finish(accounts[0])
+      } catch(err) {
+        if(err.code===4001||err.message?.includes('rejected')||err.message?.includes('denied')){
+          setErrMsg('Connection rejected. Please try again.')
+        } else {
+          setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
+        }
+        setStatus('error')
+      }
+      return
+    }
+
+    // ── WalletConnect ───────────────────────────────────────────────────────
+    setStatus('connecting')
+    try {
+      const { EthereumProvider } = await import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
+      const provider = await EthereumProvider.init({
+        projectId: PROJECT_ID,
+        chains: [56],
+        showQrModal: true,
+        qrModalOptions: {
+          themeMode: 'dark',
+          themeVariables: { '--wcm-accent-color': '#FFD700', '--wcm-background-color': '#0e0d09' }
+        },
+        metadata: {
+          name: 'PMT Millionaires Club',
+          description: 'The elite holders of the PMT ecosystem.',
+          url: window.location.origin,
+          icons: [`${window.location.origin}/PMT-logo.png`]
+        }
+      })
+      wcRef.current = provider
+      await provider.connect()
+      const accounts = await provider.request({ method: 'eth_accounts' })
+      if(!accounts?.[0]) throw new Error('No account')
+      await finish(accounts[0])
+    } catch(err) {
+      if(err.message?.includes('Modal closed')||err.message?.includes('User closed')||err.message?.includes('close')){
+        setStatus('idle'); return
+      }
+      setErrMsg('WalletConnect failed: ' + (err.message||'Unknown error'))
       setStatus('error')
     }
   }
