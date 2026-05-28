@@ -189,7 +189,6 @@ body{
   gap:12px;
   margin-bottom:24px;
 }
-}
 
 .stat-card{
   display:flex;align-items:center;gap:16px;
@@ -551,13 +550,11 @@ body{
   .lb-row{grid-template-columns:52px 1fr 120px 30px;gap:10px;padding:14px 16px}
   .col-share{display:none}
   .lb-row--first{margin:6px 8px;padding:16px !important}
-}
 
   .col-arrow{display:none}
   .status-chip:nth-child(2){display:none}
   .bal-num{font-size:15px}
   .lb-row--first .bal-num{font-size:17px}
-}
 /* ── Landing Page — matches leaderboard style ───────────────── */
 .lp { background: #0A0A0A; color: #fff; font-family: 'Inter', sans-serif; }
 
