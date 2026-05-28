@@ -155,7 +155,7 @@ export default function LandingPage({ onNavigate }) {
             {[
               ['01','Buy PMT','Purchase PMT tokens on PancakeSwap. The token is live on PMT Chain.'],
               ['02','Hold 1M+','Accumulate at least 1,000,000 PMT tokens in your wallet and hold them.'],
-              ['03','Claim your spot','You automatically appear on the live leaderboard. First 100 wallets qualify.'],
+              ['03','Request a Spot','Send an email to info@publicmasterpiece.com with your wallet address, your Telegram @username, and a short introduction about yourself.'],
             ].map(([n,t,d],i)=>(
               <div key={n} className="lp-step">
                 <div className="lp-step-num">{n}</div>
@@ -167,7 +167,7 @@ export default function LandingPage({ onNavigate }) {
           </div>
           <div style={{textAlign:'center',marginTop:32}}>
             <button className="lp-btn-primary lp-btn-lg" onClick={()=>scrollTo('join')}>
-              Buy PMT — Coming Soon
+              Request a Spot — info@publicmasterpiece.com
             </button>
           </div>
         </div>
