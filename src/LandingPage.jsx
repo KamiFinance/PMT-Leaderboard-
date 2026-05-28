@@ -231,22 +231,6 @@ export default function LandingPage({ onNavigate }) {
           <h2 className="lp-section-title">PMT <span className="gold">Events</span></h2>
           <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>PMT Millionaires Club members are invited as VIP guests to every event.</p>
           <div className="lp-events-placeholder">
-            <a href="https://www.youtube.com/watch?v=Qb5ry97zTP8" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
-              <div className="lp-event-thumb" style={{position:'relative'}}>
-                <img
-                  src="https://img.youtube.com/vi/Qb5ry97zTP8/maxresdefault.jpg"
-                  alt="Dubai AI & Web3 Festival"
-                  style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0,borderRadius:'14px 14px 0 0'}}
-                  onError={e=>{e.target.style.display='none'}}
-                />
-                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.35)',borderRadius:'14px 14px 0 0'}}>
-                  <div style={{width:48,height:48,borderRadius:'50%',background:'rgba(255,0,0,.9)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                    <svg viewBox="0 0 24 24" fill="white" style={{width:20,height:20,marginLeft:3}}><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Dubai AI & Web3 Festival 2024</div>
-            </a>
             <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
@@ -262,6 +246,22 @@ export default function LandingPage({ onNavigate }) {
                 </div>
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>PMT Art Exhibition | Hamburg, Germany</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=Qb5ry97zTP8" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+              <div className="lp-event-thumb" style={{position:'relative'}}>
+                <img
+                  src="https://img.youtube.com/vi/Qb5ry97zTP8/maxresdefault.jpg"
+                  alt="Dubai AI & Web3 Festival"
+                  style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0,borderRadius:'14px 14px 0 0'}}
+                  onError={e=>{e.target.style.display='none'}}
+                />
+                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.35)',borderRadius:'14px 14px 0 0'}}>
+                  <div style={{width:48,height:48,borderRadius:'50%',background:'rgba(255,0,0,.9)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                    <svg viewBox="0 0 24 24" fill="white" style={{width:20,height:20,marginLeft:3}}><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Dubai AI & Web3 Festival 2024</div>
             </a>
             <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
