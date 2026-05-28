@@ -15,6 +15,7 @@ const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 
 export default function LandingPage({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showBuyTip, setShowBuyTip] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -22,6 +23,12 @@ export default function LandingPage({ onNavigate }) {
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
   }, [])
+
+  // TODO: replace with internal swap function when PMT Chain is live
+  const handleBuyPmt = () => {
+    setShowBuyTip(true)
+    setTimeout(() => setShowBuyTip(false), 2500)
+  }
 
   const scrollTo = (id) => {
     setMenuOpen(false)
@@ -46,7 +53,12 @@ export default function LandingPage({ onNavigate }) {
           </nav>
 
           <div className="lp-header-right">
-            <button className="lp-btn-buy" onClick={()=>scrollTo('join')}>Buy PMT</button>
+            <div style={{position:'relative'}}>
+              <button className="lp-btn-buy" onClick={handleBuyPmt}>Buy PMT</button>
+              {showBuyTip&&<div style={{position:'absolute',top:'calc(100% + 8px)',right:0,background:'rgba(18,16,10,.98)',border:'1px solid rgba(255,215,0,.25)',borderRadius:8,padding:'8px 14px',whiteSpace:'nowrap',fontSize:11,color:'rgba(255,255,255,.7)',zIndex:200}}>
+                🔒 Swap coming soon
+              </div>}
+            </div>
             <button className="lp-hamburger" onClick={()=>setMenuOpen(s=>!s)} aria-label="Menu">
               <span/><span/><span/>
             </button>
