@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import WalletModal from './WalletModal.jsx'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -16,6 +17,7 @@ const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 export default function LandingPage({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showBuyTip, setShowBuyTip] = useState(false)
+  const [showWallet, setShowWallet] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export default function LandingPage({ onNavigate }) {
 
   return (
     <div className="lp">
+
+      {showWallet&&<WalletModal onSuccess={()=>{setShowWallet(false);onNavigate('leaderboard')}} onClose={()=>setShowWallet(false)}/>}
 
       {/* ── HEADER ── */}
       <header className={`lp-header${scrolled?' lp-header--scrolled':''}`}>
@@ -74,7 +78,7 @@ export default function LandingPage({ onNavigate }) {
           <h1 className="lp-hero-h1"><span className="gold">PMT</span> Millionaires Club</h1>
           <p className="lp-hero-tag">The elite holders of the PMT ecosystem.</p>
           <div className="lp-hero-btns">
-            <button className="lp-btn-primary" onClick={()=>onNavigate('leaderboard')}>View Leaderboard</button>
+            <button className="lp-btn-primary" onClick={()=>setShowWallet(true)}>View Leaderboard</button>
             <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>Discover the Club</button>
           </div>
           <div className="lp-hero-stats">
