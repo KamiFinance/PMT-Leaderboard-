@@ -120,7 +120,9 @@ export default function LandingPage({ onNavigate }) {
           <p className="lp-section-desc">Each of the 100 members receives two exclusive physical collectibles — numbered and strictly limited.</p>
           <div className="lp-rewards-row">
             <div className="lp-reward-card">
-              <img src={`${BASE}certificate.png`} alt="Millionaires Club Certificate" className="lp-reward-img"/>
+              <div className="lp-reward-img-wrap">
+                <img src={`${BASE}certificate.png`} alt="Millionaires Club Certificate" className="lp-reward-img"/>
+              </div>
               <div className="lp-reward-info">
                 <div className="lp-reward-label">Certificate</div>
                 <div className="lp-reward-name">Millionaires Club Certificate</div>
@@ -129,7 +131,9 @@ export default function LandingPage({ onNavigate }) {
               </div>
             </div>
             <div className="lp-reward-card">
-              <img src={`${BASE}coin.png`} alt="PMT Silver Coin" className="lp-reward-img lp-reward-img--coin"/>
+              <div className="lp-reward-img-wrap">
+                <img src={`${BASE}coin.png`} alt="PMT Silver Coin" className="lp-reward-img lp-reward-img--coin"/>
+              </div>
               <div className="lp-reward-info">
                 <div className="lp-reward-label">Silver Coin</div>
                 <div className="lp-reward-name">PMT Silver Coin</div>
