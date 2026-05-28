@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
+import MetaMaskSDK from '@metamask/sdk'
 
 const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
+
+let mmSDK = null
+const getMMProvider = () => {
+  if(!mmSDK) {
+    mmSDK = new MetaMaskSDK({
+      dappMetadata: { name: 'PMT Millionaires Club', url: window.location.href },
+      logging: { developerMode: false },
+      checkInstallationImmediately: false,
+    })
+  }
+  return mmSDK.getProvider()
+}
 
 const METAMASK_ICON = <svg viewBox="0 0 318 318" fill="none" style={{width:36,height:36}}><path d="M274.1 35.5L174.6 109l18.8-44.5 80.7-29z" fill="#E2761B"/><path d="M44.4 35.5l98.7 74.2-17.9-45.2-80.8-29zM238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3-46.5-.9zM33.9 207.7l16.2 55.3 56.7-15.6-26.5-40.6-46.4.9z" fill="#E4761B"/><path d="M179.7 193.5l8.3-17.4 20 9.1-28.3 8.3zM138.8 193.5l-28.2-8.3 19.9-9.1 8.3 17.4z" fill="#233447"/><path d="M106.8 247.4l4.8-40.6-31.2.9 26.4 39.7zM206.9 206.8l4.8 40.6 26.5-39.7-31.3-.9z" fill="#CD6116"/><path d="M211.8 247.4L177.9 230.9l2.8 22.9-.3 9.5 31.4-16zM106.8 247.4l31.4 16-.2-9.5 2.7-22.9-33.9 16.4z" fill="#D7C1B3"/></svg>
 
@@ -11,24 +24,23 @@ const COINBASE_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,
 const WC_ICON = <svg viewBox="0 0 300 185" fill="none" style={{width:36,height:36}}><rect width="300" height="185" rx="40" fill="#3B99FC"/><path d="M61.4 57.1c48.9-47.9 128.3-47.9 177.3 0l5.9 5.8a6 6 0 010 8.6L225 91.1a3.2 3.2 0 01-4.4 0l-8.1-8c-34.1-33.4-89.4-33.4-123.5 0l-8.7 8.5a3.2 3.2 0 01-4.4 0L56.3 71.9a6 6 0 010-8.6l5.1-6.2zm219 40.8l19.5 19.1a6 6 0 010 8.6l-88 86.2a6.3 6.3 0 01-8.9 0l-62.4-61.1a1.6 1.6 0 00-2.2 0l-62.4 61.1a6.3 6.3 0 01-8.9 0L19.4 125.6a6 6 0 010-8.6l19.5-19.1a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.4-61.2a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.5-61.2a6.3 6.3 0 018.9 0z" fill="white"/></svg>
 
 const WALLETS = [
-  { id:'metamask',      name:'MetaMask',        icon:METAMASK_ICON,  desc:'Browser extension' },
+  { id:'metamask',      name:'MetaMask',        icon:METAMASK_ICON,  desc:'Browser & mobile' },
   { id:'trust',         name:'Trust Wallet',    icon:TRUST_ICON,     desc:'Mobile & extension' },
   { id:'coinbase',      name:'Coinbase Wallet', icon:COINBASE_ICON,  desc:'Browser extension' },
   { id:'walletconnect', name:'WalletConnect',   icon:WC_ICON,        desc:'Any mobile wallet — scan QR' },
 ]
 
-const DOWNLOAD = {
-  metamask: 'https://metamask.io/download/',
-  trust:    'https://trustwallet.com/download',
-  coinbase: 'https://www.coinbase.com/wallet/downloads',
+const checkAccess = async (address) => {
+  const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
+  const list = await res.json()
+  return list.map(w=>w.toLowerCase()).includes(address.toLowerCase())
 }
 
 export default function WalletModal({ onSuccess, onClose }) {
-  const [status, setStatus]   = useState('idle')
-  const [addr, setAddr]       = useState('')
-  const [errMsg, setErrMsg]   = useState('')
-  const [isWC, setIsWC]       = useState(false)
-  const wcRef                 = useRef(null)
+  const [status, setStatus] = useState('idle')
+  const [addr, setAddr]     = useState('')
+  const [errMsg, setErrMsg] = useState('')
+  const [isWC, setIsWC]     = useState(false)
 
   useEffect(() => {
     const fn = e => { if(e.key==='Escape') onClose() }
@@ -36,95 +48,74 @@ export default function WalletModal({ onSuccess, onClose }) {
     return () => window.removeEventListener('keydown', fn)
   }, [onClose])
 
-  const handleResult = (address, allowed) => {
+  const handleResult = async (address) => {
+    const allowed = await checkAccess(address)
     setAddr(address)
     if(allowed){ setStatus('success'); setTimeout(onSuccess, 1200) }
     else setStatus('denied')
   }
 
   const handleError = (err) => {
-    if(err.code===4001 || err.message?.includes('reject') || err.message?.includes('denied')){
+    if(err.code===4001||err.message?.includes('reject')||err.message?.includes('denied')){
       setErrMsg('Connection rejected. Please try again.')
-    } else if(err.message?.includes('closed')||err.message?.includes('close')){
+    } else if(err.message?.toLowerCase().includes('close')||err.message?.toLowerCase().includes('cancel')){
       setStatus('idle'); return
     } else {
-      setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
+      setErrMsg(err.message||'Connection failed. Please try again.')
     }
     setStatus('error')
   }
 
-  // Non-async click handler — window.ethereum.request() called synchronously
-  // so MetaMask receives it within the user gesture context
   const connect = (walletId) => {
     setIsWC(walletId==='walletconnect')
+    setStatus('connecting')
 
-    if(walletId === 'walletconnect'){
-      setStatus('connecting')
+    if(walletId==='metamask'){
+      // Use MetaMask SDK — opens popup on desktop, deep link on mobile
+      try {
+        const provider = getMMProvider()
+        provider.request({ method:'eth_requestAccounts' })
+          .then(accounts => handleResult(accounts[0]))
+          .catch(handleError)
+      } catch(e) {
+        handleError(e)
+      }
+      return
+    }
+
+    if(walletId==='walletconnect'){
       import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
         .then(({ EthereumProvider }) => EthereumProvider.init({
           projectId: PROJECT_ID,
           chains: [56],
           showQrModal: true,
-          qrModalOptions: {
-            themeMode: 'dark',
-            themeVariables: { '--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09' }
-          },
-          metadata: {
-            name: 'PMT Millionaires Club',
-            description: 'The elite holders of the PMT ecosystem.',
-            url: window.location.origin,
-            icons: [window.location.origin+'/PMT-logo.png']
-          }
+          qrModalOptions: { themeMode:'dark', themeVariables:{'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09'} },
+          metadata: { name:'PMT Millionaires Club', description:'The elite holders of the PMT ecosystem.', url:window.location.origin, icons:[window.location.origin+'/PMT-logo.png'] }
         }))
-        .then(provider => {
-          wcRef.current = provider
-          return provider.connect().then(() => provider.request({ method:'eth_accounts' }))
-        })
-        .then(async accounts => {
-          const address = accounts?.[0]
-          if(!address) throw new Error('No account')
-          const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
-          const list = await res.json()
-          handleResult(address, list.map(w=>w.toLowerCase()).includes(address.toLowerCase()))
-        })
+        .then(p => p.connect().then(()=>p.request({method:'eth_accounts'})))
+        .then(async accounts => { if(!accounts?.[0]) throw new Error('No account'); await handleResult(accounts[0]) })
         .catch(handleError)
       return
     }
 
-    // Browser extension wallets — no window.ethereum means not installed
+    // Trust Wallet & Coinbase — use window.ethereum
     if(!window.ethereum){
-      window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask, '_blank')
+      const links = { trust:'https://trustwallet.com/download', coinbase:'https://www.coinbase.com/wallet/downloads' }
+      window.open(links[walletId]||links.trust, '_blank')
       setStatus('noWallet')
       return
     }
-
-    // KEY FIX: call request() synchronously here — no await, no async wrapper
-    // This keeps us inside the browser's user-gesture context so MetaMask opens
-    setStatus('connecting')
     window.ethereum.request({ method:'eth_requestAccounts' })
-      .then(async accounts => {
-        const address = accounts?.[0]
-        if(!address) throw new Error('No account')
-        const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
-        const list = await res.json()
-        handleResult(address, list.map(w=>w.toLowerCase()).includes(address.toLowerCase()))
-      })
+      .then(accounts => handleResult(accounts[0]))
       .catch(handleError)
   }
 
   const hideOverlay = isWC && status==='connecting'
 
   return (
-    <div
-      className="wm-overlay"
-      style={{
-        background: hideOverlay ? 'transparent':'rgba(0,0,0,.75)',
-        backdropFilter: hideOverlay ? 'none':'blur(6px)',
-        WebkitBackdropFilter: hideOverlay ? 'none':'blur(6px)',
-        pointerEvents: hideOverlay ? 'none':'auto'
-      }}
-      onClick={e=>e.target.classList.contains('wm-overlay')&&!hideOverlay&&onClose()}
-    >
+    <div className="wm-overlay"
+      style={{background:hideOverlay?'transparent':'rgba(0,0,0,.75)',backdropFilter:hideOverlay?'none':'blur(6px)',WebkitBackdropFilter:hideOverlay?'none':'blur(6px)',pointerEvents:hideOverlay?'none':'auto'}}
+      onClick={e=>e.target.classList.contains('wm-overlay')&&!hideOverlay&&onClose()}>
       <div className="wm-modal" style={{display:hideOverlay?'none':'block'}}>
 
         <div className="wm-header">
@@ -160,13 +151,7 @@ export default function WalletModal({ onSuccess, onClose }) {
         {status==='connecting'&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
-            <p className="wm-subtitle">Waiting for wallet approval…</p>
-            {!isWC && <div style={{marginTop:8,padding:'10px 16px',background:'rgba(255,215,0,.06)',border:'1px solid rgba(255,215,0,.15)',borderRadius:10,maxWidth:300}}>
-              <p style={{fontSize:11,color:'rgba(255,215,0,.9)',textAlign:'center',lineHeight:1.7,margin:0}}>
-                💡 A popup should appear in your browser.<br/>
-                If you don't see it, <strong>click the wallet icon</strong> in your browser toolbar (top-right).
-              </p>
-            </div>}
+            <p className="wm-subtitle">Opening wallet…</p>
           </div>
         )}
 
@@ -194,11 +179,9 @@ export default function WalletModal({ onSuccess, onClose }) {
         {(status==='error'||status==='noWallet')&&(
           <div className="wm-body wm-centered">
             <div className="wm-denied-icon">⚠</div>
-            <p className="wm-subtitle">{status==='noWallet'?'Wallet not installed':'Something went wrong'}</p>
+            <p className="wm-subtitle">{status==='noWallet'?'Wallet not installed':'Error'}</p>
             <p className="wm-note" style={{textAlign:'center',lineHeight:1.6,maxWidth:280}}>
-              {status==='noWallet'
-                ? 'Opening download page… Install the wallet app and try again.'
-                : errMsg}
+              {status==='noWallet'?'Opening download page…':errMsg}
             </p>
             <button className="wm-btn-retry" onClick={()=>setStatus('idle')}>Try again</button>
           </div>
