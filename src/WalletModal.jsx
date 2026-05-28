@@ -160,7 +160,13 @@ export default function WalletModal({ onSuccess, onClose }) {
         {status==='connecting'&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
-            <p className="wm-subtitle">Approve the connection in your wallet…</p>
+            <p className="wm-subtitle">Waiting for wallet approval…</p>
+            {!isWC && <div style={{marginTop:8,padding:'10px 16px',background:'rgba(255,215,0,.06)',border:'1px solid rgba(255,215,0,.15)',borderRadius:10,maxWidth:300}}>
+              <p style={{fontSize:11,color:'rgba(255,215,0,.9)',textAlign:'center',lineHeight:1.7,margin:0}}>
+                💡 A popup should appear in your browser.<br/>
+                If you don't see it, <strong>click the wallet icon</strong> in your browser toolbar (top-right).
+              </p>
+            </div>}
           </div>
         )}
 
