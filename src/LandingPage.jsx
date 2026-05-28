@@ -170,7 +170,23 @@ export default function LandingPage({ onNavigate }) {
                 <div className="lp-reward-spec">925 silver · 90g · 5cm diameter · Public Masterpiece Token design</div>
                 <span className="lp-reward-badge">Limited to 100</span>
               </div>
-            </div>
+              <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+              <div className="lp-event-thumb" style={{position:'relative'}}>
+                <img
+                  src="https://img.youtube.com/vi/mIQ9rDT5ufo/maxresdefault.jpg"
+                  alt="Istanbul Blockchain Week 2025"
+                  style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0,borderRadius:'14px 14px 0 0'}}
+                  onError={e=>{e.target.style.display='none'}}
+                />
+                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.35)',borderRadius:'14px 14px 0 0'}}>
+                  <div style={{width:48,height:48,borderRadius:'50%',background:'rgba(255,0,0,.9)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                    <svg viewBox="0 0 24 24" fill="white" style={{width:20,height:20,marginLeft:3}}><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Istanbul Blockchain Week 2025</div>
+            </a>
+          </div>
           </div>
         </div>
       </section>
@@ -303,7 +319,23 @@ export default function LandingPage({ onNavigate }) {
                 <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</a>
                 <span>Digital Park · Dubai Silicon Oasis · UAE</span>
               </div>
-            </div>
+              <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+              <div className="lp-event-thumb" style={{position:'relative'}}>
+                <img
+                  src="https://img.youtube.com/vi/mIQ9rDT5ufo/maxresdefault.jpg"
+                  alt="Istanbul Blockchain Week 2025"
+                  style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0,borderRadius:'14px 14px 0 0'}}
+                  onError={e=>{e.target.style.display='none'}}
+                />
+                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.35)',borderRadius:'14px 14px 0 0'}}>
+                  <div style={{width:48,height:48,borderRadius:'50%',background:'rgba(255,0,0,.9)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                    <svg viewBox="0 0 24 24" fill="white" style={{width:20,height:20,marginLeft:3}}><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Istanbul Blockchain Week 2025</div>
+            </a>
+          </div>
           </div>
           <div className="lp-footer-bottom">
             <span>© 2025 PMT Millionaires Club · Public Masterpiece · All rights reserved</span>
