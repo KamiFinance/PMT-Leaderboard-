@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import MetaMaskSDK from '@metamask/sdk'
 
 const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
 
@@ -14,24 +15,21 @@ const WALLETS = [
   { id:'walletconnect', name:'WalletConnect',   icon:WC_ICON,        desc:'Any mobile wallet — scan QR' },
 ]
 
-const DOWNLOAD = {
-  metamask: 'https://metamask.io/download/',
-  trust:    'https://trustwallet.com/download',
-  coinbase: 'https://www.coinbase.com/wallet/downloads',
-}
+const DOWNLOAD = { metamask:'https://metamask.io/download/', trust:'https://trustwallet.com/download', coinbase:'https://www.coinbase.com/wallet/downloads' }
 
 const checkAccess = async (address) => {
-  const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
+  const res = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
   const list = await res.json()
   return list.map(w=>w.toLowerCase()).includes(address.toLowerCase())
 }
 
 export default function WalletModal({ onSuccess, onClose }) {
-  const [status, setStatus]     = useState('idle')
-  const [addr, setAddr]         = useState('')
-  const [errMsg, setErrMsg]     = useState('')
-  const [isWC, setIsWC]         = useState(false)
-  const [waiting, setWaiting]   = useState(false)
+  const [status, setStatus]   = useState('idle')
+  const [addr, setAddr]       = useState('')
+  const [errMsg, setErrMsg]   = useState('')
+  const [isWC, setIsWC]       = useState(false)
+  const [mmReady, setMmReady] = useState(false)
+  const mmProviderRef         = useRef(null)
 
   useEffect(() => {
     const fn = e => { if(e.key==='Escape') onClose() }
@@ -39,12 +37,44 @@ export default function WalletModal({ onSuccess, onClose }) {
     return () => window.removeEventListener('keydown', fn)
   }, [onClose])
 
-  // Show "click MetaMask icon" hint after 3 seconds of waiting
+  // Pre-initialize MetaMask SDK as soon as modal opens
+  // so provider is ready by the time user clicks
   useEffect(() => {
-    if(status!=='connecting'||isWC) return
-    const t = setTimeout(()=>setWaiting(true), 3000)
-    return ()=>{ clearTimeout(t); setWaiting(false) }
-  }, [status, isWC])
+    try {
+      const sdk = new MetaMaskSDK({
+        dappMetadata: { name:'PMT Millionaires Club', url:window.location.href },
+        logging: { developerMode:false },
+        checkInstallationImmediately: false,
+        useDeeplink: false,
+      })
+
+      // Poll until provider is available (SDK init is async)
+      let attempts = 0
+      const poll = setInterval(() => {
+        const p = sdk.getProvider()
+        if(p) {
+          mmProviderRef.current = p
+          setMmReady(true)
+          clearInterval(poll)
+        } else if(++attempts > 30) {
+          // After 3s fallback to window.ethereum
+          clearInterval(poll)
+          if(window.ethereum) {
+            mmProviderRef.current = window.ethereum
+            setMmReady(true)
+          }
+        }
+      }, 100)
+
+      return () => clearInterval(poll)
+    } catch(e) {
+      // Fallback to window.ethereum if SDK throws
+      if(window.ethereum) {
+        mmProviderRef.current = window.ethereum
+        setMmReady(true)
+      }
+    }
+  }, [])
 
   const handleResult = async (address) => {
     const allowed = await checkAccess(address)
@@ -55,18 +85,17 @@ export default function WalletModal({ onSuccess, onClose }) {
 
   const handleError = (err) => {
     if(err.code===4001||err.message?.includes('reject')||err.message?.includes('denied')){
-      setStatus('idle') // just go back — user rejected
+      setStatus('idle')
     } else if(err.message?.toLowerCase().includes('clos')||err.message?.toLowerCase().includes('cancel')){
       setStatus('idle')
     } else {
-      setErrMsg(err.message||'Connection failed.')
+      setErrMsg(err.message||'Connection failed. Please try again.')
       setStatus('error')
     }
   }
 
   const connect = (walletId) => {
     setIsWC(walletId==='walletconnect')
-    setWaiting(false)
 
     if(walletId==='walletconnect'){
       setStatus('connecting')
@@ -77,27 +106,22 @@ export default function WalletModal({ onSuccess, onClose }) {
           metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
         }))
         .then(p=>p.connect().then(()=>p.request({method:'eth_accounts'})))
-        .then(async accounts=>{
-          if(!accounts?.[0]) throw new Error('No account')
-          await handleResult(accounts[0])
-        })
+        .then(async accounts=>{ if(!accounts?.[0]) throw new Error('No account'); await handleResult(accounts[0]) })
         .catch(handleError)
       return
     }
 
-    if(!window.ethereum){
+    // Browser wallets — use pre-initialized MetaMask SDK provider
+    const provider = walletId==='metamask' ? mmProviderRef.current : window.ethereum
+    if(!provider){
       window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask,'_blank')
       setStatus('noWallet')
       return
     }
 
     setStatus('connecting')
-    // Simple, universal eth_requestAccounts — works on all wallets
-    window.ethereum.request({method:'eth_requestAccounts'})
-      .then(accounts=>{
-        if(!accounts?.[0]) throw new Error('No account returned')
-        return handleResult(accounts[0])
-      })
+    provider.request({method:'eth_requestAccounts'})
+      .then(accounts=>{ if(!accounts?.[0]) throw new Error('No account'); return handleResult(accounts[0]) })
       .catch(handleError)
   }
 
@@ -125,10 +149,13 @@ export default function WalletModal({ onSuccess, onClose }) {
             <p className="wm-subtitle">Choose your wallet to verify membership</p>
             <div className="wm-wallets">
               {WALLETS.map(w=>(
-                <button key={w.id} className="wm-wallet-btn" onClick={()=>connect(w.id)}>
+                <button key={w.id} className="wm-wallet-btn"
+                  onClick={()=>connect(w.id)}
+                  style={{opacity:w.id==='metamask'&&!mmReady?.9:1,cursor:w.id==='metamask'&&!mmReady?'wait':'pointer'}}
+                  title={w.id==='metamask'&&!mmReady?'Initializing…':undefined}>
                   <span className="wm-wallet-icon">{w.icon}</span>
                   <span className="wm-wallet-info">
-                    <span className="wm-wallet-name">{w.name}</span>
+                    <span className="wm-wallet-name">{w.name}{w.id==='metamask'&&!mmReady&&<span style={{fontSize:9,color:'rgba(255,215,0,.5)',marginLeft:6}}>initializing…</span>}</span>
                     <span className="wm-wallet-desc">{w.desc}</span>
                   </span>
                   <span className="wm-wallet-arrow">→</span>
@@ -142,16 +169,7 @@ export default function WalletModal({ onSuccess, onClose }) {
         {status==='connecting'&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
-            <p className="wm-subtitle">Waiting for wallet…</p>
-            {waiting&&(
-              <div style={{marginTop:12,padding:'10px 16px',background:'rgba(255,215,0,.06)',border:'1px solid rgba(255,215,0,.15)',borderRadius:10,maxWidth:290,textAlign:'center'}}>
-                <p style={{fontSize:11,color:'rgba(255,215,0,.9)',lineHeight:1.7,margin:0}}>
-                  🦊 Don't see a popup?<br/>
-                  Click the <strong>MetaMask icon</strong> in your browser toolbar to approve the connection.
-                </p>
-                <button className="wm-btn-retry" style={{marginTop:8,fontSize:10,padding:'6px 14px'}} onClick={()=>setStatus('idle')}>Cancel</button>
-              </div>
-            )}
+            <p className="wm-subtitle">Approve in your wallet…</p>
           </div>
         )}
 
