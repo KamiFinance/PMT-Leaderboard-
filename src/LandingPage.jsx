@@ -16,9 +16,17 @@ const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 
 export default function LandingPage({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
   const [showWallet, setShowWallet] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    fetch(`${BASE}wallets.json`)
+      .then(r=>r.json())
+      .then(list=>setMemberCount(list.length))
+      .catch(()=>{})
+  }, [])
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40)
