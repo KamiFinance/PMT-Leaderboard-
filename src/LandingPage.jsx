@@ -55,7 +55,7 @@ export default function LandingPage({ onNavigate }) {
           <div className="lp-header-right">
             <div style={{position:'relative'}}>
               <button className="lp-btn-buy" onClick={handleBuyPmt}>Buy PMT</button>
-              {showBuyTip&&<div style={{position:'absolute',top:'calc(100% + 8px)',right:0,background:'rgba(18,16,10,.98)',border:'1px solid rgba(255,215,0,.25)',borderRadius:8,padding:'8px 14px',whiteSpace:'nowrap',fontSize:11,color:'rgba(255,255,255,.7)',zIndex:200}}>
+              {showBuyTip&&<div style={{position:'fixed',top:70,right:24,background:'rgba(18,16,10,.98)',border:'1px solid rgba(255,215,0,.3)',borderRadius:8,padding:'10px 16px',whiteSpace:'nowrap',fontSize:12,color:'rgba(255,255,255,.8)',zIndex:9999,boxShadow:'0 4px 20px rgba(0,0,0,.5)'}}>
                 🔒 Swap coming soon
               </div>}
             </div>
