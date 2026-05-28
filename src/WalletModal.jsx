@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 
 const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
-const BSC_CHAIN  = 56
 
-const METAMASK_ICON = <svg viewBox="0 0 318 318" fill="none" style={{width:36,height:36}}><path d="M274.1 35.5L174.6 109l18.8-44.5 80.7-29z" fill="#E2761B"/><path d="M44.4 35.5l98.7 74.2-17.9-45.2-80.8-29zM238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3-46.5-.9zM33.9 207.7l16.2 55.3 56.7-15.6-26.5-40.6-46.4.9z" fill="#E4761B"/><path d="M103.6 138.2L87.8 162l56.2 2.5-2-60.5-38.4 34.2zM214.9 138.2l-38.9-34.9-1.3 61.2 56.2-2.5-16-23.8zM106.8 247.4l33.8-16.5-29.2-22.8-4.6 39.3zM177.9 230.9l33.9 16.5-4.7-39.3-29.2 22.8z" fill="#E4761B"/><path d="M211.8 247.4L177.9 230.9l2.8 22.9-.3 9.5 31.4-16zM106.8 247.4l31.4 16-.2-9.5 2.7-22.9-33.9 16.4z" fill="#D7C1B3"/><path d="M138.8 193.5l-28.2-8.3 19.9-9.1 8.3 17.4zM179.7 193.5l8.3-17.4 20 9.1-28.3 8.3z" fill="#233447"/><path d="M106.8 247.4l4.8-40.6-31.2.9 26.4 39.7zM206.9 206.8l4.8 40.6 26.5-39.7-31.3-.9zM231.3 162l-56.2 2.5 5.2 29 8.3-17.4 20 9.1 22.7-23.2zM110.6 185.2l20-9.1 8.2 17.4 5.3-29-56.2-2.5 22.7 23.2z" fill="#CD6116"/><path d="M87.8 162l29.7 57.9-1-34.7L87.8 162zM201.1 185.2l-1.1 34.7 29.7-57.9-28.6 23.2zM143.9 164.5l-5.3 29 6.6 34.1 1.5-44.9-2.8-18.2zM175.1 164.5l-2.7 18.1 1.4 45 6.6-34.1-5.3-29z" fill="#E4751F"/><path d="M179.7 193.5l-6.6 34.1 4.8 3.3 29.2-22.8 1.1-34.7-28.5 20.1zM110.6 185.2l1 34.7 29.2 22.8 4.8-3.3-6.6-34.1-28.4-20.1z" fill="#F6851B"/></svg>
+const METAMASK_ICON = <svg viewBox="0 0 318 318" fill="none" style={{width:36,height:36}}><path d="M274.1 35.5L174.6 109l18.8-44.5 80.7-29z" fill="#E2761B"/><path d="M44.4 35.5l98.7 74.2-17.9-45.2-80.8-29zM238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3-46.5-.9zM33.9 207.7l16.2 55.3 56.7-15.6-26.5-40.6-46.4.9z" fill="#E4761B"/><path d="M179.7 193.5l8.3-17.4 20 9.1-28.3 8.3zM138.8 193.5l-28.2-8.3 19.9-9.1 8.3 17.4z" fill="#233447"/><path d="M106.8 247.4l4.8-40.6-31.2.9 26.4 39.7zM206.9 206.8l4.8 40.6 26.5-39.7-31.3-.9z" fill="#CD6116"/><path d="M211.8 247.4L177.9 230.9l2.8 22.9-.3 9.5 31.4-16zM106.8 247.4l31.4 16-.2-9.5 2.7-22.9-33.9 16.4z" fill="#D7C1B3"/></svg>
 
 const TRUST_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,height:36}}><circle cx="512" cy="512" r="512" fill="#3375BB"/><path d="M512 128l256 96v256c0 154.24-109.227 298.027-256 352C365.227 778.027 256 634.24 256 480V224l256-96z" fill="white"/><path d="M512 256l160 60v160c0 96.4-68.267 186.267-160 220-91.733-33.733-160-123.6-160-220V316l160-60z" fill="#3375BB"/></svg>
 
@@ -12,10 +11,10 @@ const COINBASE_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,
 const WC_ICON = <svg viewBox="0 0 300 185" fill="none" style={{width:36,height:36}}><rect width="300" height="185" rx="40" fill="#3B99FC"/><path d="M61.4 57.1c48.9-47.9 128.3-47.9 177.3 0l5.9 5.8a6 6 0 010 8.6L225 91.1a3.2 3.2 0 01-4.4 0l-8.1-8c-34.1-33.4-89.4-33.4-123.5 0l-8.7 8.5a3.2 3.2 0 01-4.4 0L56.3 71.9a6 6 0 010-8.6l5.1-6.2zm219 40.8l19.5 19.1a6 6 0 010 8.6l-88 86.2a6.3 6.3 0 01-8.9 0l-62.4-61.1a1.6 1.6 0 00-2.2 0l-62.4 61.1a6.3 6.3 0 01-8.9 0L19.4 125.6a6 6 0 010-8.6l19.5-19.1a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.4-61.2a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.5-61.2a6.3 6.3 0 018.9 0z" fill="white"/></svg>
 
 const WALLETS = [
-  { id: 'metamask',      name: 'MetaMask',        icon: METAMASK_ICON,  desc: 'Browser extension' },
-  { id: 'trust',         name: 'Trust Wallet',    icon: TRUST_ICON,     desc: 'Mobile & extension' },
-  { id: 'coinbase',      name: 'Coinbase Wallet', icon: COINBASE_ICON,  desc: 'Browser extension' },
-  { id: 'walletconnect', name: 'WalletConnect',   icon: WC_ICON,        desc: 'Any mobile wallet' },
+  { id:'metamask',      name:'MetaMask',        icon:METAMASK_ICON,  desc:'Browser extension' },
+  { id:'trust',         name:'Trust Wallet',    icon:TRUST_ICON,     desc:'Mobile & extension' },
+  { id:'coinbase',      name:'Coinbase Wallet', icon:COINBASE_ICON,  desc:'Browser extension' },
+  { id:'walletconnect', name:'WalletConnect',   icon:WC_ICON,        desc:'Any mobile wallet — scan QR' },
 ]
 
 const checkAccess = async (address) => {
@@ -25,96 +24,78 @@ const checkAccess = async (address) => {
 }
 
 export default function WalletModal({ onSuccess, onClose }) {
-  const [status, setStatus]   = useState('idle')
-  const [addr, setAddr]       = useState('')
-  const [errMsg, setErrMsg]   = useState('')
-  const wcProviderRef         = useRef(null)
+  const [status, setStatus] = useState('idle')
+  const [addr, setAddr]     = useState('')
+  const [errMsg, setErrMsg] = useState('')
+  const wcRef               = useRef(null)
 
   useEffect(() => {
     const fn = (e) => { if(e.key==='Escape') onClose() }
     window.addEventListener('keydown', fn)
-    return () => {
-      window.removeEventListener('keydown', fn)
-      if(wcProviderRef.current) wcProviderRef.current.disconnect().catch(()=>{})
-    }
+    return () => { window.removeEventListener('keydown', fn) }
   }, [onClose])
 
-  const handleResult = async (address) => {
+  const finish = async (address) => {
     const allowed = await checkAccess(address)
     setAddr(address)
-    if(allowed){
-      setStatus('success')
-      setTimeout(() => onSuccess(), 1200)
-    } else {
-      setStatus('denied')
-    }
-  }
-
-  const connectBrowser = async () => {
-    if(!window.ethereum) return false
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    return accounts[0]
-  }
-
-  const connectWC = async () => {
-    const { EthereumProvider } = await import('@walletconnect/ethereum-provider')
-    const provider = await EthereumProvider.init({
-      projectId: PROJECT_ID,
-      chains: [BSC_CHAIN],
-      showQrModal: true,
-      qrModalOptions: {
-        themeMode: 'dark',
-        themeVariables: {
-          '--wcm-accent-color': '#FFD700',
-          '--wcm-background-color': '#0e0d09',
-        }
-      },
-      metadata: {
-        name: 'PMT Millionaires Club',
-        description: 'The elite holders of the PMT ecosystem.',
-        url: window.location.origin,
-        icons: [`${window.location.origin}/PMT-logo.png`]
-      }
-    })
-    wcProviderRef.current = provider
-    await provider.connect()
-    const accounts = await provider.request({ method: 'eth_accounts' })
-    return accounts[0]
+    if(allowed){ setStatus('success'); setTimeout(()=>onSuccess(), 1200) }
+    else setStatus('denied')
   }
 
   const connect = async (walletId) => {
     setStatus('connecting')
     try {
-      let address = null
-
       if(walletId === 'walletconnect'){
-        address = await connectWC()
-      } else {
-        // Browser extension wallets
-        if(!window.ethereum){
-          const links = {
-            metamask: 'https://metamask.io/download/',
-            trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
-            coinbase: 'https://www.coinbase.com/wallet/downloads',
+        // Lazy-load WalletConnect from CDN — no npm install needed
+        const { EthereumProvider } = await import(
+          'https://esm.sh/@walletconnect/ethereum-provider@2.17.0'
+        )
+        const provider = await EthereumProvider.init({
+          projectId: PROJECT_ID,
+          chains: [56],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+            themeVariables: { '--wcm-accent-color': '#FFD700', '--wcm-background-color': '#0e0d09' }
+          },
+          metadata: {
+            name: 'PMT Millionaires Club',
+            description: 'The elite holders of the PMT ecosystem.',
+            url: window.location.origin,
+            icons: [`${window.location.origin}/PMT-logo.png`]
           }
-          window.open(links[walletId] || links.metamask, '_blank')
-          setStatus('noWallet')
-          return
-        }
-        address = await connectBrowser()
+        })
+        wcRef.current = provider
+        await provider.connect()
+        const accounts = await provider.request({ method: 'eth_accounts' })
+        if(!accounts[0]) throw new Error('No account')
+        await finish(accounts[0])
+        return
       }
 
-      if(!address) throw new Error('No address returned')
-      await handleResult(address)
+      // Browser extension wallets
+      if(!window.ethereum){
+        const links = {
+          metamask: 'https://metamask.io/download/',
+          trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
+          coinbase: 'https://www.coinbase.com/wallet/downloads',
+        }
+        window.open(links[walletId]||links.metamask, '_blank')
+        setStatus('noWallet')
+        return
+      }
+
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      if(!accounts[0]) throw new Error('No account')
+      await finish(accounts[0])
 
     } catch(err) {
-      if(err.code === 4001 || err.message?.includes('rejected')){
+      if(err.code===4001||err.message?.includes('rejected')||err.message?.includes('denied')){
         setErrMsg('Connection rejected. Please try again.')
-      } else if(err.message?.includes('Modal closed')){
-        setStatus('idle')
-        return
+      } else if(err.message?.includes('Modal closed')||err.message?.includes('User closed')){
+        setStatus('idle'); return
       } else {
-        setErrMsg('Connection failed. Please try again.')
+        setErrMsg('Connection failed: ' + (err.message||'Unknown error'))
       }
       setStatus('error')
     }
@@ -126,16 +107,16 @@ export default function WalletModal({ onSuccess, onClose }) {
 
         <div className="wm-header">
           <div className="wm-title">
-            {status==='idle'       && 'Connect Wallet'}
-            {status==='connecting' && 'Connecting…'}
-            {status==='success'    && '✓ Access Granted'}
-            {status==='denied'     && '🚫 Access Denied'}
-            {(status==='error'||status==='noWallet') && 'Error'}
+            {status==='idle'&&'Connect Wallet'}
+            {status==='connecting'&&'Connecting…'}
+            {status==='success'&&'✓ Access Granted'}
+            {status==='denied'&&'🚫 Members Only'}
+            {(status==='error'||status==='noWallet')&&'Connection Error'}
           </div>
           <button className="wm-close" onClick={onClose}>✕</button>
         </div>
 
-        {status==='idle' && (
+        {status==='idle'&&(
           <div className="wm-body">
             <p className="wm-subtitle">Choose your wallet to verify membership</p>
             <div className="wm-wallets">
@@ -154,14 +135,14 @@ export default function WalletModal({ onSuccess, onClose }) {
           </div>
         )}
 
-        {status==='connecting' && (
+        {status==='connecting'&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
             <p className="wm-subtitle">Approve the connection in your wallet…</p>
           </div>
         )}
 
-        {status==='success' && (
+        {status==='success'&&(
           <div className="wm-body wm-centered">
             <div className="wm-success-icon">✓</div>
             <p className="wm-subtitle" style={{color:'#4CAF50'}}>Welcome, Millionaire!</p>
@@ -170,11 +151,11 @@ export default function WalletModal({ onSuccess, onClose }) {
           </div>
         )}
 
-        {status==='denied' && (
+        {status==='denied'&&(
           <div className="wm-body wm-centered">
             <div className="wm-denied-icon">🚫</div>
             <p className="wm-subtitle">Members Only</p>
-            <p className="wm-note" style={{maxWidth:280,textAlign:'center',lineHeight:1.6}}>
+            <p className="wm-note" style={{maxWidth:280,textAlign:'center',lineHeight:1.7}}>
               Wallet <strong style={{color:'rgba(255,255,255,.7)'}}>{addr.slice(0,6)}…{addr.slice(-4)}</strong> is not a Millionaires Club member.
               <br/><br/>Hold at least <strong style={{color:'#FFD700'}}>1,000,000 PMT</strong> to qualify.
             </p>
@@ -182,12 +163,12 @@ export default function WalletModal({ onSuccess, onClose }) {
           </div>
         )}
 
-        {(status==='error'||status==='noWallet') && (
+        {(status==='error'||status==='noWallet')&&(
           <div className="wm-body wm-centered">
             <div className="wm-denied-icon">⚠</div>
-            <p className="wm-subtitle">{status==='noWallet' ? 'No wallet detected' : 'Something went wrong'}</p>
+            <p className="wm-subtitle">{status==='noWallet'?'No wallet detected':'Something went wrong'}</p>
             <p className="wm-note" style={{textAlign:'center',lineHeight:1.6,maxWidth:280}}>
-              {status==='noWallet' ? 'Opening wallet app… Install MetaMask or Trust Wallet if nothing happened.' : errMsg}
+              {status==='noWallet'?'Opening wallet app… Install MetaMask or Trust Wallet if nothing happened.':errMsg}
             </p>
             <button className="wm-btn-retry" onClick={()=>setStatus('idle')}>Try again</button>
           </div>
