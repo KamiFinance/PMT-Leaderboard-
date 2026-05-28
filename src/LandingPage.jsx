@@ -4,7 +4,7 @@ const BASE = import.meta.env.BASE_URL
 
 const BENEFITS = [
   { icon: '◈', title: 'Network Access', desc: 'Use the international network through the Millionaires Club — personalities from business, politics, film, sport, art, media, fashion, real estate and blockchain.' },
-  { icon: '⬡', title: 'Staking Rewards', desc: 'Stake your PMT tokens to generate additional returns and grow your holdings within the ecosystem.' },
+  { icon: '⬡', title: 'Millionaires Node', desc: 'As a Millionaires Club member you operate a node on the PMT Chain — validating transactions, securing the network and earning node rewards.' },
   { icon: '◇', title: 'Pre-Sale Advantage', desc: 'Acquire Real World Assets (RWAs) before they are available to the public — exclusive early access.' },
   { icon: '★', title: 'VIP Events', desc: 'VIP invitation to all PMT Art Show events and international business & networking events worldwide.' },
   { icon: '◉', title: 'Your Vote Counts', desc: 'Become part of the creative process with the founders — your voice shapes the future of PMT.' },
