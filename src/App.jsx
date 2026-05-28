@@ -405,6 +405,7 @@ export default function App() {
             <h1 className="hero-h1">
               <span className="gold-word">PMT</span> Millionaires Club
             </h1>
+            <p className="hero-leaderboard">LEADERBOARD</p>
             <p className="hero-tagline">The elite holders of the PMT ecosystem.</p>
             <div className="hero-chips">
               <span className="chain-chip">
