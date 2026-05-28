@@ -24,10 +24,11 @@ const checkAccess = async (address) => {
 }
 
 export default function WalletModal({ onSuccess, onClose }) {
-  const [status, setStatus] = useState('idle')
-  const [addr, setAddr]     = useState('')
-  const [errMsg, setErrMsg] = useState('')
-  const wcRef               = useRef(null)
+  const [status, setStatus]     = useState('idle')
+  const [addr, setAddr]         = useState('')
+  const [errMsg, setErrMsg]     = useState('')
+  const [walletId, setWalletId] = useState('')
+  const wcRef                   = useRef(null)
 
   useEffect(() => {
     const fn = (e) => { if(e.key==='Escape') onClose() }
@@ -43,6 +44,7 @@ export default function WalletModal({ onSuccess, onClose }) {
   }
 
   const connect = async (walletId) => {
+    setWalletId(walletId)
     setStatus('connecting')
     try {
       if(walletId === 'walletconnect'){
@@ -101,9 +103,11 @@ export default function WalletModal({ onSuccess, onClose }) {
     }
   }
 
+  const isWCConnecting = walletId==='walletconnect' && status==='connecting'
+
   return (
-    <div className="wm-overlay" onClick={(e)=>e.target.classList.contains('wm-overlay')&&onClose()}>
-      <div className="wm-modal">
+    <div className="wm-overlay" style={{background:isWCConnecting?'transparent':'rgba(0,0,0,.75)',backdropFilter:isWCConnecting?'none':'blur(6px)',WebkitBackdropFilter:isWCConnecting?'none':'blur(6px)',pointerEvents:isWCConnecting?'none':'auto'}} onClick={(e)=>e.target.classList.contains('wm-overlay')&&!isWCConnecting&&onClose()}>
+      <div className="wm-modal" style={{display:isWCConnecting?'none':'block'}}>
 
         <div className="wm-header">
           <div className="wm-title">
