@@ -419,7 +419,7 @@ export default function App() {
             <p className="hero-tagline">The elite holders of the PMT ecosystem.</p>
             <div className="hero-chips">
               <span className="chain-chip">
-                <span className="pulse-dot"/>LIVE ON BNB SMART CHAIN
+                <span className="pulse-dot"/>LIVE ON PMT CHAIN
               </span>
               {blockNum>0&&<span className="chain-chip block-chip">BLOCK #{blockNum.toLocaleString()}</span>}
             </div>
