@@ -138,16 +138,48 @@ export default function WalletModal({ onSuccess, onClose }) {
     setIsWC(walletId==='walletconnect')
 
     if(walletId==='walletconnect'){
-      setStatus('connecting')
+      setStatus('wcLoading')
       import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
         .then(({EthereumProvider})=>EthereumProvider.init({
-          projectId:PROJECT_ID, chains:[56], showQrModal:true,
-          qrModalOptions:{themeMode:'dark',themeVariables:{'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09'}},
-          metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
+          projectId: PROJECT_ID,
+          chains: [56],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+            themeVariables: {
+              '--wcm-accent-color': '#FFD700',
+              '--wcm-background-color': '#0e0d09',
+              '--wcm-z-index': '99999',
+            },
+            mobileWallets: [
+              { id:'metamask',   name:'MetaMask',    links:{ native:'metamask://',   universal:'https://metamask.app.link' }},
+              { id:'trust',      name:'Trust Wallet', links:{ native:'trust://',      universal:'https://link.trustwallet.com' }},
+              { id:'rainbow',    name:'Rainbow',      links:{ native:'rainbow://',    universal:'https://rnbwapp.com' }},
+            ],
+            walletImages: {
+              metamask: 'https://raw.githubusercontent.com/WalletConnect/walletconnect-assets/master/Icon/Gradient/Icon.png',
+            }
+          },
+          metadata:{
+            name:'PMT Millionaires Club',
+            description:'The elite holders of the PMT ecosystem.',
+            url: window.location.origin,
+            icons:[window.location.origin+'/PMT-logo.png']
+          }
         }))
-        .then(p=>p.connect().then(()=>p.request({method:'eth_accounts'})))
+        .then(p => {
+          setIsWC(true)
+          setStatus('connecting')
+          return p.connect().then(()=>p.request({method:'eth_accounts'}))
+        })
         .then(async accounts=>{ if(!accounts?.[0]) throw new Error('No account'); await handleResult(accounts[0]) })
-        .catch(handleError)
+        .catch(err => {
+          if(err.message?.toLowerCase().includes('clos')||err.message?.toLowerCase().includes('cancel')){
+            setStatus('idle')
+          } else {
+            handleError(err)
+          }
+        })
       return
     }
 
@@ -165,7 +197,7 @@ export default function WalletModal({ onSuccess, onClose }) {
       .catch(handleError)
   }
 
-  const hideOverlay = isWC && status==='connecting'
+  const hideOverlay = isWC && (status==='connecting')
 
   return (
     <div className="wm-overlay"
@@ -206,10 +238,23 @@ export default function WalletModal({ onSuccess, onClose }) {
           </div>
         )}
 
-        {status==='connecting'&&(
+        {(status==='wcLoading')&&(
+          <div className="wm-body wm-centered">
+            <div className="wm-spinner"/>
+            <p className="wm-subtitle">Loading WalletConnect…</p>
+            <p className="wm-note">This may take a few seconds</p>
+          </div>
+        )}
+        {status==='connecting'&&!isWC&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
             <p className="wm-subtitle">Approve in your wallet…</p>
+          </div>
+        )}
+        {status==='connecting'&&isWC&&(
+          <div className="wm-body wm-centered">
+            <div className="wm-spinner"/>
+            <p className="wm-subtitle">Scan QR or select wallet…</p>
           </div>
         )}
 
