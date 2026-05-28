@@ -3,18 +3,6 @@ import MetaMaskSDK from '@metamask/sdk'
 
 const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
 
-let mmSDK = null
-const getMMProvider = () => {
-  if(!mmSDK) {
-    mmSDK = new MetaMaskSDK({
-      dappMetadata: { name: 'PMT Millionaires Club', url: window.location.href },
-      logging: { developerMode: false },
-      checkInstallationImmediately: false,
-    })
-  }
-  return mmSDK.getProvider()
-}
-
 const METAMASK_ICON = <svg viewBox="0 0 318 318" fill="none" style={{width:36,height:36}}><path d="M274.1 35.5L174.6 109l18.8-44.5 80.7-29z" fill="#E2761B"/><path d="M44.4 35.5l98.7 74.2-17.9-45.2-80.8-29zM238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3-46.5-.9zM33.9 207.7l16.2 55.3 56.7-15.6-26.5-40.6-46.4.9z" fill="#E4761B"/><path d="M179.7 193.5l8.3-17.4 20 9.1-28.3 8.3zM138.8 193.5l-28.2-8.3 19.9-9.1 8.3 17.4z" fill="#233447"/><path d="M106.8 247.4l4.8-40.6-31.2.9 26.4 39.7zM206.9 206.8l4.8 40.6 26.5-39.7-31.3-.9z" fill="#CD6116"/><path d="M211.8 247.4L177.9 230.9l2.8 22.9-.3 9.5 31.4-16zM106.8 247.4l31.4 16-.2-9.5 2.7-22.9-33.9 16.4z" fill="#D7C1B3"/></svg>
 
 const TRUST_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,height:36}}><circle cx="512" cy="512" r="512" fill="#3375BB"/><path d="M512 128l256 96v256c0 154.24-109.227 298.027-256 352C365.227 778.027 256 634.24 256 480V224l256-96z" fill="white"/><path d="M512 256l160 60v160c0 96.4-68.267 186.267-160 220-91.733-33.733-160-123.6-160-220V316l160-60z" fill="#3375BB"/></svg>
@@ -71,15 +59,20 @@ export default function WalletModal({ onSuccess, onClose }) {
     setStatus('connecting')
 
     if(walletId==='metamask'){
-      // Use MetaMask SDK — opens popup on desktop, deep link on mobile
-      try {
-        const provider = getMMProvider()
-        provider.request({ method:'eth_requestAccounts' })
-          .then(accounts => handleResult(accounts[0]))
-          .catch(handleError)
-      } catch(e) {
-        handleError(e)
-      }
+      // Create SDK fresh each time — avoids getProvider() returning undefined
+      const sdk = new MetaMaskSDK({
+        dappMetadata: { name:'PMT Millionaires Club', url:window.location.href },
+        logging: { developerMode:false },
+        checkInstallationImmediately: false,
+      })
+      // sdk.connect() handles init + account request in one call
+      sdk.connect()
+        .then(accounts => {
+          const address = Array.isArray(accounts) ? accounts[0] : accounts
+          if(!address) throw new Error('No account')
+          return handleResult(address)
+        })
+        .catch(handleError)
       return
     }
 
