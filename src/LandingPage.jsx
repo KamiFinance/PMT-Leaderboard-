@@ -66,7 +66,7 @@ export default function LandingPage({ onNavigate }) {
             <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>Discover the Club</button>
           </div>
           <div className="lp-hero-stats">
-            {[['100','Max Members'],['1M+','PMT Required'],['BNB','Smart Chain']].map(([n,l])=>(
+            {[['100','Max Members'],['1M+','PMT Required'],['PMT','Chain']].map(([n,l])=>(
               <div key={l} className="lp-hero-stat">
                 <div className="lp-hero-stat-n">{n}</div>
                 <div className="lp-hero-stat-l">{l}</div>
