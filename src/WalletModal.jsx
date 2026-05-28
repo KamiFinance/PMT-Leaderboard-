@@ -3,10 +3,50 @@ import MetaMaskSDK from '@metamask/sdk'
 
 const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
 
-const METAMASK_ICON = <svg viewBox="0 0 318 318" fill="none" style={{width:36,height:36}}><path d="M274.1 35.5L174.6 109l18.8-44.5 80.7-29z" fill="#E2761B"/><path d="M44.4 35.5l98.7 74.2-17.9-45.2-80.8-29zM238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3-46.5-.9zM33.9 207.7l16.2 55.3 56.7-15.6-26.5-40.6-46.4.9z" fill="#E4761B"/><path d="M179.7 193.5l8.3-17.4 20 9.1-28.3 8.3zM138.8 193.5l-28.2-8.3 19.9-9.1 8.3 17.4z" fill="#233447"/><path d="M106.8 247.4l4.8-40.6-31.2.9 26.4 39.7zM206.9 206.8l4.8 40.6 26.5-39.7-31.3-.9z" fill="#CD6116"/><path d="M211.8 247.4L177.9 230.9l2.8 22.9-.3 9.5 31.4-16zM106.8 247.4l31.4 16-.2-9.5 2.7-22.9-33.9 16.4z" fill="#D7C1B3"/></svg>
-const TRUST_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,height:36}}><circle cx="512" cy="512" r="512" fill="#3375BB"/><path d="M512 128l256 96v256c0 154.24-109.227 298.027-256 352C365.227 778.027 256 634.24 256 480V224l256-96z" fill="white"/><path d="M512 256l160 60v160c0 96.4-68.267 186.267-160 220-91.733-33.733-160-123.6-160-220V316l160-60z" fill="#3375BB"/></svg>
-const COINBASE_ICON = <svg viewBox="0 0 1024 1024" fill="none" style={{width:36,height:36}}><circle cx="512" cy="512" r="512" fill="#0052FF"/><path d="M512 192c176.731 0 320 143.269 320 320s-143.269 320-320 320S192 688.731 192 512 335.269 192 512 192zm0 192a128 128 0 100 256 128 128 0 000-256z" fill="white"/></svg>
-const WC_ICON = <svg viewBox="0 0 300 185" fill="none" style={{width:36,height:36}}><rect width="300" height="185" rx="40" fill="#3B99FC"/><path d="M61.4 57.1c48.9-47.9 128.3-47.9 177.3 0l5.9 5.8a6 6 0 010 8.6L225 91.1a3.2 3.2 0 01-4.4 0l-8.1-8c-34.1-33.4-89.4-33.4-123.5 0l-8.7 8.5a3.2 3.2 0 01-4.4 0L56.3 71.9a6 6 0 010-8.6l5.1-6.2zm219 40.8l19.5 19.1a6 6 0 010 8.6l-88 86.2a6.3 6.3 0 01-8.9 0l-62.4-61.1a1.6 1.6 0 00-2.2 0l-62.4 61.1a6.3 6.3 0 01-8.9 0L19.4 125.6a6 6 0 010-8.6l19.5-19.1a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.4-61.2a6.3 6.3 0 018.9 0l62.5 61.2a1.6 1.6 0 002.2 0l62.5-61.2a6.3 6.3 0 018.9 0z" fill="white"/></svg>
+const WalletIcon = ({color, children, radius=10}) => (
+  <div style={{width:36,height:36,borderRadius:radius,background:color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+    {children}
+  </div>
+)
+
+const METAMASK_ICON = (
+  <WalletIcon color="#F6851B">
+    <svg viewBox="0 0 35 33" style={{width:22,height:22}} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M32.9 1L19.4 10.7l2.4-5.7L32.9 1z" fill="#E2761B" stroke="#E2761B" strokeWidth=".5"/>
+      <path d="M2.1 1l13.4 9.8-2.3-5.8L2.1 1zm23.9 22.5l-3.6 5.5 7.7 2.1 2.2-7.5-6.3-.1zm-24.1.1L4.1 31.1l7.7-2.1-3.6-5.5-6.3.1z" fill="#E4761B" stroke="#E4761B" strokeWidth=".5"/>
+      <path d="M11.4 14.5L9.4 17.5l7.5.4-.3-8.1-5.2 4.7zm12.2 0l-5.3-5-2.7 8.4 7.5-.4-2.4-3h2.9zm-8.8 13.3l4.5-2.2-3.9-3-0.6 5.2zm5.4-2.2l4.5 2.2-.6-5.2-3.9 3z" fill="#E4761B" stroke="#E4761B" strokeWidth=".5"/>
+      <path d="M24.4 29.8l-4.5-2.2.4 3 0 1.3 4.1-2.1zm-13.9 0l4.1 2.1 0-1.3.4-3-4.5 2.2z" fill="#D7C1B3" stroke="#D7C1B3" strokeWidth=".5"/>
+      <path d="M14.7 22.1l-3.8-1.1 2.7-1.2 1.1 2.3zm5.6 0l1.1-2.3 2.7 1.2-3.8 1.1z" fill="#233447" stroke="#233447" strokeWidth=".5"/>
+    </svg>
+  </WalletIcon>
+)
+
+const TRUST_ICON = (
+  <WalletIcon color="#3375BB" radius={18}>
+    <svg viewBox="0 0 24 24" style={{width:22,height:22}} fill="none">
+      <path d="M12 2L4 5v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V5L12 2z" fill="white" opacity=".9"/>
+      <path d="M12 5L7 7v4c0 3.9 2.7 7.5 5 8.7 2.3-.9 5-4.8 5-8.7V7L12 5z" fill="#3375BB"/>
+    </svg>
+  </WalletIcon>
+)
+
+const COINBASE_ICON = (
+  <WalletIcon color="#0052FF" radius={18}>
+    <svg viewBox="0 0 24 24" style={{width:22,height:22}} fill="none">
+      <circle cx="12" cy="12" r="10" fill="white" opacity=".9"/>
+      <circle cx="12" cy="12" r="6" fill="#0052FF"/>
+      <circle cx="12" cy="12" r="3" fill="white"/>
+    </svg>
+  </WalletIcon>
+)
+
+const WC_ICON = (
+  <WalletIcon color="#3B99FC" radius={10}>
+    <svg viewBox="0 0 24 15" style={{width:22,height:14}} fill="none">
+      <path d="M4.9 3.4c3.9-3.8 10.2-3.8 14.2 0l.5.5c.2.2.2.5 0 .7l-1.6 1.6c-.1.1-.3.1-.4 0l-.7-.6c-2.7-2.7-7.1-2.7-9.8 0l-.7.7c-.1.1-.3.1-.4 0L4.4 4.7c-.2-.2-.2-.5 0-.7l.5-.6zm17.5 3.2l1.6 1.5c.2.2.2.5 0 .7l-7 6.9c-.2.2-.5.2-.7 0l-5-4.9c0-.1-.1-.1-.2 0l-5 4.9c-.2.2-.5.2-.7 0L.4 8.8c-.2-.2-.2-.5 0-.7l1.6-1.5c.2-.2.5-.2.7 0l5 4.9c0 .1.1.1.2 0l5-4.9c.2-.2.5-.2.7 0l5 4.9c.1.1.2.1.2 0l5-4.9c.2-.2.5-.2.7 0z" fill="white"/>
+    </svg>
+  </WalletIcon>
+)
 
 const WALLETS = [
   { id:'metamask',      name:'MetaMask',        icon:METAMASK_ICON,  desc:'Browser & mobile' },
