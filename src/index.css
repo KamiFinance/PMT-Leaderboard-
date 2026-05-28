@@ -785,9 +785,10 @@ body{
   width: 36px; height: 36px; border-radius: 8px;
   background: rgba(255,215,0,.07); border: 1px solid rgba(255,215,0,.15);
   display: flex; align-items: center; justify-content: center;
-  color: #FFD700; font-size: 12px; font-weight: 700; text-decoration: none;
+  color: #FFD700; text-decoration: none;
   transition: background .15s, border-color .15s;
 }
+.lp-social svg { width: 18px; height: 18px; flex-shrink: 0; }
 .lp-social:hover { background: rgba(255,215,0,.14); border-color: rgba(255,215,0,.4); }
 .lp-footer-col-title { font-size: 9px; font-weight: 600; letter-spacing: .16em; color: rgba(255,255,255,.3); text-transform: uppercase; margin-bottom: 14px; }
 .lp-footer-links { display: flex; flex-direction: column; gap: 8px; }
