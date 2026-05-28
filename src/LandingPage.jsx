@@ -60,7 +60,6 @@ export default function LandingPage({ onNavigate }) {
         <div className="lp-hero-content">
           <p className="lp-hero-eyebrow">Public Masterpiece</p>
           <h1 className="lp-hero-h1"><span className="gold">PMT</span> Millionaires Club</h1>
-          <p className="lp-hero-leaderboard">LEADERBOARD</p>
           <p className="lp-hero-tag">The elite holders of the PMT ecosystem.</p>
           <div className="lp-hero-btns">
             <button className="lp-btn-primary" onClick={()=>onNavigate('leaderboard')}>View Leaderboard</button>
