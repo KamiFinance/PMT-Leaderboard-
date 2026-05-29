@@ -666,23 +666,22 @@ body{
 .lp-hero {
   position: relative;
   min-height: 100vh;
-  display: flex; align-items: center;
-  padding: 100px 32px 60px;
-  overflow: hidden;
-}
-.lp-hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 200px;
-  background: linear-gradient(to top, var(--lp-bg), transparent);
-  pointer-events: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 32px 80px;
 }
 .lp-hero-content {
-  max-width: 1200px; margin: 0 auto; width: 100%;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 40px; align-items: center;
+  order: 1;
   position: relative; z-index: 1;
+}
+.lp-hero-david {
+  order: 2;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
 }
 .lp-hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
@@ -784,10 +783,6 @@ body{
 }
 
 /* Hero image side */
-.lp-hero-david {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-}
 
 /* Badge pill */
 .lp-badge {
