@@ -388,6 +388,7 @@ export default function App() {
           alt=""
           aria-hidden="true"
           className="david-bg"
+          style={{top:'-20%',width:'68%'}}
         />
 
         {/* STATUS BAR — floats on top */}
