@@ -823,13 +823,13 @@ body{
   margin-left: max(40px, calc(50vw - 580px));
 }
 
-/* David — blends seamlessly, no rectangular clip */
+/* David — right-side, naturally sized */
 .lp-hero-david {
   position: absolute;
-  right: -4%;
+  right: 0%;
   top: -8%;
   bottom: -8%;
-  width: 72vw;            /* wide enough to wrap behind text */
+  width: 45vw;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -838,11 +838,11 @@ body{
   overflow: visible;
 }
 .lp-hero-david img {
-  height: 116%;
+  height: 80%;
   width: auto;
   max-width: none;
   object-fit: contain;
-  mix-blend-mode: lighten; /* ← removes dark bg, blends with page */
+  mix-blend-mode: lighten;
   filter:
     drop-shadow(0 0 100px rgba(255, 200, 0, 0.22))
     drop-shadow(0 0 40px rgba(255, 150, 0, 0.14));
