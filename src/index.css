@@ -2040,6 +2040,12 @@ body{
 .lp-network-grid [data-anim="photo-in"]:nth-child(6) { transition-delay: 350ms; }
 .lp-network-grid [data-anim="photo-in"]:nth-child(7) { transition-delay: 420ms; }
 .lp-network-grid [data-anim="photo-in"]:nth-child(8) { transition-delay: 490ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(9) { transition-delay: 560ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(10) { transition-delay: 630ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(11) { transition-delay: 700ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(12) { transition-delay: 770ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(13) { transition-delay: 840ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(14) { transition-delay: 910ms; }
 
 /* ══════════════════════════════════════════════════════════════════════
    CONTINUOUS SCROLL EFFECTS (not triggered, always running)

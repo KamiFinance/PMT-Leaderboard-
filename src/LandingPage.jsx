@@ -6,7 +6,10 @@ const BASE = import.meta.env.BASE_URL
 
 const BENEFIT_ICONS = ['◈','⬡','◇','★','◉','⬟']
 
-const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg?v=2`)
+const NETWORK_PHOTOS = [
+  ...Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg?v=2`),
+  ...Array.from({length:6},(_,i)=>`${BASE}network_${i+9}.jpg`),
+]
 
 export default function LandingPage({ onNavigate }) {
   const [lang, setLang] = useState(T.en)
