@@ -2474,7 +2474,7 @@ body{
   background: rgba(255,215,0,0.07);
   border-color: rgba(255,215,0,0.25);
 }
-.swap-connector-btn img, .swap-connector-btn svg { flex-shrink: 0; }
+.swap-connector-btn img, .swap-connector-btn svg { flex-shrink: 0; width: 28px; height: 28px; object-fit: contain; }
 /* Swap form */
 .swap-form {
   padding: 0 24px 24px;
