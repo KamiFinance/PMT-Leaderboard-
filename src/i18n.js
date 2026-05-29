@@ -56,7 +56,7 @@ export const T = {
     },
     whatIsClub: {
       title:'What is the PMT Millionaires Club?',
-      desc:'100 of the biggest PMT holders — founders, investors, and builders who backed the ecosystem with real money.',
+      desc:'An exclusively limited club of visionary personalities who position themselves innovatively and future-oriented — to secure the benefits of a strong international network and access to unique privileges.',
       maxMembers:'Max Members', pmtRequired:'PMT Required', blockchain:'Blockchain',
       minHolding:'Minimum holding to enter', fullyOnChain:'Fully on-chain & verifiable',
     },
