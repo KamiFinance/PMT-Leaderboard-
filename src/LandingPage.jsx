@@ -102,8 +102,8 @@ export default function LandingPage({ onNavigate }) {
       {/* ── WHAT IS THE CLUB ── */}
       <section className="lp-section" id="club">
         <div className="lp-section-inner">
-          <span className="lp-badge">The Club</span>
-          <h2 className="lp-section-title">What is the <span className="gold">PMT Millionaires Club?</span></h2>
+          <span className="lp-badge">{lang.misc.whatIsClubBadge}</span>
+          <h2 className="lp-section-title">{lang.misc.whatIsClubH2}</h2>
           <p className="lp-section-desc">{lang.whatIsClub.desc}</p>
           <div className="lp-three-cols">
             {[['100',lang.whatIsClub.maxMembers,null],['1,000,000',lang.whatIsClub.pmtRequired,lang.whatIsClub.minHolding],['PMT Chain',lang.whatIsClub.blockchain,lang.whatIsClub.fullyOnChain]].map(([n,l,d])=>(
@@ -113,7 +113,7 @@ export default function LandingPage({ onNavigate }) {
                 <div className="lp-info-d">
                   {d===null ? (
                     memberCount!==null
-                      ? <><span style={{color:'#FFD700',fontWeight:600}}>{memberCount}</span><span style={{color:'rgba(255,255,255,.35)'}}> / 100 joined</span></>
+                      ? <><span style={{color:'#FFD700',fontWeight:600}}>{memberCount}</span><span style={{color:'rgba(255,255,255,.35)'}}>{lang.misc.membersJoined}</span></>
                       : <span style={{color:'rgba(255,255,255,.25)'}}>Loading…</span>
                   ) : d}
                 </div>
@@ -127,8 +127,8 @@ export default function LandingPage({ onNavigate }) {
       <section className="lp-section lp-section--alt" id="benefits">
         <div className="lp-section-inner">
           <span className="lp-badge">{lang.benefits.title}</span>
-          <h2 className="lp-section-title">What you <span className="gold">get</span></h2>
-          <p className="lp-section-desc">Every member enjoys exclusive privileges across the entire PMT ecosystem and beyond.</p>
+          <h2 className="lp-section-title">{lang.misc.benefitsH2}</h2>
+          <p className="lp-section-desc">{lang.misc.benefitsSubtitle}</p>
           <div className="lp-benefits-grid">
             {lang.benefits.items.map((b,i)=>(
               <div key={b.title} className="lp-benefit-card">
@@ -145,17 +145,17 @@ export default function LandingPage({ onNavigate }) {
       <section className="lp-section" id="rewards">
         <div className="lp-section-inner">
           <span className="lp-badge">{lang.rewards.title}</span>
-          <h2 className="lp-section-title">Your <span className="gold">Membership Package</span></h2>
-          <p className="lp-section-desc">Each of the 100 members receives two exclusive physical collectibles — numbered and strictly limited.</p>
+          <h2 className="lp-section-title">{lang.misc.rewardsH2}</h2>
+          <p className="lp-section-desc">{lang.misc.rewardsSubtitle}</p>
           <div className="lp-rewards-row">
             <div className="lp-reward-card">
               <div className="lp-reward-img-wrap">
                 <img src={`${BASE}certificate.png`} alt="Millionaires Club Certificate" className="lp-reward-img"/>
               </div>
               <div className="lp-reward-info">
-                <div className="lp-reward-label">Certificate</div>
-                <div className="lp-reward-name">Millionaires Club Certificate</div>
-                <div className="lp-reward-spec">Numbered & gold-plated · 42cm × 32cm · Premium frame · Authorised by founder</div>
+                <div className="lp-reward-label">{lang.misc.certLabel}</div>
+                <div className="lp-reward-name">{lang.misc.certName}</div>
+                <div className="lp-reward-spec">{lang.misc.certSpec}</div>
                 <span className="lp-reward-badge">Limited to 100</span>
               </div>
             </div>
@@ -164,9 +164,9 @@ export default function LandingPage({ onNavigate }) {
                 <img src={`${BASE}coin.png`} alt="PMT Silver Coin" className="lp-reward-img lp-reward-img--coin"/>
               </div>
               <div className="lp-reward-info">
-                <div className="lp-reward-label">Silver Coin</div>
-                <div className="lp-reward-name">PMT Silver Coin</div>
-                <div className="lp-reward-spec">925 silver · 90g · 5cm diameter · Public Masterpiece Token design</div>
+                <div className="lp-reward-label">{lang.misc.coinLabel}</div>
+                <div className="lp-reward-name">{lang.misc.coinName}</div>
+                <div className="lp-reward-spec">{lang.misc.coinSpec}</div>
                 <span className="lp-reward-badge">Limited to 100</span>
               </div>
   
@@ -302,7 +302,7 @@ export default function LandingPage({ onNavigate }) {
             <div>
               <p className="lp-footer-col-title">{lang.footer.quickLinks}</p>
               <div className="lp-footer-links">
-                {[['hero','Home'],['club','The Club'],['benefits','Benefits'],['rewards','Rewards'],['join','How to Join'],['network','Network']].map(([id,label])=>(
+                {[['hero',lang.misc.footerHome],['club',lang.misc.footerTheClub],['benefits',lang.misc.footerBenefits],['rewards',lang.misc.footerRewards],['join',lang.misc.footerHowToJoin],['network',lang.misc.footerNetwork]].map(([id,label])=>(
                   <button key={id} onClick={()=>scrollTo(id)}>{label}</button>
                 ))}
               </div>
@@ -312,7 +312,7 @@ export default function LandingPage({ onNavigate }) {
               <div className="lp-footer-links">
                 <a href="mailto:info@publicmasterpiece.com">info@publicmasterpiece.com</a>
                 <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</a>
-                <span>Digital Park · Dubai Silicon Oasis · UAE</span>
+                <span>{lang.misc.footerAddress}</span>
               </div>
   
           </div>
