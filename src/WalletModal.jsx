@@ -89,6 +89,22 @@ export default function WalletModal({ onSuccess, onClose }) {
     setStatus('error')
   }
 
+  // Read WalletConnect address directly from localStorage
+  // WC writes the session here even while JS is backgrounded on mobile
+  const getWCAddressFromStorage = () => {
+    try {
+      for(const key of Object.keys(localStorage)){
+        if(!key.includes('wc@2') || !key.toLowerCase().includes('session')) continue
+        const data = JSON.parse(localStorage.getItem(key) || '{}')
+        for(const session of Object.values(data)){
+          const accounts = session?.namespaces?.eip155?.accounts || []
+          if(accounts.length > 0) return accounts[0].split(':').pop()
+        }
+      }
+    } catch(e){}
+    return null
+  }
+
   // WalletConnect — used for WC button AND for mobile wallet buttons
   const connectWC = async (walletId) => {
     setIsWC(true); setStatus('wcLoading')
@@ -122,28 +138,30 @@ export default function WalletModal({ onSuccess, onClose }) {
         await finish(address)
       }
 
-      // Poll p.accounts directly — this property is updated by WC internally
-      // even when the browser tab was backgrounded and the Promise didn't resume
+      // Poll localStorage — WC writes session here even while JS is backgrounded
       const poll = setInterval(() => {
-        if(p.accounts?.length > 0) handleAddress(p.accounts[0])
-      }, 500)
+        const addr = getWCAddressFromStorage()
+        if(addr) handleAddress(addr)
+      }, 800)
 
-      // Extra check when user returns to tab
+      // When user returns from wallet app — poll localStorage with retries
       const onVisible = () => {
         if(document.visibilityState !== 'visible') return
-        // Give WC 1s to sync after tab resumes
-        setTimeout(() => {
-          if(p.accounts?.length > 0) handleAddress(p.accounts[0])
-        }, 1000)
+        let tries = 0
+        const retry = setInterval(() => {
+          const addr = getWCAddressFromStorage()
+          if(addr){ clearInterval(retry); handleAddress(addr); return }
+          if(++tries >= 10) clearInterval(retry)
+        }, 600)
       }
       document.addEventListener('visibilitychange', onVisible)
 
-      // p.connect() may or may not resolve — handle both
+      // p.connect() shows the modal — may or may not resolve on mobile
       p.connect()
         .then(async () => {
           if(done) return
-          // connect resolved — get accounts
-          if(p.accounts?.length > 0){ await handleAddress(p.accounts[0]); return }
+          const addr = getWCAddressFromStorage()
+          if(addr){ await handleAddress(addr); return }
           const accs = await p.request({method:'eth_accounts'})
           if(accs?.[0]) await handleAddress(accs[0])
         })
@@ -157,32 +175,17 @@ export default function WalletModal({ onSuccess, onClose }) {
     } catch(err){ handleError(err) }
   }
 
-  // Resume after page reload — session should exist in WC localStorage
+  // Resume after page reload — read session from localStorage
   const resumeWC = async (walletId) => {
-    try {
-      const { EthereumProvider } = await import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
-      const p = await EthereumProvider.init({
-        projectId:PROJECT_ID, chains:[56], showQrModal:false,
-        metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
-      })
-      setStatus('connecting')
-
-      // Try getting accounts from existing session
-      let address = null
-      for(let i=0; i<10; i++){
-        await new Promise(r=>setTimeout(r,800))
-        try {
-          const accounts = await p.request({method:'eth_accounts'})
-          if(accounts?.[0]){ address=accounts[0]; break }
-        } catch(e){}
-      }
-
-      if(address){ await finish(address); return }
-
-      // Session not found — restart with full modal
-      setStatus('wcLoading')
-      connectWC(walletId)
-    } catch(e){ connectWC(walletId) }
+    setStatus('connecting')
+    // Try localStorage first (fast path)
+    for(let i=0; i<15; i++){
+      await new Promise(r=>setTimeout(r,700))
+      const addr = getWCAddressFromStorage()
+      if(addr){ await finish(addr); return }
+    }
+    // No session found — restart full WC flow
+    connectWC(walletId)
   }
 
   const connect = (walletId) => {
