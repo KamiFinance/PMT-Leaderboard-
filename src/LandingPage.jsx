@@ -178,19 +178,14 @@ export default function LandingPage({ onNavigate }) {
       {/* ── HOW TO JOIN ── */}
       <section className="lp-section lp-section--alt" id="join">
         <div className="lp-section-inner">
-          <span className="lp-badge">{lang.howToJoin.title}</span>
-          <h2 className="lp-section-title">Secure your <span className="gold">spot</span></h2>
-          <p className="lp-section-desc">Only 3 steps to become a PMT Millionaire. Only 100 spots available — worldwide.</p>
+          <h2 className="lp-section-title">{lang.howToJoin.title}</h2>
+          <p className="lp-section-desc">{lang.howToJoin.subtitle}</p>
           <div className="lp-steps">
-            {[
-              ['01','Buy PMT','Purchase PMT tokens on PancakeSwap. The token is live on PMT Chain.'],
-              ['02','Hold 1M+','Accumulate at least 1,000,000 PMT tokens in your wallet and hold them.'],
-              lang.howToJoin.steps[2],
-            ].map(([n,t,d],i)=>(
+            {lang.howToJoin.steps.map(({n,title,desc},i)=>(
               <div key={n} className="lp-step">
                 <div className="lp-step-num">{n}</div>
-                <div className="lp-step-title">{t}</div>
-                <div className="lp-step-desc">{d}</div>
+                <div className="lp-step-title">{title}</div>
+                <div className="lp-step-desc">{desc}</div>
                 {i<2&&<div className="lp-step-arrow">→</div>}
               </div>
             ))}
@@ -201,7 +196,7 @@ export default function LandingPage({ onNavigate }) {
               className="lp-btn-primary lp-btn-lg"
               style={{display:'inline-block',textDecoration:'none'}}
             >
-              ✉ Request a Spot
+              {lang.howToJoin.requestBtn}
             </a>
           </div>
         </div>
