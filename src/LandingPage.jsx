@@ -94,10 +94,10 @@ export default function LandingPage({ onNavigate }) {
                 {LANGS.find(l=>T[l.code]===lang)?.flag || '🌐'} {Object.keys(T).find(k=>T[k]===lang)?.toUpperCase()||'EN'}
               </button>
               {langOpen&&(
-                <div style={{position:'fixed',top:56,right:72,background:'#0e0d09',border:'1px solid rgba(255,215,0,.2)',borderRadius:10,overflow:'hidden',zIndex:9999,minWidth:110,boxShadow:'0 8px 24px rgba(0,0,0,.6)'}}>
+                <div style={{position:'absolute',top:'calc(100% + 6px)',left:0,background:'#0e0d09',border:'1px solid rgba(255,215,0,.2)',borderRadius:10,overflow:'hidden',zIndex:9999,minWidth:110,boxShadow:'0 8px 24px rgba(0,0,0,.6)'}}>
                   {LANGS.map(l=>(
                     <button key={l.code} onClick={()=>switchLang(l.code)}
-                      style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'9px 14px',background:T[l.code]===lang?'rgba(255,215,0,.08)':'transparent',border:'none',color:T[l.code]===lang?'#FFD700':'rgba(255,255,255,.7)',fontSize:13,cursor:'pointer',transition:'background .1s'}}>
+                      style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'9px 14px',background:T[l.code]===lang?'rgba(255,215,0,.08)':'transparent',border:'none',color:T[l.code]===lang?'#FFD700':'rgba(255,255,255,.7)',fontSize:13,cursor:'pointer',transition:'background .1s',whiteSpace:'nowrap'}}>
                       {l.flag} {l.label}
                     </button>
                   ))}
