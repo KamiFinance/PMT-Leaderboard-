@@ -11,13 +11,19 @@ const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 export default function LandingPage({ onNavigate }) {
   const [lang, setLang] = useState(T.en)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
   const [showWallet, setShowWallet] = useState(() => !!sessionStorage.getItem('pmt_wc_pending'))
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    detectLanguage().then(code => setLang(T[code] || T.en))
+    const saved = localStorage.getItem('pmt_lang')
+    if(saved && T[saved]) {
+      setLang(T[saved])
+    } else {
+      detectLanguage().then(code => setLang(T[code] || T.en))
+    }
   }, [])
 
   useEffect(() => {
@@ -38,6 +44,21 @@ export default function LandingPage({ onNavigate }) {
     setShowBuyTip(true)
     setTimeout(() => setShowBuyTip(false), 2500)
   }
+
+  const switchLang = (code) => {
+    setLang(T[code] || T.en)
+    localStorage.setItem('pmt_lang', code)
+    setLangOpen(false)
+  }
+
+  const LANGS = [
+    { code:'en', flag:'🇬🇧', label:'EN' },
+    { code:'de', flag:'🇩🇪', label:'DE' },
+    { code:'ar', flag:'🇦🇪', label:'AR' },
+    { code:'tr', flag:'🇹🇷', label:'TR' },
+  ]
+
+  const currentLang = LANGS.find(l => l.label === Object.keys(T).find(k => T[k] === lang)?.toUpperCase()) || LANGS[0]
 
   const scrollTo = (id) => {
     setMenuOpen(false)
@@ -64,6 +85,26 @@ export default function LandingPage({ onNavigate }) {
           </nav>
 
           <div className="lp-header-right">
+            {/* Language switcher */}
+            <div style={{position:'relative'}}>
+              <button
+                onClick={()=>setLangOpen(o=>!o)}
+                style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.12)',borderRadius:8,padding:'6px 10px',color:'rgba(255,255,255,.8)',fontSize:13,cursor:'pointer',display:'flex',alignItems:'center',gap:5,transition:'all .15s',whiteSpace:'nowrap'}}
+              >
+                {LANGS.find(l=>T[l.code]===lang)?.flag || '🌐'} {Object.keys(T).find(k=>T[k]===lang)?.toUpperCase()||'EN'}
+              </button>
+              {langOpen&&(
+                <div style={{position:'fixed',top:56,right:72,background:'#0e0d09',border:'1px solid rgba(255,215,0,.2)',borderRadius:10,overflow:'hidden',zIndex:9999,minWidth:110,boxShadow:'0 8px 24px rgba(0,0,0,.6)'}}>
+                  {LANGS.map(l=>(
+                    <button key={l.code} onClick={()=>switchLang(l.code)}
+                      style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'9px 14px',background:T[l.code]===lang?'rgba(255,215,0,.08)':'transparent',border:'none',color:T[l.code]===lang?'#FFD700':'rgba(255,255,255,.7)',fontSize:13,cursor:'pointer',transition:'background .1s'}}>
+                      {l.flag} {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {langOpen&&<div style={{position:'fixed',inset:0,zIndex:9998}} onClick={()=>setLangOpen(false)}/>}
+            </div>
             <div style={{position:'relative'}}>
               <button className="lp-btn-buy" onClick={handleBuyPmt}>Buy PMT</button>
               {showBuyTip&&<div style={{position:'fixed',top:70,right:24,background:'rgba(18,16,10,.98)',border:'1px solid rgba(255,215,0,.3)',borderRadius:8,padding:'10px 16px',whiteSpace:'nowrap',fontSize:12,color:'rgba(255,255,255,.8)',zIndex:9999,boxShadow:'0 4px 20px rgba(0,0,0,.5)'}}>
