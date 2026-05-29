@@ -100,36 +100,59 @@ export default function WalletModal({ onSuccess, onClose }) {
         coinbase:'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
       }
       const p = await EthereumProvider.init({
-        projectId: PROJECT_ID, chains:[56], showQrModal:true,
+        projectId:PROJECT_ID, chains:[56], showQrModal:true,
         qrModalOptions:{
           themeMode:'dark',
           themeVariables:{'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09','--wcm-z-index':'99999'},
-          explorerRecommendedWalletIds: WC_IDS[walletId]?[WC_IDS[walletId]]:undefined,
+          explorerRecommendedWalletIds:WC_IDS[walletId]?[WC_IDS[walletId]]:undefined,
           enableExplorer:true,
         },
         metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
       })
 
-      // Save session flag BEFORE opening modal so page reload can resume it
       sessionStorage.setItem(WC_FLAG, JSON.stringify({walletId, ts:Date.now()}))
       setStatus('connecting')
 
-      // Await connect — resolves when user approves in wallet
-      await p.connect()
-
-      // Give the session 1 second to fully propagate
-      await new Promise(r=>setTimeout(r,1000))
-
-      // Get accounts with retry
-      let address = null
-      for(let i=0; i<6; i++){
-        const accounts = await p.request({method:'eth_accounts'})
-        if(accounts?.[0]){ address=accounts[0]; break }
-        await new Promise(r=>setTimeout(r,800))
+      let done = false
+      const handleAddress = async (address) => {
+        if(done) return; done = true
+        clearInterval(poll)
+        document.removeEventListener('visibilitychange', onVisible)
+        sessionStorage.removeItem(WC_FLAG)
+        await finish(address)
       }
 
-      if(address) await finish(address)
-      else throw new Error('No account returned after approval')
+      // Poll p.accounts directly — this property is updated by WC internally
+      // even when the browser tab was backgrounded and the Promise didn't resume
+      const poll = setInterval(() => {
+        if(p.accounts?.length > 0) handleAddress(p.accounts[0])
+      }, 500)
+
+      // Extra check when user returns to tab
+      const onVisible = () => {
+        if(document.visibilityState !== 'visible') return
+        // Give WC 1s to sync after tab resumes
+        setTimeout(() => {
+          if(p.accounts?.length > 0) handleAddress(p.accounts[0])
+        }, 1000)
+      }
+      document.addEventListener('visibilitychange', onVisible)
+
+      // p.connect() may or may not resolve — handle both
+      p.connect()
+        .then(async () => {
+          if(done) return
+          // connect resolved — get accounts
+          if(p.accounts?.length > 0){ await handleAddress(p.accounts[0]); return }
+          const accs = await p.request({method:'eth_accounts'})
+          if(accs?.[0]) await handleAddress(accs[0])
+        })
+        .catch(err => {
+          if(done) return
+          clearInterval(poll)
+          document.removeEventListener('visibilitychange', onVisible)
+          handleError(err)
+        })
 
     } catch(err){ handleError(err) }
   }
