@@ -199,7 +199,7 @@ export default function WalletModal({ onSuccess, onClose }) {
       }
 
       import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
-        .then(({EthereumProvider})=>EthereumProvider.init({
+        .then(({EthereumProvider}) => EthereumProvider.init({
           projectId: PROJECT_ID,
           chains: [56],
           showQrModal: true,
@@ -213,10 +213,40 @@ export default function WalletModal({ onSuccess, onClose }) {
         }))
         .then(p => {
           setStatus('connecting')
-          return p.connect().then(()=>p.request({method:'eth_accounts'}))
+
+          // Use event listeners — more reliable than awaiting connect()
+          // especially when user backgrounds the browser to approve in wallet app
+          const onConnect = async () => {
+            try {
+              const accounts = await p.request({method:'eth_accounts'})
+              if(accounts?.[0]) await handleResult(accounts[0])
+            } catch(e) { handleError(e) }
+          }
+
+          p.on('connect', onConnect)
+          p.on('accountsChanged', async (accounts) => {
+            if(accounts?.[0]) await handleResult(accounts[0])
+          })
+
+          // Also poll when page becomes visible again (user returns from wallet app)
+          const onVisible = async () => {
+            if(document.visibilityState==='visible'){
+              try {
+                const accounts = await p.request({method:'eth_accounts'})
+                if(accounts?.[0]) { document.removeEventListener('visibilitychange',onVisible); await handleResult(accounts[0]) }
+              } catch(e) {}
+            }
+          }
+          document.addEventListener('visibilitychange', onVisible)
+
+          // Start the connection
+          p.connect().catch(err => {
+            document.removeEventListener('visibilitychange', onVisible)
+            if(err.message?.toLowerCase().includes('clos')||err.message?.toLowerCase().includes('cancel')){setStatus('idle')}
+            else handleError(err)
+          })
         })
-        .then(async accounts=>{ if(!accounts?.[0]) throw new Error('No account'); await handleResult(accounts[0]) })
-        .catch(err=>{
+        .catch(err => {
           if(err.message?.toLowerCase().includes('clos')||err.message?.toLowerCase().includes('cancel')){setStatus('idle')}
           else handleError(err)
         })
