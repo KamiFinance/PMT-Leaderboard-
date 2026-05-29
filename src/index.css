@@ -1486,6 +1486,14 @@ body{
   transform: scale(1.06);
 }
 .lp-network-photo:hover::after { opacity: 0.4; }
+/* Center a trailing 2-photo row on the 4-column (desktop/tablet) layout.
+   Targets the first photo of a final row that has exactly 2 items and
+   pushes it to column 2 so the pair sits centered (cols 2–3). */
+@media (min-width: 601px) {
+  .lp-network-grid > .lp-network-photo:nth-child(4n+1):nth-last-child(2) {
+    grid-column: 2;
+  }
+}
 
 /* ── EVENTS ───────────────────────────────────────────────────────────── */
 .lp-events-placeholder {
