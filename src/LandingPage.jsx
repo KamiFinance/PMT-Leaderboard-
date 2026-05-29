@@ -34,8 +34,23 @@ export default function LandingPage({ onNavigate }) {
   }, [])
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', fn)
+    let wasDown = false
+    const fn = () => {
+      const y = window.scrollY
+      setScrolled(y > 40)
+      // Re-trigger David zoom when scrolling back to near top
+      if (wasDown && y < 60) {
+        const img = document.querySelector('.lp-hero-david img')
+        if (img) {
+          img.style.animation = 'none'
+          void img.offsetWidth
+          img.style.animation = ''
+        }
+      }
+      if (y > 200) wasDown = true
+      else if (y < 60) wasDown = false
+    }
+    window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
