@@ -130,9 +130,9 @@ export default function LandingPage({ onNavigate }) {
           <h2 className="lp-section-title">What you <span className="gold">get</span></h2>
           <p className="lp-section-desc">Every member enjoys exclusive privileges across the entire PMT ecosystem and beyond.</p>
           <div className="lp-benefits-grid">
-            {BENEFITS.map(b=>(
+            {lang.benefits.items.map((b,i)=>(
               <div key={b.title} className="lp-benefit-card">
-                <div className="lp-benefit-icon">{b.icon}</div>
+                <div className="lp-benefit-icon">{BENEFIT_ICONS[i]}</div>
                 <div className="lp-benefit-title">{b.title}</div>
                 <div className="lp-benefit-desc">{b.desc}</div>
               </div>
