@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import SwapModal from './SwapModal.jsx'
 import WalletModal from './WalletModal.jsx'
 import { detectLanguage, T } from './i18n.js'
 
@@ -20,7 +21,7 @@ export default function LandingPage({ onNavigate }) {
   const [formSent, setFormSent] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
-  const [showBuyTip, setShowBuyTip] = useState(false)
+  const [showSwap, setShowSwap] = useState(false)
   const [showWallet, setShowWallet] = useState(() => !!sessionStorage.getItem('pmt_wc_pending'))
   const [scrolled, setScrolled] = useState(false)
 
@@ -117,8 +118,7 @@ export default function LandingPage({ onNavigate }) {
 
   // TODO: replace with internal swap function when PMT Chain is live
   const handleBuyPmt = () => {
-    setShowBuyTip(true)
-    setTimeout(() => setShowBuyTip(false), 2500)
+    setShowSwap(true)
   }
 
   const switchLang = (code) => {
@@ -187,9 +187,7 @@ export default function LandingPage({ onNavigate }) {
             </div>
             <div style={{position:'relative'}}>
               <button className="lp-btn-buy" onClick={handleBuyPmt}>Buy PMT</button>
-              {showBuyTip&&<div style={{position:'fixed',top:70,right:24,background:'rgba(18,16,10,.98)',border:'1px solid rgba(255,215,0,.3)',borderRadius:8,padding:'10px 16px',whiteSpace:'nowrap',fontSize:12,color:'rgba(255,255,255,.8)',zIndex:9999,boxShadow:'0 4px 20px rgba(0,0,0,.5)'}}>
-                🔒 Swap coming soon
-              </div>}
+
             </div>
             <button className="lp-hamburger" onClick={()=>setMenuOpen(s=>!s)} aria-label="Menu">
               <span/><span/><span/>
@@ -443,6 +441,8 @@ export default function LandingPage({ onNavigate }) {
           </div>
         </div>
       </footer>
+
+      {showSwap && <SwapModal onClose={() => setShowSwap(false)} />}
 
       {/* ── Request a Spot Modal ──────────────────────────────────────── */}
       {requestModal && (
