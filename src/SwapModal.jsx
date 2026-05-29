@@ -399,7 +399,7 @@ export default function SwapModal({ onClose }) {
               </button>
             )}
 
-            <p className="swap-disclaimer">Powered by PancakeSwap V3 · BSC</p>
+            <p className="swap-disclaimer">Powered by Public Masterpiece</p>
           </div>
         )}
       </div>
