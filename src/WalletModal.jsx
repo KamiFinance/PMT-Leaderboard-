@@ -42,8 +42,12 @@ const MM_ICON = (
 )
 
 const TRUST_ICON = (
-  <div style={{width:36,height:36,borderRadius:10,overflow:'hidden',flexShrink:0}}>
-    <img src={`${import.meta.env.BASE_URL}wallet-trust.png`} style={{width:36,height:36,objectFit:'cover'}} alt="Trust Wallet"/>
+  <div style={{width:36,height:36,borderRadius:10,overflow:'hidden',flexShrink:0,background:'#3375BB',display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <svg viewBox="0 0 126 148" style={{width:22,height:26}} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M63 0L0 28.4v46.3C0 111 27.1 140.9 63 148c35.9-7.1 63-37 63-73.3V28.4L63 0z" fill="white"/>
+      <path d="M63 18L16 40.7v33.6C16 100.5 36.5 123 63 129c26.5-6 47-28.5 47-54.7V40.7L63 18z" fill="#3375BB"/>
+      <path d="M63 37L32 52.7v21.6C32 90 44.9 104 63 108c18.1-4 31-18 31-33.7V52.7L63 37z" fill="white"/>
+    </svg>
   </div>
 )
 
