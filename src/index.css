@@ -2230,3 +2230,131 @@ body{
 @media (max-width: 600px) {
   .video-modal-box { border-radius: 14px; }
 }
+
+/* ── Request a Spot Form Modal ───────────────────────────────────────── */
+.request-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: #0d0d12;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+  animation: vmBoxIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.request-modal-header {
+  padding: 32px 32px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+.request-modal-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.request-modal-header p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+.request-modal-form {
+  padding: 0 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.request-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.request-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.request-form-group input,
+.request-form-group textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  resize: none;
+}
+.request-form-group input::placeholder,
+.request-form-group textarea::placeholder {
+  color: rgba(255,255,255,0.25);
+}
+.request-form-group input:focus,
+.request-form-group textarea:focus {
+  border-color: rgba(255, 215, 0, 0.45);
+  background: rgba(255,255,255,0.06);
+}
+.request-form-submit {
+  width: 100%;
+  margin-top: 4px;
+  font-size: 15px;
+  padding: 14px;
+  border: none;
+  cursor: pointer;
+}
+.request-form-note {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  margin: 0;
+}
+.request-modal-success {
+  padding: 56px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.request-modal-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFE566, #FFA500);
+  color: #000;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.request-modal-success h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.request-modal-success p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  max-width: 300px;
+  line-height: 1.6;
+  margin: 0;
+}
+.request-modal-success button {
+  margin-top: 8px;
+  padding: 12px 32px;
+  border: none;
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  .request-modal-box { border-radius: 16px; }
+  .request-modal-header, .request-modal-form { padding-left: 20px; padding-right: 20px; }
+}
