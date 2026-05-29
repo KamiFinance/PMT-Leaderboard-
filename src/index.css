@@ -1830,8 +1830,8 @@ body{
   .lp-hero-david {
     display: flex;
     width: 95vw;
-    right: 2%;
-    top: 8%;
+    right: -5%;
+    top: -2%;
     bottom: auto;
     height: 78%;
     opacity: 0.6;
