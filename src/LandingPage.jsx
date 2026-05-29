@@ -498,17 +498,32 @@ export default function LandingPage({ onNavigate }) {
                   </div>
                   <button
                     className="lp-btn-primary request-form-submit"
-                    onClick={() => {
+                    onClick={async () => {
                       const { name, wallet, telegram, about } = formData
                       if (!wallet || !telegram) return
-                      const body = `Hi PMT Team,%0A%0AName: ${encodeURIComponent(name)}%0AWallet Address: ${encodeURIComponent(wallet)}%0ATelegram: ${encodeURIComponent(telegram)}%0A%0AAbout me:%0A${encodeURIComponent(about)}`
-                      window.location.href = `mailto:info@publicmasterpiece.com?subject=PMT%20Millionaires%20Club%20%E2%80%94%20Spot%20Request&body=${body}`
-                      setTimeout(() => setFormSent(true), 500)
-                    }}
-                  >
-                    Send Request ✉
+                      try {
+                        const res = await fetch('https://poyrbkokdwjjnlcqgdpi.supabase.co/rest/v1/spot_requests', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBveXJia29rZHdqam5sY3FnZHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTg0MjIsImV4cCI6MjA5NTYzNDQyMn0.ZOIIyeaHK_U5bMGzVCO5xlc7LQNi8oP86ume2VJrVBA',
+                            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBveXJia29rZHdqam5sY3FnZHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTg0MjIsImV4cCI6MjA5NTYzNDQyMn0.ZOIIyeaHK_U5bMGzVCO5xlc7LQNi8oP86ume2VJrVBA',
+                            'Prefer': 'return=minimal'
+                          },
+                          body: JSON.stringify({ name, wallet, telegram, about })
+                        })
+                        if (res.ok || res.status === 201) {
+                          setFormSent(true)
+                        } else {
+                          alert('Something went wrong. Please try again.')
+                        }
+                      } catch(e) {
+                        alert('Connection error. Please try again.')
+                      }
+                    }}>
+                    Send Request
                   </button>
-                  <p className="request-form-note">Your email client will open with this info pre-filled.</p>
+                  <p className="request-form-note">Wallet + Telegram are required.</p>
                 </div>
               </>
             )}
