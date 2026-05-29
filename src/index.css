@@ -823,29 +823,29 @@ body{
   margin-left: max(40px, calc(50vw - 580px));
 }
 
-/* David — fills the full hero from top to bottom, right-anchored */
+/* David — blends seamlessly, no rectangular clip */
 .lp-hero-david {
   position: absolute;
-  right: -2%;
-  top: -5%;
-  bottom: -5%;
-  width: 54vw;
+  right: -4%;
+  top: -8%;
+  bottom: -8%;
+  width: 72vw;            /* wide enough to wrap behind text */
   display: flex;
   align-items: center;
   justify-content: flex-end;
   pointer-events: none;
   z-index: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 .lp-hero-david img {
-  height: 110%;
+  height: 116%;
   width: auto;
   max-width: none;
   object-fit: contain;
-  object-position: center center;
+  mix-blend-mode: lighten; /* ← removes dark bg, blends with page */
   filter:
-    drop-shadow(0 0 120px rgba(255, 200, 0, 0.28))
-    drop-shadow(0 0 60px rgba(255, 160, 0, 0.18));
+    drop-shadow(0 0 100px rgba(255, 200, 0, 0.22))
+    drop-shadow(0 0 40px rgba(255, 150, 0, 0.14));
   will-change: transform;
 }
 /* Glow halo behind David */
@@ -860,12 +860,12 @@ body{
   border-radius: 50%;
   pointer-events: none;
 }
-/* Subtle bottom fade only so David blends into the page */
+/* Bottom fade — subtle, most blending handled by mix-blend-mode */
 .lp-hero-david::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 18%;
+  bottom: -8%; left: 0; right: 0;
+  height: 22%;
   background: linear-gradient(to top, var(--lp-bg) 0%, transparent 100%);
   pointer-events: none;
   z-index: 2;
