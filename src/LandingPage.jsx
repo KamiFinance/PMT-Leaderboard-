@@ -11,6 +11,7 @@ const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 export default function LandingPage({ onNavigate }) {
   const [lang, setLang] = useState(T.en)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [videoModal, setVideoModal] = useState(null) // YouTube video ID
   const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
@@ -311,7 +312,7 @@ export default function LandingPage({ onNavigate }) {
               style={{display:'inline-block',textDecoration:'none'}}
             >
               {lang.howToJoin.requestBtn}
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -339,7 +340,7 @@ export default function LandingPage({ onNavigate }) {
           <h2 className="lp-section-title" data-anim="title">{lang.misc.eventsH2}</h2>
           <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>{lang.misc.eventsDesc}</p>
           <div className="lp-events-placeholder">
-            <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="1" style={{textDecoration:'none',display:'block'}}>
+            <div className="lp-event-card" data-anim="card-up" data-delay="1" onClick={()=>setVideoModal('m5r5Jp_pf4k')} style={{cursor:'pointer'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/m5r5Jp_pf4k/maxresdefault.jpg"
@@ -354,8 +355,8 @@ export default function LandingPage({ onNavigate }) {
                 </div>
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>PMT Art Exhibition | Hamburg, Germany</div>
-            </a>
-            <a href="https://www.youtube.com/watch?v=Qb5ry97zTP8" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="2" style={{textDecoration:'none',display:'block'}}>
+            </div>
+            <div className="lp-event-card" data-anim="card-up" data-delay="2" onClick={()=>setVideoModal('Qb5ry97zTP8')} style={{cursor:'pointer'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/Qb5ry97zTP8/maxresdefault.jpg"
@@ -370,8 +371,8 @@ export default function LandingPage({ onNavigate }) {
                 </div>
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Dubai AI & Web3 Festival 2024</div>
-            </a>
-            <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="3" style={{textDecoration:'none',display:'block'}}>
+            </div>
+            <div className="lp-event-card" data-anim="card-up" data-delay="3" onClick={()=>setVideoModal('mIQ9rDT5ufo')} style={{cursor:'pointer'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/mIQ9rDT5ufo/maxresdefault.jpg"
@@ -386,7 +387,7 @@ export default function LandingPage({ onNavigate }) {
                 </div>
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Istanbul Blockchain Week 2025</div>
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -409,7 +410,7 @@ export default function LandingPage({ onNavigate }) {
                 {href:'https://youtube.com/', label:'YouTube', svg:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>},
                 {href:'https://linkedin.com/', label:'LinkedIn', svg:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>},
               ].map(({href,label,svg})=>(
-                <a key={label} href={href} className="lp-social" aria-label={label} target="_blank" rel="noreferrer">{svg}</a>
+                <a key={label} href={href} className="lp-social" aria-label={label} target="_blank" rel="noreferrer">{svg}</div>
               ))}
               </div>
             </div>
@@ -424,8 +425,8 @@ export default function LandingPage({ onNavigate }) {
             <div>
               <p className="lp-footer-col-title">{lang.footer.contact}</p>
               <div className="lp-footer-links">
-                <a href="mailto:info@publicmasterpiece.com">info@publicmasterpiece.com</a>
-                <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</a>
+                <a href="mailto:info@publicmasterpiece.com">info@publicmasterpiece.com</div>
+                <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</div>
               </div>
   
           </div>
@@ -437,6 +438,29 @@ export default function LandingPage({ onNavigate }) {
         </div>
       </footer>
 
+      {/* ── YouTube Video Modal ─────────────────────────────────────── */}
+      {videoModal && (
+        <div
+          className="video-modal-overlay"
+          onClick={() => setVideoModal(null)}
+        >
+          <div
+            className="video-modal-box"
+            onClick={e => e.stopPropagation()}
+          >
+            <button className="video-modal-close" onClick={() => setVideoModal(null)}>✕</button>
+            <div className="video-modal-iframe-wrap">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoModal}?autoplay=1&rel=0`}
+                title="PMT Video"
+                frameBorder="0"
+                allow="autoplay; encrypted-media; fullscreen"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
