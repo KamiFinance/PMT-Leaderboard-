@@ -807,13 +807,14 @@ body{
   position: relative;
   min-height: 100svh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.15fr;
   align-items: center;
-  max-width: 1240px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 68px 40px 60px;
-  gap: 48px;
+  gap: 24px;
   z-index: 1;
+  overflow: visible;
 }
 
 /* Left side text content */
@@ -827,18 +828,22 @@ body{
   order: 2;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
+  /* Overflow the hero grid to make David feel enormous */
+  margin-top: -80px;
+  margin-bottom: -80px;
+  margin-right: -80px;
 }
 .lp-hero-david img {
-  width: 100%;
-  max-width: 560px;
+  width: 115%;
+  max-width: 780px;
   height: auto;
-  max-height: 82vh;
+  max-height: 100vh;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 80px rgba(255, 200, 0, 0.2))
-    drop-shadow(0 0 30px rgba(255, 160, 0, 0.12));
+    drop-shadow(0 0 120px rgba(255, 200, 0, 0.25))
+    drop-shadow(0 0 50px rgba(255, 160, 0, 0.15));
   position: relative;
   z-index: 1;
 }
@@ -848,9 +853,9 @@ body{
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 65%;
-  height: 65%;
-  background: radial-gradient(ellipse, rgba(255, 200, 0, 0.09) 0%, transparent 70%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(ellipse, rgba(255, 200, 0, 0.1) 0%, transparent 65%);
   border-radius: 50%;
   pointer-events: none;
 }
