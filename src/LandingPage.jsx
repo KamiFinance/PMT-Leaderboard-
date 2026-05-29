@@ -39,6 +39,60 @@ export default function LandingPage({ onNavigate }) {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  // ── Scroll animations (IntersectionObserver) ───────────────────────────
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('anim-in')
+          io.unobserve(e.target)
+        }
+      }),
+      { threshold: 0.08, rootMargin: '0px 0px -50px 0px' }
+    )
+    document.querySelectorAll('[data-anim]').forEach(el => io.observe(el))
+    return () => io.disconnect()
+  }, [lang])
+
+  // ── Parallax on David ──────────────────────────────────────────────────
+  useEffect(() => {
+    const onScroll = () => {
+      const david = document.querySelector('.lp-hero-david')
+      if (david) david.style.transform = `translateY(${window.scrollY * 0.14}px)`
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // ── Counter animation for hero stats ──────────────────────────────────
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (!e.isIntersecting) return
+        const el = e.target
+        const raw = el.dataset.countTo
+        if (!raw) return
+        const target = parseFloat(raw)
+        const isFloat = raw.includes('.')
+        const suffix = el.dataset.countSuffix || ''
+        const dur = 1600
+        const start = performance.now()
+        const tick = (now) => {
+          const p = Math.min((now - start) / dur, 1)
+          const eased = 1 - Math.pow(1 - p, 4)
+          const val = target * eased
+          el.textContent = (isFloat ? val.toFixed(1) : Math.round(val)) + suffix
+          if (p < 1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+        io.unobserve(el)
+      }),
+      { threshold: 0.5 }
+    )
+    document.querySelectorAll('[data-count-to]').forEach(el => io.observe(el))
+    return () => io.disconnect()
+  }, [lang])
+
   // TODO: replace with internal swap function when PMT Chain is live
   const handleBuyPmt = () => {
     setShowBuyTip(true)
@@ -126,14 +180,14 @@ export default function LandingPage({ onNavigate }) {
       <section className="lp-hero" id="hero">
         <div className="lp-hero-david"><img src={`${BASE}david.png`} alt="" aria-hidden="true"/></div>
         <div className="lp-hero-content">
-          <p className="lp-hero-eyebrow">Public Masterpiece</p>
-          <h1 className="lp-hero-h"><span className="gold">PMT</span> Millionaires Club</h1>
-          <p className="lp-hero-tag">{lang.hero.subtitle}</p>
-          <div className="lp-hero-btns">
+          <p className="lp-hero-eyebrow" data-anim="fade-up" data-delay="0">Public Masterpiece</p>
+          <h1 className="lp-hero-h" data-anim="fade-up" data-delay="1"><span className="gold">PMT</span> Millionaires Club</h1>
+          <p className="lp-hero-tag" data-anim="fade-up" data-delay="2">{lang.hero.subtitle}</p>
+          <div className="lp-hero-btns" data-anim="fade-up" data-delay="3">
             <button className="lp-btn-primary" onClick={()=>setShowWallet(true)}>{lang.hero.viewLeaderboard}</button>
             <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>{lang.hero.discoverClub}</button>
           </div>
-          <div className="lp-hero-stats">
+          <div className="lp-hero-stats" data-anim="fade-up" data-delay="4">
             {[['100',lang.whatIsClub.maxMembers],['1M+',lang.whatIsClub.pmtRequired],['PMT',lang.misc.chainLabel]].map(([n,l])=>(
               <div key={l} className="lp-hero-stat">
                 <div className="lp-hero-stat-n">{n}</div>
@@ -147,12 +201,12 @@ export default function LandingPage({ onNavigate }) {
       {/* ── WHAT IS THE CLUB ── */}
       <section className="lp-section" id="club">
         <div className="lp-section-inner">
-          <span className="lp-badge">{lang.misc.whatIsClubBadge}</span>
-          <h2 className="lp-section-title">{lang.misc.whatIsClubH2}</h2>
-          <p className="lp-section-desc">{lang.whatIsClub.desc}</p>
+          <span className="lp-badge" data-anim="fade-up">{lang.misc.whatIsClubBadge}</span>
+          <h2 className="lp-section-title" data-anim="title">{lang.misc.whatIsClubH2}</h2>
+          <p className="lp-section-desc" data-anim="fade-up" data-delay="1">{lang.whatIsClub.desc}</p>
           <div className="lp-three-cols">
             {[['100',lang.whatIsClub.maxMembers,null],['1,000,000',lang.whatIsClub.pmtRequired,lang.whatIsClub.minHolding],['PMT Chain',lang.whatIsClub.blockchain,lang.whatIsClub.fullyOnChain]].map(([n,l,d])=>(
-              <div key={l} className="lp-info-card">
+              <div key={l} className="lp-info-card" data-anim="card-up">
                 <div className="lp-info-n">{n}</div>
                 <div className="lp-info-l">{l}</div>
                 <div className="lp-info-d">
@@ -171,12 +225,12 @@ export default function LandingPage({ onNavigate }) {
       {/* ── BENEFITS ── */}
       <section className="lp-section lp-section--alt" id="benefits">
         <div className="lp-section-inner">
-          <span className="lp-badge">{lang.benefits.title}</span>
-          <h2 className="lp-section-title">{lang.misc.benefitsH2}</h2>
-          <p className="lp-section-desc">{lang.misc.benefitsSubtitle}</p>
+          <span className="lp-badge" data-anim="fade-up">{lang.benefits.title}</span>
+          <h2 className="lp-section-title" data-anim="title">{lang.misc.benefitsH2}</h2>
+          <p className="lp-section-desc" data-anim="fade-up" data-delay="1">{lang.misc.benefitsSubtitle}</p>
           <div className="lp-benefits-grid">
             {lang.benefits.items.map((b,i)=>(
-              <div key={b.title} className="lp-benefit-card">
+              <div key={b.title} className="lp-benefit-card" data-anim="card-up" data-delay={String(i%3+1)}>
                 <div className="lp-benefit-icon">{BENEFIT_ICONS[i]}</div>
                 <div className="lp-benefit-title">{b.title}</div>
                 <div className="lp-benefit-desc">{b.desc}</div>
@@ -189,9 +243,9 @@ export default function LandingPage({ onNavigate }) {
       {/* ── PHYSICAL REWARDS ── */}
       <section className="lp-section" id="rewards">
         <div className="lp-section-inner">
-          <span className="lp-badge">{lang.rewards.title}</span>
-          <h2 className="lp-section-title">{lang.misc.rewardsH2}</h2>
-          <p className="lp-section-desc">{lang.misc.rewardsSubtitle}</p>
+          <span className="lp-badge" data-anim="fade-up">{lang.rewards.title}</span>
+          <h2 className="lp-section-title" data-anim="title">{lang.misc.rewardsH2}</h2>
+          <p className="lp-section-desc" data-anim="fade-up" data-delay="1">{lang.misc.rewardsSubtitle}</p>
           <div className="lp-rewards-row">
             <div className="lp-reward-card">
               <div className="lp-reward-img-wrap">
@@ -223,11 +277,11 @@ export default function LandingPage({ onNavigate }) {
       {/* ── HOW TO JOIN ── */}
       <section className="lp-section lp-section--alt" id="join">
         <div className="lp-section-inner">
-          <h2 className="lp-section-title">{lang.howToJoin.title}</h2>
-          <p className="lp-section-desc">{lang.howToJoin.subtitle}</p>
+          <h2 className="lp-section-title" data-anim="title">{lang.howToJoin.title}</h2>
+          <p className="lp-section-desc" data-anim="fade-up" data-delay="1">{lang.howToJoin.subtitle}</p>
           <div className="lp-steps">
             {lang.howToJoin.steps.map(({n,title,desc},i)=>(
-              <div key={n} className="lp-step">
+              <div key={n} className="lp-step" data-anim="step-up" data-delay={String(i+1)}>
                 <div className="lp-step-num">{n}</div>
                 <div className="lp-step-title">{title}</div>
                 <div className="lp-step-desc">{desc}</div>
@@ -250,12 +304,12 @@ export default function LandingPage({ onNavigate }) {
       {/* ── NETWORK ── */}
       <section className="lp-section" id="network">
         <div className="lp-section-inner">
-          <span className="lp-badge">{lang.network.title}</span>
-          <h2 className="lp-section-title">{lang.misc.networkH2}</h2>
-          <p className="lp-section-desc">{lang.misc.networkDesc}</p>
+          <span className="lp-badge" data-anim="fade-up">{lang.network.title}</span>
+          <h2 className="lp-section-title" data-anim="title">{lang.misc.networkH2}</h2>
+          <p className="lp-section-desc" data-anim="fade-up" data-delay="1">{lang.misc.networkDesc}</p>
           <div className="lp-network-grid">
             {NETWORK_PHOTOS.map((src,i)=>(
-              <div key={i} className="lp-network-photo">
+              <div key={i} className="lp-network-photo" data-anim="photo-in" data-delay={String((i%4)+1)}>
                 <img src={src} alt={`Partner ${i+1}`} loading="lazy"/>
               </div>
             ))}
@@ -266,11 +320,11 @@ export default function LandingPage({ onNavigate }) {
       {/* ── EVENTS PLACEHOLDER ── */}
       <section className="lp-section lp-section--alt" id="events">
         <div className="lp-section-inner" style={{textAlign:'center'}}>
-          <span className="lp-badge">{lang.events.title}</span>
-          <h2 className="lp-section-title">{lang.misc.eventsH2}</h2>
+          <span className="lp-badge" data-anim="fade-up">{lang.events.title}</span>
+          <h2 className="lp-section-title" data-anim="title">{lang.misc.eventsH2}</h2>
           <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>{lang.misc.eventsDesc}</p>
           <div className="lp-events-placeholder">
-            <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+            <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="1" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/m5r5Jp_pf4k/maxresdefault.jpg"
@@ -286,7 +340,7 @@ export default function LandingPage({ onNavigate }) {
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>PMT Art Exhibition | Hamburg, Germany</div>
             </a>
-            <a href="https://www.youtube.com/watch?v=Qb5ry97zTP8" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+            <a href="https://www.youtube.com/watch?v=Qb5ry97zTP8" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="2" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/Qb5ry97zTP8/maxresdefault.jpg"
@@ -302,7 +356,7 @@ export default function LandingPage({ onNavigate }) {
               </div>
               <div className="lp-event-label" style={{color:'rgba(255,255,255,.7)'}}>Dubai AI & Web3 Festival 2024</div>
             </a>
-            <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
+            <a href="https://www.youtube.com/watch?v=mIQ9rDT5ufo" target="_blank" rel="noreferrer" className="lp-event-card" data-anim="card-up" data-delay="3" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
                 <img
                   src="https://img.youtube.com/vi/mIQ9rDT5ufo/maxresdefault.jpg"
