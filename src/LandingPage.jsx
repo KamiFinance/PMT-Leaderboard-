@@ -411,7 +411,6 @@ export default function LandingPage({ onNavigate }) {
               <div className="lp-footer-links">
                 <a href="mailto:info@publicmasterpiece.com">info@publicmasterpiece.com</a>
                 <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</a>
-                <span>{lang.misc.footerAddress}</span>
               </div>
   
           </div>
