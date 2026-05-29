@@ -847,6 +847,27 @@ body{
     drop-shadow(0 0 100px rgba(255, 200, 0, 0.22))
     drop-shadow(0 0 40px rgba(255, 150, 0, 0.14));
   will-change: transform;
+  animation: davidZoomIn 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@keyframes davidZoomIn {
+  0%   {
+    transform: scale(0.42) translateY(60px);
+    opacity: 0;
+    filter: blur(14px) brightness(0.3);
+  }
+  35%  {
+    opacity: 0.5;
+    filter: blur(6px) brightness(0.7);
+  }
+  65%  {
+    filter: blur(1px) brightness(0.95);
+  }
+  100% {
+    transform: scale(1) translateY(0px);
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+  }
 }
 /* Glow halo behind David */
 .lp-hero-david::before {
