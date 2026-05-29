@@ -4,20 +4,73 @@ import MetaMaskSDK from '@metamask/sdk'
 const PROJECT_ID = '68140be0602e8677013cb0cf750294bc'
 const WC_FLAG    = 'pmt_wc_pending'
 
-const WALLETS = [
-  { id:'metamask',      name:'MetaMask',        desc:'Browser & mobile',  color:'#F6851B' },
-  { id:'trust',         name:'Trust Wallet',    desc:'Mobile & extension', color:'#3375BB' },
-  { id:'coinbase',      name:'Coinbase Wallet', desc:'Browser extension',  color:'#0052FF' },
-  { id:'walletconnect', name:'WalletConnect',   desc:'Any mobile wallet',  color:'#3B99FC' },
-]
-
-const WalletIcon = ({ color, letter }) => (
-  <div style={{width:36,height:36,borderRadius:10,background:color,display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:700,fontSize:15,flexShrink:0}}>
-    {letter}
+// Official wallet icons
+const MM_ICON = (
+  <div style={{width:36,height:36,borderRadius:10,overflow:'hidden',flexShrink:0,background:'#fff'}}>
+    <svg viewBox="0 0 318.6 318.6" xmlns="http://www.w3.org/2000/svg" style={{width:36,height:36}}>
+      <polygon points="274.1,35.5 174.6,109.4 193.1,65" fill="#E2761B" stroke="#E2761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="44.4,35.5 143.1,110.1 125.6,65" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="238.3,206.8 211.8,247.4 268.5,263 284.8,207.7" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="33.9,207.7 50.1,263 106.8,247.4 80.3,206.8" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="103.6,138.2 87.8,162 144.1,164.5 142.1,104" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="214.9,138.2 176.1,103.3 174.6,164.5 230.8,162" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="106.8,247.4 140.6,230.9 111.4,208.1" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="177.9,230.9 211.8,247.4 207.1,208.1" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="211.8,247.4 177.9,230.9 180.7,253.8 180.4,263" fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="106.8,247.4 138.2,263 138.1,253.8 140.6,230.9" fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="138.8,193.5 110.6,185.2 130.5,176.1" fill="#233447" stroke="#233447" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="179.7,193.5 188,176.1 207.9,185.2" fill="#233447" stroke="#233447" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="106.8,247.4 111.6,206.8 80.3,207.7" fill="#CC6228" stroke="#CC6228" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="207,206.8 211.8,247.4 238.3,207.7" fill="#CC6228" stroke="#CC6228" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="230.8,162 174.6,164.5 179.7,193.5 188,176.1 207.9,185.2" fill="#CC6228" stroke="#CC6228" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="110.6,185.2 130.5,176.1 138.8,193.5 144.1,164.5 87.8,162" fill="#CC6228" stroke="#CC6228" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="87.8,162 138.8,193.5 111.4,208.1" fill="#E27525" stroke="#E27525" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="207.1,208.1 179.7,193.5 230.8,162" fill="#E27525" stroke="#E27525" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="144.1,164.5 138.8,193.5 145.9,230.2 147.5,183" fill="#E27525" stroke="#E27525" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="174.6,164.5 171.2,182.9 172.5,230.2 179.7,193.5" fill="#E27525" stroke="#E27525" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="179.7,193.5 172.5,230.2 177.9,233.8 207.1,208.1 230.8,162" fill="#F5841F" stroke="#F5841F" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="110.6,185.2 111.4,208.1 140.6,233.8 145.9,230.2 138.8,193.5" fill="#F5841F" stroke="#F5841F" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="180.4,263 180.7,253.8 178,251.4 140.5,251.4 138.1,253.8 138.2,263 106.8,247.4 117.8,256.4 140.2,271.9 178.3,271.9 200.8,256.4 211.8,247.4" fill="#C0AD9E" stroke="#C0AD9E" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="177.9,233.8 172.5,230.2 145.9,230.2 140.6,233.8 138.1,253.8 140.5,251.4 178,251.4 180.7,253.8" fill="#161616" stroke="#161616" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="278.3,114.2 286.8,73.4 274.1,35.5 177.9,105.9 214.9,138.2 267.2,154.6 278.8,141.1 273.8,137.5 281.8,130.2 275.6,125.5 283.6,119.5" fill="#763D16" stroke="#763D16" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="31.8,73.4 40.3,114.2 34.9,119.5 42.9,125.5 36.8,130.2 44.8,137.5 39.8,141.1 51.3,154.6 103.6,138.2 140.6,105.9 44.4,35.5" fill="#763D16" stroke="#763D16" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="267.2,154.6 214.9,138.2 230.8,162 207.1,208.1 238.3,207.7 284.8,207.7" fill="#F5841F" stroke="#F5841F" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="103.6,138.2 51.3,154.6 33.9,207.7 80.3,207.7 111.4,208.1 87.8,162" fill="#F5841F" stroke="#F5841F" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points="174.6,164.5 177.9,105.9 193.6,65 125.1,65 140.6,105.9 144.1,164.5 145.7,183.2 145.9,230.2 172.5,230.2 172.7,183.2" fill="#F5841F" stroke="#F5841F" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
   </div>
 )
-const ICONS = { metamask:'M', trust:'T', coinbase:'C', walletconnect:'W' }
-const COLORS = { metamask:'#F6851B', trust:'#3375BB', coinbase:'#0052FF', walletconnect:'#3B99FC' }
+
+const TRUST_ICON = (
+  <div style={{width:36,height:36,borderRadius:10,overflow:'hidden',flexShrink:0}}>
+    <img src={`${import.meta.env.BASE_URL}wallet-trust.png`} style={{width:36,height:36,objectFit:'cover'}} alt="Trust Wallet"/>
+  </div>
+)
+
+const COINBASE_ICON = (
+  <div style={{width:36,height:36,borderRadius:'50%',overflow:'hidden',flexShrink:0,background:'#0052FF',display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <svg viewBox="0 0 1000 1000" style={{width:36,height:36}}>
+      <circle cx="500" cy="500" r="500" fill="#0052FF"/>
+      <path d="M500 150C306.7 150 150 306.7 150 500s156.7 350 350 350 350-156.7 350-350S693.3 150 500 150zm0 560c-116.2 0-210-93.8-210-210s93.8-210 210-210 210 93.8 210 210-93.8 210-210 210z" fill="white"/>
+      <rect x="380" y="380" width="240" height="240" rx="40" fill="white"/>
+    </svg>
+  </div>
+)
+
+const WC_ICON = (
+  <div style={{width:36,height:36,borderRadius:10,overflow:'hidden',flexShrink:0}}>
+    <img src={`${import.meta.env.BASE_URL}wallet-wc.png`} style={{width:36,height:36,objectFit:'cover'}} alt="WalletConnect"/>
+  </div>
+)
+
+const WALLET_ICONS = { metamask:MM_ICON, trust:TRUST_ICON, coinbase:COINBASE_ICON, walletconnect:WC_ICON }
+
+const WALLETS = [
+  { id:'metamask',      name:'MetaMask',        desc:'Browser & mobile' },
+  { id:'trust',         name:'Trust Wallet',    desc:'Mobile & extension' },
+  { id:'coinbase',      name:'Coinbase Wallet', desc:'Browser extension' },
+  { id:'walletconnect', name:'WalletConnect',   desc:'Any mobile wallet' },
+]
 
 const checkAccess = async (address) => {
   const res  = await fetch(`${import.meta.env.BASE_URL}wallets.json`)
@@ -247,7 +300,7 @@ export default function WalletModal({ onSuccess, onClose }) {
             <div className="wm-wallets">
               {WALLETS.map(w=>(
                 <button key={w.id} className="wm-wallet-btn" onClick={()=>connect(w.id)}>
-                  <WalletIcon color={COLORS[w.id]} letter={ICONS[w.id]}/>
+                  {WALLET_ICONS[w.id]}
                   <span className="wm-wallet-info">
                     <span className="wm-wallet-name">{w.name}{w.id==='metamask'&&!mmReady&&<span style={{fontSize:9,color:'rgba(255,255,255,.3)',marginLeft:6}}>loading…</span>}</span>
                     <span className="wm-wallet-desc">{w.desc}</span>
