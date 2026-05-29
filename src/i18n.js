@@ -43,7 +43,7 @@ export const T = {
     hero: {
       badge:'PUBLIC MASTERPIECE',
       title:'PMT Millionaires Club',
-      subtitle:'100 spots. Real holders. PMT Chain.',
+      subtitle:'The elite holders of the PMT ecosystem.',
       viewLeaderboard:'View Leaderboard',
       discoverClub:'Discover the Club',
       maxMembers:'MAX MEMBERS', pmtRequired:'PMT REQUIRED', chain:'CHAIN',
@@ -96,7 +96,7 @@ export const T = {
     network: { title:'Our Network', subtitle:'A global community of visionaries.' },
     events:  { title:'Events', subtitle:'PMT at the world\'s leading blockchain conferences.' },
     footer: {
-      tagline:'100 spots. Real holdings. PMT Chain.',
+      tagline:'The elite holders of the PMT ecosystem.',
       quickLinks:'Quick Links',
       contact:'Contact',
       email:'info@publicmasterpiece.com',
