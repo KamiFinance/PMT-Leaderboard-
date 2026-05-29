@@ -1826,18 +1826,18 @@ body{
     min-height: auto;
     padding: 100px 24px 72px;
   }
-  /* David — visible on mobile as cinematic right-side backdrop */
+  /* David — visible on mobile, right-side atmospheric backdrop */
   .lp-hero-david {
     display: flex;
-    width: 90vw;
-    right: -10%;
-    top: auto;
-    bottom: -5%;
-    height: 60%;
-    opacity: 0.55;
+    width: 95vw;
+    right: -8%;
+    top: 8%;
+    bottom: auto;
+    height: 78%;
+    opacity: 0.6;
     z-index: 0;
   }
-  .lp-hero-content { order: 1; z-index: 2; }
+  .lp-hero-content { order: 1; z-index: 2; position: relative; }
   .lp-hero-content { order: 1; }
   .lp-hero-h { font-size: clamp(34px, 9vw, 54px); }
   .lp-hero-stats { flex-wrap: wrap; }
