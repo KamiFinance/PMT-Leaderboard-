@@ -183,24 +183,47 @@ export default function WalletModal({ onSuccess, onClose }) {
       return
     }
 
-    // Detect mobile
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-    // Mobile deep links — open site inside the wallet's built-in browser
-    // Once inside, window.ethereum is available and connection works automatically
-    const DEEPLINKS = {
-      metamask: `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`,
-      trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
-      coinbase: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
-    }
-
-    // If on mobile without window.ethereum — redirect into wallet browser
+    // On mobile without window.ethereum: use WalletConnect which bundles
+    // the connection request into the deep link — wallet opens with approve screen
     if(isMobile && !window.ethereum){
-      window.location.href = DEEPLINKS[walletId] || DEEPLINKS.metamask
+      setIsWC(true)
+      setStatus('wcLoading')
+
+      // Map wallet id to WalletConnect explorer ID so the right wallet is pre-selected
+      const WC_WALLET_IDS = {
+        metamask: 'c57ca95b47569778a828d19178114f4db188b89b547b43be7fae921f2b6a6aa0',
+        trust:    '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+        coinbase: 'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
+      }
+
+      import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
+        .then(({EthereumProvider})=>EthereumProvider.init({
+          projectId: PROJECT_ID,
+          chains: [56],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+            themeVariables: {'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09','--wcm-z-index':'99999'},
+            explorerRecommendedWalletIds: WC_WALLET_IDS[walletId] ? [WC_WALLET_IDS[walletId]] : undefined,
+            enableExplorer: true,
+          },
+          metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
+        }))
+        .then(p => {
+          setStatus('connecting')
+          return p.connect().then(()=>p.request({method:'eth_accounts'}))
+        })
+        .then(async accounts=>{ if(!accounts?.[0]) throw new Error('No account'); await handleResult(accounts[0]) })
+        .catch(err=>{
+          if(err.message?.toLowerCase().includes('clos')||err.message?.toLowerCase().includes('cancel')){setStatus('idle')}
+          else handleError(err)
+        })
       return
     }
 
-    // Desktop or already inside wallet browser — use provider
+    // Desktop or inside wallet browser — use provider directly
     const provider = walletId==='metamask' ? (mmProviderRef.current || window.ethereum) : window.ethereum
     if(!provider){
       window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask,'_blank')
