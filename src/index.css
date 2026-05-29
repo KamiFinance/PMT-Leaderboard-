@@ -1824,7 +1824,7 @@ body{
   .lp-hero {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding: 100px 24px 72px;
+    padding: 160px 24px 72px;
   }
   /* David — visible on mobile, right-side atmospheric backdrop */
   .lp-hero-david {
