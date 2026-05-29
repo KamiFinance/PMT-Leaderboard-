@@ -806,46 +806,46 @@ body{
 .lp-hero {
   position: relative;
   min-height: 100svh;
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  align-items: center;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 68px 40px 60px;
-  gap: 24px;
-  z-index: 1;
-  overflow: visible;
-}
-
-/* Left side text content */
-.lp-hero-content {
-  order: 1;
-  position: relative;
-}
-
-/* Right side image */
-.lp-hero-david {
-  order: 2;
+  width: 100%;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  z-index: 1;
+}
+
+/* Text content — left aligned within max-width layout */
+.lp-hero-content {
   position: relative;
-  /* Overflow the hero grid to make David feel enormous */
-  margin-top: -80px;
-  margin-bottom: -80px;
-  margin-right: -80px;
+  z-index: 2;
+  width: 100%;
+  max-width: 600px;
+  padding: 110px 0 80px;
+  margin-left: max(40px, calc(50vw - 580px));
+}
+
+/* David — absolute right side, fills viewport height */
+.lp-hero-david {
+  position: absolute;
+  right: -2%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 105vh;
+  width: 52vw;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 1;
 }
 .lp-hero-david img {
-  width: 115%;
-  max-width: 780px;
-  height: auto;
-  max-height: 100vh;
+  height: 100%;
+  width: auto;
+  max-width: none;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 120px rgba(255, 200, 0, 0.25))
-    drop-shadow(0 0 50px rgba(255, 160, 0, 0.15));
-  position: relative;
-  z-index: 1;
+    drop-shadow(0 0 120px rgba(255, 200, 0, 0.28))
+    drop-shadow(0 0 60px rgba(255, 160, 0, 0.18));
+  will-change: transform;
 }
 /* Glow halo behind David */
 .lp-hero-david::before {
@@ -853,11 +853,23 @@ body{
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
-  height: 80%;
-  background: radial-gradient(ellipse, rgba(255, 200, 0, 0.1) 0%, transparent 65%);
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(ellipse, rgba(255, 200, 0, 0.1) 0%, transparent 60%);
   border-radius: 50%;
   pointer-events: none;
+}
+/* Fade David out at the edges */
+.lp-hero-david::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--lp-bg) 0%, transparent 18%),
+    linear-gradient(to top, var(--lp-bg) 0%, transparent 12%),
+    linear-gradient(to bottom, var(--lp-bg) 0%, transparent 10%);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Eyebrow badge */
