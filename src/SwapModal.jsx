@@ -380,7 +380,7 @@ export default function SwapModal({ onClose }) {
             {pmtOut && !quoting && parseFloat(amount) > 0 && (
               <div className="swap-info-row">
                 <span>Rate</span>
-                <span>1 {symbol} ≈ {fmtPmt(pmtOut * BigInt(10000) / parseUnits(amount, inputToken === 'BNB' ? 18 : 18) * BigInt(100))} PMT</span>
+                <span>1 {symbol} ≈ {fmtPmt(pmtOut * parseUnits('1', 18) / parseUnits(amount, 18))} PMT</span>
               </div>
             )}
 
