@@ -1,25 +1,24 @@
 import { useState, useEffect } from 'react'
 import WalletModal from './WalletModal.jsx'
+import { detectLanguage, T } from './i18n.js'
 
 const BASE = import.meta.env.BASE_URL
 
-const BENEFITS = [
-  { icon: '◈', title: 'Network Access', desc: 'Use the international network through the Millionaires Club — personalities from business, politics, film, sport, art, media, fashion, real estate and blockchain.' },
-  { icon: '⬡', title: 'Millionaires Node', desc: 'As a Millionaires Club member you operate a node on the PMT Chain — validating transactions, securing the network and earning node rewards.' },
-  { icon: '◇', title: 'Pre-Sale Advantage', desc: 'Acquire Real World Assets (RWAs) before they are available to the public — exclusive early access.' },
-  { icon: '★', title: 'VIP Events', desc: 'VIP invitation to all PMT Art Show events and international business & networking events worldwide.' },
-  { icon: '◉', title: 'Your Vote Counts', desc: 'Become part of the creative process with the founders — your voice shapes the future of PMT.' },
-  { icon: '⬟', title: 'Creator Connection', desc: 'Connect directly with the artist behind the Masterpieces — exclusive access to the creative mind.' },
-]
+const BENEFIT_ICONS = ['◈','⬡','◇','★','◉','⬟']
 
 const NETWORK_PHOTOS = Array.from({length:8},(_,i)=>`${BASE}network_${i+1}.jpg`)
 
 export default function LandingPage({ onNavigate }) {
+  const [lang, setLang] = useState(T.en)
   const [menuOpen, setMenuOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
   const [showWallet, setShowWallet] = useState(() => !!sessionStorage.getItem('pmt_wc_pending'))
   const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    detectLanguage().then(code => setLang(T[code] || T.en))
+  }, [])
 
   useEffect(() => {
     fetch(`${BASE}wallets.json`)
@@ -46,7 +45,7 @@ export default function LandingPage({ onNavigate }) {
   }
 
   return (
-    <div className="lp">
+    <div className="lp" dir={lang.dir}>
 
       {showWallet&&<WalletModal onSuccess={()=>{setShowWallet(false);onNavigate('leaderboard')}} onClose={()=>setShowWallet(false)}/>}
 
@@ -84,13 +83,13 @@ export default function LandingPage({ onNavigate }) {
         <div className="lp-hero-content">
           <p className="lp-hero-eyebrow">Public Masterpiece</p>
           <h1 className="lp-hero-h1"><span className="gold">PMT</span> Millionaires Club</h1>
-          <p className="lp-hero-tag">The elite holders of the PMT ecosystem.</p>
+          <p className="lp-hero-tag">{lang.hero.subtitle}</p>
           <div className="lp-hero-btns">
-            <button className="lp-btn-primary" onClick={()=>setShowWallet(true)}>View Leaderboard</button>
-            <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>Discover the Club</button>
+            <button className="lp-btn-primary" onClick={()=>setShowWallet(true)}>{lang.hero.viewLeaderboard}</button>
+            <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>{lang.hero.discoverClub}</button>
           </div>
           <div className="lp-hero-stats">
-            {[['100','Max Members'],['1M+','PMT Required'],['PMT','Chain']].map(([n,l])=>(
+            {[['100',{lang.whatIsClub.maxMembers}],['1M+',{lang.whatIsClub.pmtRequired}],['PMT','Chain']].map(([n,l])=>(
               <div key={l} className="lp-hero-stat">
                 <div className="lp-hero-stat-n">{n}</div>
                 <div className="lp-hero-stat-l">{l}</div>
@@ -105,9 +104,9 @@ export default function LandingPage({ onNavigate }) {
         <div className="lp-section-inner">
           <span className="lp-badge">The Club</span>
           <h2 className="lp-section-title">What is the <span className="gold">PMT Millionaires Club?</span></h2>
-          <p className="lp-section-desc">An exclusively limited club of visionary personalities who position themselves innovatively and future-oriented — to secure the benefits of a strong international network and access to unique privileges.</p>
+          <p className="lp-section-desc">{lang.whatIsClub.desc}</p>
           <div className="lp-three-cols">
-            {[['100','Max Members',null],['1,000,000','PMT Required','Minimum holding to enter'],['PMT Chain','Blockchain','Fully on-chain & verifiable']].map(([n,l,d])=>(
+            {[['100',{lang.whatIsClub.maxMembers},null],['1,000,000',{lang.whatIsClub.pmtRequired},{lang.whatIsClub.minHolding}],['PMT Chain',{lang.whatIsClub.blockchain},{lang.whatIsClub.fullyOnChain}]].map(([n,l,d])=>(
               <div key={l} className="lp-info-card">
                 <div className="lp-info-n">{n}</div>
                 <div className="lp-info-l">{l}</div>
@@ -127,7 +126,7 @@ export default function LandingPage({ onNavigate }) {
       {/* ── BENEFITS ── */}
       <section className="lp-section lp-section--alt" id="benefits">
         <div className="lp-section-inner">
-          <span className="lp-badge">Member Benefits</span>
+          <span className="lp-badge">{lang.benefits.title}</span>
           <h2 className="lp-section-title">What you <span className="gold">get</span></h2>
           <p className="lp-section-desc">Every member enjoys exclusive privileges across the entire PMT ecosystem and beyond.</p>
           <div className="lp-benefits-grid">
@@ -145,7 +144,7 @@ export default function LandingPage({ onNavigate }) {
       {/* ── PHYSICAL REWARDS ── */}
       <section className="lp-section" id="rewards">
         <div className="lp-section-inner">
-          <span className="lp-badge">Physical Rewards</span>
+          <span className="lp-badge">{lang.rewards.title}</span>
           <h2 className="lp-section-title">Your <span className="gold">Membership Package</span></h2>
           <p className="lp-section-desc">Each of the 100 members receives two exclusive physical collectibles — numbered and strictly limited.</p>
           <div className="lp-rewards-row">
@@ -179,14 +178,14 @@ export default function LandingPage({ onNavigate }) {
       {/* ── HOW TO JOIN ── */}
       <section className="lp-section lp-section--alt" id="join">
         <div className="lp-section-inner">
-          <span className="lp-badge">How to Join</span>
+          <span className="lp-badge">{lang.howToJoin.title}</span>
           <h2 className="lp-section-title">Secure your <span className="gold">spot</span></h2>
           <p className="lp-section-desc">Only 3 steps to become a PMT Millionaire. Only 100 spots available — worldwide.</p>
           <div className="lp-steps">
             {[
               ['01','Buy PMT','Purchase PMT tokens on PancakeSwap. The token is live on PMT Chain.'],
               ['02','Hold 1M+','Accumulate at least 1,000,000 PMT tokens in your wallet and hold them.'],
-              ['03','Request a Spot','Send an email to info@publicmasterpiece.com with your wallet address, your Telegram @username, and a short introduction about yourself.'],
+              lang.howToJoin.steps[2],
             ].map(([n,t,d],i)=>(
               <div key={n} className="lp-step">
                 <div className="lp-step-num">{n}</div>
@@ -211,7 +210,7 @@ export default function LandingPage({ onNavigate }) {
       {/* ── NETWORK ── */}
       <section className="lp-section" id="network">
         <div className="lp-section-inner">
-          <span className="lp-badge">Our Network</span>
+          <span className="lp-badge">{lang.network.title}</span>
           <h2 className="lp-section-title">Global <span className="gold">connections</span></h2>
           <p className="lp-section-desc">The global Public Masterpiece network includes outstanding personalities from business, politics, film & TV, sport, art, media, fashion, real estate and blockchain.</p>
           <div className="lp-network-grid">
@@ -227,8 +226,8 @@ export default function LandingPage({ onNavigate }) {
       {/* ── EVENTS PLACEHOLDER ── */}
       <section className="lp-section lp-section--alt" id="events">
         <div className="lp-section-inner" style={{textAlign:'center'}}>
-          <span className="lp-badge">Events</span>
-          <h2 className="lp-section-title">PMT <span className="gold">Events</span></h2>
+          <span className="lp-badge">{lang.events.title}</span>
+          <h2 className="lp-section-title">PMT <span className="gold">{lang.events.title}</span></h2>
           <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>PMT Millionaires Club members are invited as VIP guests to every event.</p>
           <div className="lp-events-placeholder">
             <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
@@ -302,11 +301,11 @@ export default function LandingPage({ onNavigate }) {
                 {href:'https://linkedin.com/', label:'LinkedIn', svg:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>},
               ].map(({href,label,svg})=>(
                 <a key={label} href={href} className="lp-social" aria-label={label} target="_blank" rel="noreferrer">{svg}</a>
-              ))}
+              })}
               </div>
             </div>
             <div>
-              <p className="lp-footer-col-title">Quick Links</p>
+              <p className="lp-footer-col-title">{lang.footer.quickLinks}</p>
               <div className="lp-footer-links">
                 {[['hero','Home'],['club','The Club'],['benefits','Benefits'],['rewards','Rewards'],['join','How to Join'],['network','Network']].map(([id,label])=>(
                   <button key={id} onClick={()=>scrollTo(id)}>{label}</button>
@@ -314,7 +313,7 @@ export default function LandingPage({ onNavigate }) {
               </div>
             </div>
             <div>
-              <p className="lp-footer-col-title">Contact</p>
+              <p className="lp-footer-col-title">{lang.footer.contact}</p>
               <div className="lp-footer-links">
                 <a href="mailto:info@publicmasterpiece.com">info@publicmasterpiece.com</a>
                 <a href="https://www.publicmasterpiece.com" target="_blank" rel="noreferrer">www.publicmasterpiece.com</a>
