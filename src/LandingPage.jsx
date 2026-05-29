@@ -156,7 +156,7 @@ export default function LandingPage({ onNavigate }) {
                 <div className="lp-reward-label">{lang.misc.certLabel}</div>
                 <div className="lp-reward-name">{lang.misc.certName}</div>
                 <div className="lp-reward-spec">{lang.misc.certSpec}</div>
-                <span className="lp-reward-badge">Limited to 100</span>
+                <span className="lp-reward-badge">{lang.rewards.limited}</span>
               </div>
             </div>
             <div className="lp-reward-card">
@@ -167,7 +167,7 @@ export default function LandingPage({ onNavigate }) {
                 <div className="lp-reward-label">{lang.misc.coinLabel}</div>
                 <div className="lp-reward-name">{lang.misc.coinName}</div>
                 <div className="lp-reward-spec">{lang.misc.coinSpec}</div>
-                <span className="lp-reward-badge">Limited to 100</span>
+                <span className="lp-reward-badge">{lang.rewards.limited}</span>
               </div>
   
           </div>
