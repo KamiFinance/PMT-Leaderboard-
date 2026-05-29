@@ -859,15 +859,13 @@ body{
   border-radius: 50%;
   pointer-events: none;
 }
-/* Fade David out at the edges */
+/* Subtle bottom fade only so David blends into the page */
 .lp-hero-david::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to right, var(--lp-bg) 0%, transparent 18%),
-    linear-gradient(to top, var(--lp-bg) 0%, transparent 12%),
-    linear-gradient(to bottom, var(--lp-bg) 0%, transparent 10%);
+  bottom: 0; left: 0; right: 0;
+  height: 18%;
+  background: linear-gradient(to top, var(--lp-bg) 0%, transparent 100%);
   pointer-events: none;
   z-index: 2;
 }
