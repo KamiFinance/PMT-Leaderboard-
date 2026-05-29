@@ -84,7 +84,16 @@ const checkAccess = async (address) => {
 
 const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-export default function WalletModal({ onSuccess, onClose }) {
+export default function WalletModal({ onSuccess, onClose, t: tProp }) {
+  const t = tProp || {
+    title:t.title, subtitle:t.subtitle,
+    note:t.note,
+    connecting:t.connecting, loading:t.loading, approve:t.approve,
+    success:t.success, welcome:t.welcome, redirecting:t.redirecting,
+    denied:t.denied, membersOnly:t.membersOnly, notMember:t.notMember,
+    holdRequirement:t.holdRequirement, toQualify:t.toQualify, tryAnother:t.tryAnother,
+    error:t.error, notInstalled:t.notInstalled, openingDownload:t.openingDownload, tryAgain:t.tryAgain,
+  }
   const [status, setStatus]   = useState('idle')
   const [addr, setAddr]       = useState('')
   const [errMsg, setErrMsg]   = useState('')
@@ -289,11 +298,11 @@ export default function WalletModal({ onSuccess, onClose }) {
 
         <div className="wm-header">
           <div className="wm-title">
-            {status==='idle'&&'Connect Wallet'}
-            {(status==='connecting'||status==='wcLoading')&&'Connecting…'}
-            {status==='success'&&'✓ Access Granted'}
-            {status==='denied'&&'🚫 Members Only'}
-            {(status==='error'||status==='noWallet')&&'Error'}
+            {status==='idle'&&t.title}
+            {(status==='connecting'||status==='wcLoading')&&t.connecting}
+            {status==='success'&&t.success}
+            {status==='denied'&&t.denied}
+            {(status==='error'||status==='noWallet')&&t.error}
           </div>
           <button className="wm-close" onClick={onClose}>✕</button>
         </div>
@@ -320,7 +329,7 @@ export default function WalletModal({ onSuccess, onClose }) {
         {(status==='connecting'||status==='wcLoading')&&(
           <div className="wm-body wm-centered">
             <div className="wm-spinner"/>
-            <p className="wm-subtitle">{status==='wcLoading'?'Loading…':'Approve in your wallet…'}</p>
+            <p className="wm-subtitle">{status==='wcLoading'?t.loading:t.approve}</p>
             {status==='connecting'&&<p className="wm-note">After approving, return to this page</p>}
           </div>
         )}
@@ -349,9 +358,9 @@ export default function WalletModal({ onSuccess, onClose }) {
         {(status==='error'||status==='noWallet')&&(
           <div className="wm-body wm-centered">
             <div className="wm-denied-icon">⚠</div>
-            <p className="wm-subtitle">{status==='noWallet'?'Wallet not installed':'Error'}</p>
+            <p className="wm-subtitle">{status==='noWallet'?t.notInstalled:t.error}</p>
             <p className="wm-note" style={{textAlign:'center',lineHeight:1.6,maxWidth:280}}>
-              {status==='noWallet'?'Opening download page…':errMsg}
+              {status==='noWallet'?t.openingDownload:errMsg}
             </p>
             <button className="wm-btn-retry" onClick={()=>setStatus('idle')}>Try again</button>
           </div>
