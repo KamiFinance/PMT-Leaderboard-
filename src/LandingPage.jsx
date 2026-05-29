@@ -47,7 +47,7 @@ export default function LandingPage({ onNavigate }) {
   return (
     <div className="lp" dir={lang.dir}>
 
-      {showWallet&&<WalletModal onSuccess={()=>{setShowWallet(false);onNavigate('leaderboard')}} onClose={()=>setShowWallet(false)}/>}
+      {showWallet&&<WalletModal t={lang.wallet} onSuccess={()=>{setShowWallet(false);onNavigate('leaderboard')}} onClose={()=>setShowWallet(false)}/>}
 
       {/* ── HEADER ── */}
       <header className={`lp-header${scrolled?' lp-header--scrolled':''}`}>
@@ -58,8 +58,8 @@ export default function LandingPage({ onNavigate }) {
           </div>
 
           <nav className={`lp-nav${menuOpen?' lp-nav--open':''}`}>
-            {[['hero','Home'],['club','Club'],['benefits','Benefits'],['rewards','Rewards'],['join','How to Join'],['network','Network']].map(([id,label])=>(
-              <button key={id} className="lp-nav-link" onClick={()=>scrollTo(id)}>{label}</button>
+            {[['hero','home'],['club','club'],['benefits','benefits'],['rewards','rewards'],['join','howToJoin'],['network','network']].map(([id,key])=>(
+              <button key={id} className="lp-nav-link" onClick={()=>scrollTo(id)}>{lang.nav[key]}</button>
             ))}
           </nav>
 
