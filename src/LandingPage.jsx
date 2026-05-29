@@ -13,7 +13,7 @@ export default function LandingPage({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [videoModal, setVideoModal] = useState(null) // YouTube video ID
   const [requestModal, setRequestModal] = useState(false)
-  const [formData, setFormData] = useState({name:'',wallet:'',telegram:'',about:''})
+  const [formData, setFormData] = useState({name:'',wallet:'',telegram:'',email:'',about:''})
   const [formSent, setFormSent] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
@@ -311,7 +311,7 @@ export default function LandingPage({ onNavigate }) {
           <div style={{textAlign:'center',marginTop:32}}>
             <button
               className="lp-btn-primary lp-btn-lg"
-              onClick={() => { setFormData({name:'',wallet:'',telegram:'',about:''}); setFormSent(false); setRequestModal(true) }}
+              onClick={() => { setFormData({name:'',wallet:'',telegram:'',email:'',about:''}); setFormSent(false); setRequestModal(true) }}
               style={{cursor:'pointer',border:'none'}}
             >
               {lang.howToJoin.requestBtn}
@@ -488,6 +488,15 @@ export default function LandingPage({ onNavigate }) {
                     />
                   </div>
                   <div className="request-form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={e => setFormData(p => ({...p, email: e.target.value}))}
+                    />
+                  </div>
+                  <div className="request-form-group">
                     <label>About You</label>
                     <textarea
                       placeholder="Tell us a bit about yourself — background, why you want to join..."
@@ -510,7 +519,7 @@ export default function LandingPage({ onNavigate }) {
                             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBveXJia29rZHdqam5sY3FnZHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTg0MjIsImV4cCI6MjA5NTYzNDQyMn0.ZOIIyeaHK_U5bMGzVCO5xlc7LQNi8oP86ume2VJrVBA',
                             'Prefer': 'return=minimal'
                           },
-                          body: JSON.stringify({ name, wallet, telegram, about })
+                          body: JSON.stringify({ name, wallet, telegram, email: formData.email, about })
                         })
                         if (res.ok || res.status === 201) {
                           setFormSent(true)
