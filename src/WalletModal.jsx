@@ -183,8 +183,25 @@ export default function WalletModal({ onSuccess, onClose }) {
       return
     }
 
-    // Browser wallets — use pre-initialized MetaMask SDK provider
-    const provider = walletId==='metamask' ? mmProviderRef.current : window.ethereum
+    // Detect mobile
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+    // Mobile deep links — open site inside the wallet's built-in browser
+    // Once inside, window.ethereum is available and connection works automatically
+    const DEEPLINKS = {
+      metamask: `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`,
+      trust:    `https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(window.location.href)}`,
+      coinbase: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
+    }
+
+    // If on mobile without window.ethereum — redirect into wallet browser
+    if(isMobile && !window.ethereum){
+      window.location.href = DEEPLINKS[walletId] || DEEPLINKS.metamask
+      return
+    }
+
+    // Desktop or already inside wallet browser — use provider
+    const provider = walletId==='metamask' ? (mmProviderRef.current || window.ethereum) : window.ethereum
     if(!provider){
       window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask,'_blank')
       setStatus('noWallet')
