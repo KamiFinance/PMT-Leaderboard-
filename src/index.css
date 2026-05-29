@@ -1821,3 +1821,292 @@ body{
   .lp-footer { padding: 52px 20px 32px; }
 }
 
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2026 SCROLL ANIMATION SYSTEM
+   Glass-smooth · Cinematic easing · Premium reveals
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Easing curves ────────────────────────────────────────────────────── */
+:root {
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --anim-dur:       0.75s;
+}
+
+/* ── Respect user preference ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  [data-anim] { transition: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BASE HIDDEN STATES — elements start invisible and transform
+══════════════════════════════════════════════════════════════════════ */
+
+/* Fade + slide up (default) */
+[data-anim="fade-up"] {
+  opacity: 0;
+  transform: translateY(52px);
+  transition:
+    opacity var(--anim-dur) var(--ease-out-quart),
+    transform var(--anim-dur) var(--ease-out-expo);
+}
+
+/* Section title — larger travel, slight blur */
+[data-anim="title"] {
+  opacity: 0;
+  transform: translateY(64px);
+  filter: blur(4px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo),
+    filter 0.9s var(--ease-out-expo);
+}
+
+/* Cards — scale + fade + rise */
+[data-anim="card-up"] {
+  opacity: 0;
+  transform: translateY(44px) scale(0.93);
+  transition:
+    opacity 0.7s var(--ease-out-quart),
+    transform 0.7s var(--ease-out-expo);
+}
+
+/* Reward cards — slide from sides */
+[data-anim="slide-left"] {
+  opacity: 0;
+  transform: translateX(-72px) translateY(24px);
+  transition:
+    opacity 0.85s var(--ease-out-expo),
+    transform 0.85s var(--ease-out-expo);
+}
+[data-anim="slide-right"] {
+  opacity: 0;
+  transform: translateX(72px) translateY(24px);
+  transition:
+    opacity 0.85s var(--ease-out-expo),
+    transform 0.85s var(--ease-out-expo);
+}
+
+/* Step circles — spring bounce up */
+[data-anim="step-up"] {
+  opacity: 0;
+  transform: translateY(48px) scale(0.85);
+  transition:
+    opacity 0.6s var(--ease-out-quart),
+    transform 0.7s var(--ease-spring);
+}
+
+/* Network photos — scale from slightly smaller + blur */
+[data-anim="photo-in"] {
+  opacity: 0;
+  transform: scale(0.88);
+  filter: blur(6px) saturate(0);
+  transition:
+    opacity 0.7s var(--ease-out-quart),
+    transform 0.7s var(--ease-out-expo),
+    filter 0.9s var(--ease-out-quart);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VISIBLE STATE — add .anim-in via JS to trigger
+══════════════════════════════════════════════════════════════════════ */
+[data-anim].anim-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ── Stagger delays ───────────────────────────────────────────────────── */
+[data-delay="0"] { transition-delay: 0ms; }
+[data-delay="1"] { transition-delay: 110ms; }
+[data-delay="2"] { transition-delay: 210ms; }
+[data-delay="3"] { transition-delay: 310ms; }
+[data-delay="4"] { transition-delay: 410ms; }
+[data-delay="5"] { transition-delay: 510ms; }
+[data-delay="6"] { transition-delay: 610ms; }
+
+/* ── Hero load animations (CSS-only, no JS needed) ───────────────────── */
+/* These run on page load, not on scroll */
+.lp-hero-content [data-anim] {
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-out-expo);
+}
+/* Override — hero items animate in immediately via CSS animation */
+.lp-hero-content [data-anim="fade-up"],
+.lp-hero-content [data-anim="title"] {
+  animation: heroFadeUp 0.9s var(--ease-out-expo) both;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.lp-hero-content [data-delay="0"] { animation-delay: 0.1s; }
+.lp-hero-content [data-delay="1"] { animation-delay: 0.22s; }
+.lp-hero-content [data-delay="2"] { animation-delay: 0.36s; }
+.lp-hero-content [data-delay="3"] { animation-delay: 0.50s; }
+.lp-hero-content [data-delay="4"] { animation-delay: 0.64s; }
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: none;
+  }
+}
+
+/* ── Section title — word-by-word clip reveal on scroll ──────────────── */
+/* Applied via JS: add .title-revealed class when in view */
+.lp-section-title[data-anim="title"].anim-in {
+  /* The IntersectionObserver adds .anim-in which overrides the hidden state */
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ── Staggered info cards via CSS nth-child ──────────────────────────── */
+.lp-three-cols [data-anim="card-up"]:nth-child(1) { transition-delay: 60ms; }
+.lp-three-cols [data-anim="card-up"]:nth-child(2) { transition-delay: 160ms; }
+.lp-three-cols [data-anim="card-up"]:nth-child(3) { transition-delay: 260ms; }
+
+/* ── Benefit grid stagger ────────────────────────────────────────────── */
+.lp-benefits-grid [data-anim="card-up"]:nth-child(1) { transition-delay: 50ms; }
+.lp-benefits-grid [data-anim="card-up"]:nth-child(2) { transition-delay: 130ms; }
+.lp-benefits-grid [data-anim="card-up"]:nth-child(3) { transition-delay: 210ms; }
+.lp-benefits-grid [data-anim="card-up"]:nth-child(4) { transition-delay: 290ms; }
+.lp-benefits-grid [data-anim="card-up"]:nth-child(5) { transition-delay: 370ms; }
+.lp-benefits-grid [data-anim="card-up"]:nth-child(6) { transition-delay: 450ms; }
+
+/* ── Network photo stagger ───────────────────────────────────────────── */
+.lp-network-grid [data-anim="photo-in"]:nth-child(1) { transition-delay: 0ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(2) { transition-delay: 70ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(3) { transition-delay: 140ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(4) { transition-delay: 210ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(5) { transition-delay: 280ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(6) { transition-delay: 350ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(7) { transition-delay: 420ms; }
+.lp-network-grid [data-anim="photo-in"]:nth-child(8) { transition-delay: 490ms; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CONTINUOUS SCROLL EFFECTS (not triggered, always running)
+══════════════════════════════════════════════════════════════════════ */
+
+/* David image — parallax handled by JS, but this smooths it */
+.lp-hero-david {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ── Section ambient glow entrance ──────────────────────────────────── */
+/* Sections get a subtle glow border as they enter view */
+.lp-section.section-visible::before {
+  animation: glowIn 1.5s var(--ease-out-expo) forwards;
+}
+@keyframes glowIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BUTTON HOVER — Magnetic + glow pulse
+══════════════════════════════════════════════════════════════════════ */
+.lp-btn-primary {
+  will-change: transform, box-shadow;
+}
+.lp-btn-primary:hover {
+  animation: btnGlow 1.8s var(--ease-out-quart) infinite;
+}
+@keyframes btnGlow {
+  0%,100% { box-shadow: 0 8px 32px rgba(255,180,0,0.35), 0 1px 0 rgba(255,255,255,0.4) inset; }
+  50%      { box-shadow: 0 8px 44px rgba(255,180,0,0.55), 0 1px 0 rgba(255,255,255,0.4) inset; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GOLD LINE DRAWING EFFECT on section entry
+══════════════════════════════════════════════════════════════════════ */
+.lp-hero-stat.anim-in::after {
+  animation: lineSlide 0.8s var(--ease-out-expo) 0.3s both;
+}
+@keyframes lineSlide {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BADGE POP-IN animation
+══════════════════════════════════════════════════════════════════════ */
+.lp-badge[data-anim="fade-up"].anim-in {
+  animation: badgePop 0.5s var(--ease-spring) both;
+}
+@keyframes badgePop {
+  0%  { opacity: 0; transform: scale(0.7) translateY(20px); }
+  60% { transform: scale(1.06) translateY(-3px); }
+  100%{ opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   STEP NUMBERS — appear with a glow burst
+══════════════════════════════════════════════════════════════════════ */
+.lp-step[data-anim="step-up"].anim-in .lp-step-num {
+  animation: stepGlow 0.6s var(--ease-out-expo) 0.3s both;
+}
+@keyframes stepGlow {
+  0%  { box-shadow: 0 0 0 0 rgba(255,215,0,0); }
+  40% { box-shadow: 0 0 0 20px rgba(255,215,0,0.12), 0 0 40px rgba(255,215,0,0.15); }
+  100%{ box-shadow: 0 0 0 8px rgba(255,215,0,0.04), 0 0 24px rgba(255,215,0,0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PHOTO REVEAL — saturation sweep (grayscale → color)
+══════════════════════════════════════════════════════════════════════ */
+.lp-network-photo[data-anim="photo-in"].anim-in img {
+  filter: grayscale(55%) brightness(0.85);
+  /* Hover still de-saturates via hover rule from main CSS */
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   REWARD CARDS — golden border trace on entry
+══════════════════════════════════════════════════════════════════════ */
+@keyframes borderTrace {
+  0%   { box-shadow: 0 0 0 1px rgba(255,215,0,0.05),  0 24px 64px rgba(0,0,0,0.4); }
+  50%  { box-shadow: 0 0 0 1px rgba(255,215,0,0.35), 0 28px 72px rgba(0,0,0,0.5), 0 0 40px rgba(255,200,0,0.08); }
+  100% { box-shadow: 0 0 0 1px rgba(255,215,0,0.14), 0 24px 64px rgba(0,0,0,0.4); }
+}
+.lp-reward-card[data-anim].anim-in {
+  animation: borderTrace 1.2s var(--ease-out-expo) 0.4s both;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EVENT CARDS — shimmer sweep on entry
+══════════════════════════════════════════════════════════════════════ */
+.lp-event-card[data-anim="card-up"].anim-in {
+  position: relative;
+}
+.lp-event-card[data-anim="card-up"].anim-in::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+    transparent 0%,
+    rgba(255,255,255,0.04) 40%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  border-radius: inherit;
+  animation: shimmerSweep 0.9s ease-out 0.3s both;
+  pointer-events: none;
+  z-index: 2;
+}
+@keyframes shimmerSweep {
+  from { background-position: 200% 0; opacity: 1; }
+  to   { background-position: -200% 0; opacity: 0; }
+}
+
