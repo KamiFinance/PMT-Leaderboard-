@@ -56,6 +56,10 @@ export default function LandingPage({ onNavigate }) {
     { code:'de', flag:'🇩🇪', label:'DE' },
     { code:'ar', flag:'🇦🇪', label:'AR' },
     { code:'tr', flag:'🇹🇷', label:'TR' },
+    { code:'fr', flag:'🇫🇷', label:'FR' },
+    { code:'es', flag:'🇪🇸', label:'ES' },
+    { code:'ru', flag:'🇷🇺', label:'RU' },
+    { code:'zh', flag:'🇨🇳', label:'ZH' },
   ]
 
   const currentLang = LANGS.find(l => l.label === Object.keys(T).find(k => T[k] === lang)?.toUpperCase()) || LANGS[0]
