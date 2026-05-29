@@ -12,6 +12,9 @@ export default function LandingPage({ onNavigate }) {
   const [lang, setLang] = useState(T.en)
   const [menuOpen, setMenuOpen] = useState(false)
   const [videoModal, setVideoModal] = useState(null) // YouTube video ID
+  const [requestModal, setRequestModal] = useState(false)
+  const [formData, setFormData] = useState({name:'',wallet:'',telegram:'',about:''})
+  const [formSent, setFormSent] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
@@ -306,13 +309,13 @@ export default function LandingPage({ onNavigate }) {
             ))}
           </div>
           <div style={{textAlign:'center',marginTop:32}}>
-            <a
-              href="mailto:info@publicmasterpiece.com?subject=PMT%20Millionaires%20Club%20%E2%80%94%20Spot%20Request&body=Hi%20PMT%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20spot%20in%20the%20Millionaires%20Club.%0A%0AWallet%20Address%3A%20%0ATelegram%20%40%3A%20%0A%0AAbout%20me%3A%20"
+            <button
               className="lp-btn-primary lp-btn-lg"
-              style={{display:'inline-block',textDecoration:'none'}}
+              onClick={() => { setFormData({name:'',wallet:'',telegram:'',about:''}); setFormSent(false); setRequestModal(true) }}
+              style={{cursor:'pointer',border:'none'}}
             >
               {lang.howToJoin.requestBtn}
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -439,6 +442,80 @@ export default function LandingPage({ onNavigate }) {
         </div>
       </footer>
 
+      {/* ── Request a Spot Modal ──────────────────────────────────────── */}
+      {requestModal && (
+        <div className="video-modal-overlay" onClick={() => setRequestModal(false)}>
+          <div className="request-modal-box" onClick={e => e.stopPropagation()}>
+            <button className="video-modal-close" onClick={() => setRequestModal(false)}>✕</button>
+            {formSent ? (
+              <div className="request-modal-success">
+                <div className="request-modal-success-icon">✓</div>
+                <h3>Request Sent!</h3>
+                <p>We'll review your application and get back to you via Telegram or email.</p>
+                <button className="lp-btn-primary" onClick={() => setRequestModal(false)}>Close</button>
+              </div>
+            ) : (
+              <>
+                <div className="request-modal-header">
+                  <h2>Request a Spot</h2>
+                  <p>Fill in your details and we'll get back to you.</p>
+                </div>
+                <div className="request-modal-form">
+                  <div className="request-form-group">
+                    <label>Your Name</label>
+                    <input
+                      type="text"
+                      placeholder="John Smith"
+                      value={formData.name}
+                      onChange={e => setFormData(p => ({...p, name: e.target.value}))}
+                    />
+                  </div>
+                  <div className="request-form-group">
+                    <label>Wallet Address</label>
+                    <input
+                      type="text"
+                      placeholder="0x..."
+                      value={formData.wallet}
+                      onChange={e => setFormData(p => ({...p, wallet: e.target.value}))}
+                    />
+                  </div>
+                  <div className="request-form-group">
+                    <label>Telegram Username</label>
+                    <input
+                      type="text"
+                      placeholder="@username"
+                      value={formData.telegram}
+                      onChange={e => setFormData(p => ({...p, telegram: e.target.value}))}
+                    />
+                  </div>
+                  <div className="request-form-group">
+                    <label>About You</label>
+                    <textarea
+                      placeholder="Tell us a bit about yourself — background, why you want to join..."
+                      value={formData.about}
+                      onChange={e => setFormData(p => ({...p, about: e.target.value}))}
+                      rows={4}
+                    />
+                  </div>
+                  <button
+                    className="lp-btn-primary request-form-submit"
+                    onClick={() => {
+                      const { name, wallet, telegram, about } = formData
+                      if (!wallet || !telegram) return
+                      const body = `Hi PMT Team,%0A%0AName: ${encodeURIComponent(name)}%0AWallet Address: ${encodeURIComponent(wallet)}%0ATelegram: ${encodeURIComponent(telegram)}%0A%0AAbout me:%0A${encodeURIComponent(about)}`
+                      window.location.href = `mailto:info@publicmasterpiece.com?subject=PMT%20Millionaires%20Club%20%E2%80%94%20Spot%20Request&body=${body}`
+                      setTimeout(() => setFormSent(true), 500)
+                    }}
+                  >
+                    Send Request ✉
+                  </button>
+                  <p className="request-form-note">Your email client will open with this info pre-filled.</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
       {/* ── YouTube Video Modal ─────────────────────────────────────── */}
       {videoModal && (
         <div
