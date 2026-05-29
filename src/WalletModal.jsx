@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import MetaMaskSDK from '@metamask/sdk'
 
-const PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
+const PROJECT_ID = '68140be0602e8677013cb0cf750294bc'
 const WC_FLAG    = 'pmt_wc_pending'
 
 const WALLETS = [
