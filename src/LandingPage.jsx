@@ -54,11 +54,11 @@ export default function LandingPage({ onNavigate }) {
     return () => io.disconnect()
   }, [lang])
 
-  // ── Parallax on David ──────────────────────────────────────────────────
+  // ── Parallax on David (preserves absolute centering) ─────────────────
   useEffect(() => {
     const onScroll = () => {
       const david = document.querySelector('.lp-hero-david')
-      if (david) david.style.transform = `translateY(${window.scrollY * 0.14}px)`
+      if (david) david.style.transform = `translateY(calc(-50% + ${window.scrollY * 0.08}px))`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
