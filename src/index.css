@@ -2633,3 +2633,68 @@ body{
   font-family: inherit;
 }
 .swap-max-btn:hover { background: rgba(255,215,0,0.25); }
+
+/* ── Swap token toggle ────────────────────────────────────────────── */
+.swap-token-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+.swap-toggle-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.swap-toggle-btn.active {
+  background: rgba(255,215,0,0.15);
+  color: #FFD700;
+  border: 1px solid rgba(255,215,0,0.25);
+}
+/* ── Slippage row ─────────────────────────────────────────────────── */
+.swap-slippage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+.swap-slippage-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+.swap-slippage-options {
+  display: flex;
+  gap: 6px;
+}
+.swap-slippage-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.swap-slippage-btn.active {
+  background: rgba(255,215,0,0.12);
+  border-color: rgba(255,215,0,0.3);
+  color: #FFD700;
+}
+.swap-slippage-btn:hover:not(.active) {
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.75);
+}
