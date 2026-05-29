@@ -89,7 +89,7 @@ export default function LandingPage({ onNavigate }) {
             <button className="lp-btn-ghost" onClick={()=>scrollTo('club')}>{lang.hero.discoverClub}</button>
           </div>
           <div className="lp-hero-stats">
-            {[['100',lang.whatIsClub.maxMembers],['1M+',lang.whatIsClub.pmtRequired],['PMT','Chain']].map(([n,l])=>(
+            {[['100',lang.whatIsClub.maxMembers],['1M+',lang.whatIsClub.pmtRequired],['PMT',lang.misc.chainLabel]].map(([n,l])=>(
               <div key={l} className="lp-hero-stat">
                 <div className="lp-hero-stat-n">{n}</div>
                 <div className="lp-hero-stat-l">{l}</div>
@@ -206,8 +206,8 @@ export default function LandingPage({ onNavigate }) {
       <section className="lp-section" id="network">
         <div className="lp-section-inner">
           <span className="lp-badge">{lang.network.title}</span>
-          <h2 className="lp-section-title">Global <span className="gold">connections</span></h2>
-          <p className="lp-section-desc">The global Public Masterpiece network includes outstanding personalities from business, politics, film & TV, sport, art, media, fashion, real estate and blockchain.</p>
+          <h2 className="lp-section-title">{lang.misc.networkH2}</h2>
+          <p className="lp-section-desc">{lang.misc.networkDesc}</p>
           <div className="lp-network-grid">
             {NETWORK_PHOTOS.map((src,i)=>(
               <div key={i} className="lp-network-photo">
@@ -222,8 +222,8 @@ export default function LandingPage({ onNavigate }) {
       <section className="lp-section lp-section--alt" id="events">
         <div className="lp-section-inner" style={{textAlign:'center'}}>
           <span className="lp-badge">{lang.events.title}</span>
-          <h2 className="lp-section-title">PMT <span className="gold">{lang.events.title}</span></h2>
-          <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>PMT Millionaires Club members are invited as VIP guests to every event.</p>
+          <h2 className="lp-section-title">{lang.misc.eventsH2}</h2>
+          <p className="lp-section-desc" style={{margin:'0 auto 32px'}}>{lang.misc.eventsDesc}</p>
           <div className="lp-events-placeholder">
             <a href="https://www.youtube.com/watch?v=m5r5Jp_pf4k" target="_blank" rel="noreferrer" className="lp-event-card" style={{textDecoration:'none',display:'block'}}>
               <div className="lp-event-thumb" style={{position:'relative'}}>
