@@ -18,7 +18,7 @@ export default function LandingPage({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showBuyTip, setShowBuyTip] = useState(false)
-  const [showWallet, setShowWallet] = useState(false)
+  const [showWallet, setShowWallet] = useState(() => !!sessionStorage.getItem('pmt_wc_pending'))
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
