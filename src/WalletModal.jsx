@@ -116,7 +116,7 @@ export default function WalletModal({ onSuccess, onClose }) {
         coinbase:'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
       }
       const p = await EthereumProvider.init({
-        projectId:PROJECT_ID, chains:[56], showQrModal:true,
+        projectId:PROJECT_ID, chains:[1], optionalChains:[56,137,42161], showQrModal:true,
         qrModalOptions:{
           themeMode:'dark',
           themeVariables:{'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09','--wcm-z-index':'99999'},
