@@ -2250,12 +2250,16 @@ body{
   position: relative;
   width: 100%;
   max-width: 520px;
+  max-height: 92vh;
   background: #0d0d12;
   border: 1px solid rgba(255, 215, 0, 0.18);
   border-radius: 20px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 40px 100px rgba(0,0,0,0.8);
   animation: vmBoxIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,215,0,0.2) transparent;
 }
 .request-modal-header {
   padding: 32px 32px 0;
@@ -2275,10 +2279,10 @@ body{
   margin: 0;
 }
 .request-modal-form {
-  padding: 0 32px 32px;
+  padding: 0 28px 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 .request-form-group {
   display: flex;
