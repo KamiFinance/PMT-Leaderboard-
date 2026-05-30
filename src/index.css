@@ -2729,24 +2729,24 @@ body{
   left: 0%;
   justify-content: flex-start;
 }
+
+/* Mirror LTR: text fills right portion naturally, overlaps David the same way LTR does */
 [dir="rtl"] .lp-hero-inner {
-  padding-left: 48vw;
+  padding-left: 40px;
   padding-right: 40px;
+  align-items: flex-end;
+  text-align: right;
 }
 [dir="rtl"] .lp-hero-badge {
   margin-right: 0;
-  margin-left: auto;
+  margin-left: 0;
 }
 [dir="rtl"] .lp-hero-cta {
   justify-content: flex-end;
 }
-
-/* Fix header layout in RTL — keep logo on right, nav + buttons on left */
-[dir="rtl"] .lp-header-inner {
-  flex-direction: row-reverse;
-}
-[dir="rtl"] .lp-header-right {
-  flex-direction: row-reverse;
+[dir="rtl"] .lp-hero-title,
+[dir="rtl"] .lp-hero-sub {
+  text-align: right;
 }
 
 /* Fix section inner text in RTL */
@@ -2758,19 +2758,14 @@ body{
   margin-left: auto;
 }
 
-/* Fix hero text alignment in RTL */
-[dir="rtl"] .lp-hero-title,
-[dir="rtl"] .lp-hero-sub {
-  text-align: right;
-}
-
 @media (max-width: 768px) {
   [dir="rtl"] .lp-hero-inner {
     padding-left: 8px;
     padding-right: 8px;
   }
   [dir="rtl"] .lp-hero-david {
-    right: -30%;
     left: auto;
+    right: -30%;
+    opacity: 0.5;
   }
 }
