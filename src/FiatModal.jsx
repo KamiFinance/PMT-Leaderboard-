@@ -3,30 +3,19 @@ import { useAccount, useWalletClient } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
 import { USDT, BSC_CHAIN_ID } from './wagmi.js'
 
-// ── Config ──────────────────────────────────────────────────────────────────
-const TRANSAK_API_KEY   = import.meta.env.VITE_TRANSAK_API_KEY || 'YOUR_TRANSAK_API_KEY'
-const PMT_ONRAMP        = import.meta.env.VITE_PMT_ONRAMP_CONTRACT || '' // set after deploy
-const BSC_RPC           = 'https://bsc-dataseed.binance.org/'
+const TRANSAK_API_KEY  = import.meta.env.VITE_TRANSAK_API_KEY || ''
+const PMT_ONRAMP       = import.meta.env.VITE_PMT_ONRAMP_CONTRACT || ''
+const BSC_RPC          = 'https://bsc-dataseed.binance.org/'
 
 const ONRAMP_ABI = [
   { name: 'buyPMT', type: 'function', stateMutability: 'nonpayable',
     inputs: [{ name: 'usdtAmount', type: 'uint256' }, { name: 'minPMTOut', type: 'uint256' }],
-    outputs: [{ name: 'amountOut', type: 'uint256' }]
-  }
+    outputs: [] }
 ]
-
 const ERC20_ABI = [
-  { name: 'balanceOf', type: 'function', stateMutability: 'view',
-    inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }]
-  },
-  { name: 'allowance', type: 'function', stateMutability: 'view',
-    inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }],
-    outputs: [{ type: 'uint256' }]
-  },
   { name: 'approve', type: 'function', stateMutability: 'nonpayable',
     inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }],
-    outputs: [{ type: 'bool' }]
-  }
+    outputs: [{ type: 'bool' }] }
 ]
 
 const rpc = async (to, data) => {
@@ -45,16 +34,8 @@ const getUsdtBalance = async (addr) => {
   return BigInt('0x' + r.slice(2, 66))
 }
 
-const getUsdtAllowance = async (owner, spender) => {
-  const pad = a => a.toLowerCase().replace('0x','').padStart(64,'0')
-  const d = '0xdd62ed3e' + pad(owner) + pad(spender)
-  const r = await rpc(USDT, d)
-  return BigInt('0x' + r.slice(2, 66))
-}
+const SLIPPAGE = 0.05
 
-const SLIPPAGE = 0.05 // 5% slippage for onramp (slightly higher for fee-on-transfer)
-
-// Build Transak URL
 const buildTransakUrl = (walletAddress) => {
   const params = new URLSearchParams({
     apiKey: TRANSAK_API_KEY,
@@ -64,10 +45,7 @@ const buildTransakUrl = (walletAddress) => {
     walletAddress: walletAddress,
     disableWalletAddressForm: 'true',
     themeColor: 'FFD700',
-    backgroundColor: '0D0D12',
     hideMenu: 'true',
-    exchangeScreenTitle: 'Buy USDT for PMT',
-    isFeeCalculationHidden: 'false',
   })
   return `https://global.transak.com/?${params.toString()}`
 }
@@ -76,27 +54,23 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
   const { address, isConnected } = useAccount()
   const { data: walletClient } = useWalletClient()
 
-  const [step, setStep] = useState('intro') // intro | transak | convert | approving | swapping | success
-  const [usdtBalance, setUsdtBalance] = useState(null)
+  const [step, setStep] = useState('intro')
   const [usdtReceived, setUsdtReceived] = useState(0n)
-  const [baselineUsdt, setBaselineUsdt] = useState(0n)
   const [error, setError] = useState(null)
   const [txHash, setTxHash] = useState(null)
   const pollingRef = useRef(null)
+  const transakRef = useRef(null)
 
-  // Poll USDT balance after Transak opens
   const startPolling = useCallback(async () => {
     if (!address) return
     const baseline = await getUsdtBalance(address)
-    setBaselineUsdt(baseline)
-
     pollingRef.current = setInterval(async () => {
       try {
         const bal = await getUsdtBalance(address)
-        setUsdtBalance(bal)
         if (bal > baseline + parseUnits('0.5', 18)) {
           setUsdtReceived(bal - baseline)
           clearInterval(pollingRef.current)
+          if (transakRef.current && !transakRef.current.closed) transakRef.current.close()
           setStep('convert')
         }
       } catch {}
@@ -105,34 +79,32 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   useEffect(() => () => clearInterval(pollingRef.current), [])
 
-  const handleStartTransak = async () => {
+  const handleOpenTransak = async () => {
     await startPolling()
-    setStep('transak')
+    setStep('waiting')
+    const url = buildTransakUrl(address)
+    transakRef.current = window.open(url, 'transak', 'width=450,height=700,left=200,top=100')
   }
 
   const handleConvert = async () => {
     if (!walletClient || !address || !PMT_ONRAMP) return
     setError(null)
+    const amountIn = usdtReceived
 
-    const amountIn = usdtReceived > 0n ? usdtReceived : usdtBalance
-    if (!amountIn || amountIn === 0n) return
-
-    // Check allowance
-    const allowance = await getUsdtAllowance(address, PMT_ONRAMP)
-    if (allowance < amountIn) {
-      setStep('approving')
-      try {
-        await walletClient.writeContract({
-          address: USDT, abi: ERC20_ABI, functionName: 'approve',
-          args: [PMT_ONRAMP, amountIn]
-        })
-      } catch (e) {
-        setError(e.shortMessage || 'Approval failed')
-        setStep('convert')
-        return
-      }
+    // Approve USDT
+    setStep('approving')
+    try {
+      await walletClient.writeContract({
+        address: USDT, abi: ERC20_ABI, functionName: 'approve',
+        args: [PMT_ONRAMP, amountIn]
+      })
+    } catch (e) {
+      setError(e.shortMessage || 'Approval failed')
+      setStep('convert')
+      return
     }
 
+    // Swap
     setStep('swapping')
     try {
       const minOut = amountIn * BigInt(Math.floor((1 - SLIPPAGE) * 10000)) / BigInt(10000)
@@ -152,21 +124,19 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   return (
     <div className="video-modal-overlay" onClick={onClose}>
-      <div className="swap-modal-box" onClick={e => e.stopPropagation()} style={{maxWidth: step === 'transak' ? 500 : 420}}>
+      <div className="swap-modal-box" onClick={e => e.stopPropagation()}>
         <button className="video-modal-close" onClick={onClose}>✕</button>
 
-        {/* Header */}
         <div className="swap-modal-header">
           <div className="swap-modal-title">Buy PMT with Card</div>
-          {isConnected && step !== 'transak' && (
-            <button className="swap-wallet-badge" style={{fontSize:12}}>
+          {isConnected && (
+            <button className="swap-wallet-badge">
               <span className="swap-wallet-dot" />
               {address?.slice(0,6)}...{address?.slice(-4)}
             </button>
           )}
         </div>
 
-        {/* Steps */}
         {step === 'intro' && (
           <div className="fiat-intro">
             <div className="fiat-steps-row">
@@ -179,19 +149,19 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
               <div className="fiat-step">
                 <div className="fiat-step-num">2</div>
                 <div className="fiat-step-label">USDT arrives</div>
-                <div className="fiat-step-desc">Sent to your wallet on BSC</div>
+                <div className="fiat-step-desc">Sent to your BSC wallet</div>
               </div>
               <div className="fiat-step-arrow">→</div>
               <div className="fiat-step">
                 <div className="fiat-step-num">3</div>
                 <div className="fiat-step-label">Get PMT</div>
-                <div className="fiat-step-desc">Auto-converted via smart contract</div>
+                <div className="fiat-step-desc">Auto-swapped via smart contract</div>
               </div>
             </div>
 
             {!isConnected ? (
               <div className="fiat-no-wallet">
-                <p>Connect your wallet first, then come back here.</p>
+                <p>Connect your wallet first to continue.</p>
                 <button className="lp-btn-primary" onClick={onSwitchToCrypto}
                   style={{border:'none',cursor:'pointer',padding:'12px 24px'}}>
                   Connect Wallet →
@@ -199,28 +169,27 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
               </div>
             ) : (
               <>
-                <button className="lp-btn-primary swap-btn" onClick={handleStartTransak}
+                <button className="lp-btn-primary swap-btn" onClick={handleOpenTransak}
                   style={{width:'100%',border:'none',cursor:'pointer'}}>
                   💳 Continue to Payment
                 </button>
-                <p className="swap-disclaimer">KYC + payment handled by Transak · Powered by Public Masterpiece</p>
+                <p className="swap-disclaimer">A Transak window will open for payment + KYC · Powered by Public Masterpiece</p>
               </>
             )}
           </div>
         )}
 
-        {step === 'transak' && (
-          <div style={{padding:'0 0 20px'}}>
-            <iframe
-              src={buildTransakUrl(address)}
-              allow="camera;microphone;payment"
-              style={{width:'100%',height:600,border:'none',borderRadius:'0 0 20px 20px'}}
-              title="Transak Onramp"
-            />
-            <div style={{padding:'12px 24px 0',textAlign:'center'}}>
-              <p style={{fontSize:13,color:'rgba(255,255,255,0.4)',margin:0}}>
-                After payment completes, your USDT will be detected automatically.
-              </p>
+        {step === 'waiting' && (
+          <div className="swap-success" style={{padding:'32px 24px'}}>
+            <div className="swap-success-icon" style={{background:'rgba(255,215,0,0.15)',color:'#FFD700',fontSize:28}}>💳</div>
+            <h3>Complete Payment</h3>
+            <p>Finish the payment in the Transak window. This page will detect your USDT automatically once it arrives.</p>
+            <button className="lp-btn-primary" onClick={handleOpenTransak}
+              style={{border:'none',cursor:'pointer',padding:'10px 24px',marginTop:4}}>
+              Reopen Window
+            </button>
+            <div style={{marginTop:12,fontSize:12,color:'rgba(255,255,255,0.3)'}}>
+              Waiting for USDT on BSC…
             </div>
           </div>
         )}
@@ -230,21 +199,17 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
             <div className="fiat-received-badge">
               <span className="fiat-check">✓</span>
               <div>
-                <div className="fiat-received-amount">${fmtUsdt(usdtReceived || usdtBalance)} USDT received</div>
-                <div className="fiat-received-sub">Now convert to PMT in one click</div>
+                <div className="fiat-received-amount">${fmtUsdt(usdtReceived)} USDT received</div>
+                <div className="fiat-received-sub">Ready to convert to PMT</div>
               </div>
             </div>
-
             {error && <div className="swap-error" style={{margin:'0 24px 8px'}}>{error}</div>}
-
             <div style={{padding:'0 24px 24px'}}>
               <button className="lp-btn-primary swap-btn" onClick={handleConvert}
                 style={{width:'100%',border:'none',cursor:'pointer'}}>
                 Convert USDT → PMT
               </button>
-              <p className="swap-disclaimer" style={{marginTop:8}}>
-                Smart contract swap · No custody · Powered by Public Masterpiece
-              </p>
+              <p className="swap-disclaimer" style={{marginTop:8}}>Smart contract swap · No custody · Powered by Public Masterpiece</p>
             </div>
           </div>
         )}
@@ -253,30 +218,28 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
           <div className="swap-success" style={{padding:'32px 24px'}}>
             <div className="swap-success-icon" style={{background:'rgba(255,215,0,0.15)',color:'#FFD700'}}>⏳</div>
             <h3>Approving USDT…</h3>
-            <p>Confirm the approval transaction in your wallet.</p>
+            <p>Confirm the approval in your wallet.</p>
           </div>
         )}
 
         {step === 'swapping' && (
           <div className="swap-success" style={{padding:'32px 24px'}}>
             <div className="swap-success-icon" style={{background:'rgba(255,215,0,0.15)',color:'#FFD700'}}>⚡</div>
-            <h3>Swapping to PMT…</h3>
-            <p>Your USDT is being converted to PMT on-chain.</p>
+            <h3>Converting to PMT…</h3>
+            <p>Your USDT is being swapped on-chain.</p>
           </div>
         )}
 
         {step === 'success' && (
           <div className="swap-success">
             <div className="swap-success-icon">✓</div>
-            <h3>PMT Received!</h3>
-            <p>Your PMT is now in your wallet.</p>
+            <h3>PMT in your wallet!</h3>
+            <p>The swap completed successfully.</p>
             <a href={`https://bscscan.com/tx/${txHash}`} target="_blank" rel="noreferrer" className="swap-bscscan-link">
               View on BSCScan ↗
             </a>
             <button className="lp-btn-primary" onClick={onClose}
-              style={{width:'100%',border:'none',cursor:'pointer',marginTop:8}}>
-              Done
-            </button>
+              style={{width:'100%',border:'none',cursor:'pointer',marginTop:8}}>Done</button>
           </div>
         )}
       </div>
