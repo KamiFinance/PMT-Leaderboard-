@@ -120,8 +120,7 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   return (
     <div className="video-modal-overlay" onClick={onClose}>
-      <div className="swap-modal-box" onClick={e => e.stopPropagation()}
-        style={{maxWidth: step === 'transak' ? 460 : 420, maxHeight: '92vh', overflowY: 'auto'}}>
+      <div className={`swap-modal-box${step === 'transak' ? ' fiat-transak-modal' : ''}`} onClick={e => e.stopPropagation()}>
         <button className="video-modal-close" onClick={onClose}>✕</button>
 
         <div className="swap-modal-header">
@@ -177,14 +176,13 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
         )}
 
         {step === 'transak' && (
-          <div style={{padding:0}}>
-            <iframe
-              src={buildTransakUrl(address)}
-              allow="camera;microphone;payment"
-              style={{width:'100%',height:'min(600px, calc(90vh - 80px))',border:'none',borderRadius:'0 0 20px 20px',display:'block'}}
-              title="Transak Onramp"
-            />
-          </div>
+          <iframe
+            src={buildTransakUrl(address)}
+            allow="camera;microphone;payment"
+            className="fiat-transak-iframe"
+            style={{borderRadius:'0 0 20px 20px'}}
+            title="Transak Onramp"
+          />
         )}
 
         {step === 'convert' && (
