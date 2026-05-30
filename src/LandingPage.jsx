@@ -507,7 +507,7 @@ export default function LandingPage({ onNavigate }) {
                       placeholder="Tell us a bit about yourself — background, why you want to join..."
                       value={formData.about}
                       onChange={e => setFormData(p => ({...p, about: e.target.value}))}
-                      rows={4}
+                      rows={3}
                     />
                   </div>
                   {/* Cloudflare Turnstile widget */}
