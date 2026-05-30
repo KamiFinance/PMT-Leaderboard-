@@ -45,7 +45,9 @@ const buildTransakUrl = (walletAddress) => {
     walletAddress: walletAddress,
     disableWalletAddressForm: 'true',
     themeColor: 'FFD700',
+    backgroundColor: '0D0D12',
     hideMenu: 'true',
+    exchangeScreenTitle: 'Buy USDT for PMT',
   })
   return `https://global.transak.com/?${params.toString()}`
 }
@@ -59,7 +61,6 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
   const [error, setError] = useState(null)
   const [txHash, setTxHash] = useState(null)
   const pollingRef = useRef(null)
-  const transakRef = useRef(null)
 
   const startPolling = useCallback(async () => {
     if (!address) return
@@ -70,7 +71,6 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
         if (bal > baseline + parseUnits('0.5', 18)) {
           setUsdtReceived(bal - baseline)
           clearInterval(pollingRef.current)
-          if (transakRef.current && !transakRef.current.closed) transakRef.current.close()
           setStep('convert')
         }
       } catch {}
@@ -79,11 +79,9 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   useEffect(() => () => clearInterval(pollingRef.current), [])
 
-  const handleOpenTransak = async () => {
+  const handleStartTransak = async () => {
     await startPolling()
-    setStep('waiting')
-    const url = buildTransakUrl(address)
-    transakRef.current = window.open(url, 'transak', 'width=450,height=700,left=200,top=100')
+    setStep('transak')
   }
 
   const handleConvert = async () => {
@@ -91,7 +89,6 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
     setError(null)
     const amountIn = usdtReceived
 
-    // Approve USDT
     setStep('approving')
     try {
       await walletClient.writeContract({
@@ -104,7 +101,6 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
       return
     }
 
-    // Swap
     setStep('swapping')
     try {
       const minOut = amountIn * BigInt(Math.floor((1 - SLIPPAGE) * 10000)) / BigInt(10000)
@@ -124,12 +120,13 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   return (
     <div className="video-modal-overlay" onClick={onClose}>
-      <div className="swap-modal-box" onClick={e => e.stopPropagation()}>
+      <div className="swap-modal-box" onClick={e => e.stopPropagation()}
+        style={{maxWidth: step === 'transak' ? 500 : 420}}>
         <button className="video-modal-close" onClick={onClose}>✕</button>
 
         <div className="swap-modal-header">
           <div className="swap-modal-title">Buy PMT with Card</div>
-          {isConnected && (
+          {isConnected && step !== 'transak' && (
             <button className="swap-wallet-badge">
               <span className="swap-wallet-dot" />
               {address?.slice(0,6)}...{address?.slice(-4)}
@@ -169,28 +166,24 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
               </div>
             ) : (
               <>
-                <button className="lp-btn-primary swap-btn" onClick={handleOpenTransak}
+                <button className="lp-btn-primary swap-btn" onClick={handleStartTransak}
                   style={{width:'100%',border:'none',cursor:'pointer'}}>
                   💳 Continue to Payment
                 </button>
-                <p className="swap-disclaimer">A Transak window will open for payment + KYC · Powered by Public Masterpiece</p>
+                <p className="swap-disclaimer">KYC + payment handled by Transak · Powered by Public Masterpiece</p>
               </>
             )}
           </div>
         )}
 
-        {step === 'waiting' && (
-          <div className="swap-success" style={{padding:'32px 24px'}}>
-            <div className="swap-success-icon" style={{background:'rgba(255,215,0,0.15)',color:'#FFD700',fontSize:28}}>💳</div>
-            <h3>Complete Payment</h3>
-            <p>Finish the payment in the Transak window. This page will detect your USDT automatically once it arrives.</p>
-            <button className="lp-btn-primary" onClick={handleOpenTransak}
-              style={{border:'none',cursor:'pointer',padding:'10px 24px',marginTop:4}}>
-              Reopen Window
-            </button>
-            <div style={{marginTop:12,fontSize:12,color:'rgba(255,255,255,0.3)'}}>
-              Waiting for USDT on BSC…
-            </div>
+        {step === 'transak' && (
+          <div style={{padding:'0 0 20px'}}>
+            <iframe
+              src={buildTransakUrl(address)}
+              allow="camera;microphone;payment"
+              style={{width:'100%',height:600,border:'none',borderRadius:'0 0 20px 20px'}}
+              title="Transak Onramp"
+            />
           </div>
         )}
 
