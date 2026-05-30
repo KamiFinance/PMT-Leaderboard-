@@ -2936,3 +2936,27 @@ body{
   .fiat-steps-row { flex-direction: column; align-items: center; }
   .fiat-step-arrow { transform: rotate(90deg); }
 }
+
+/* ── Transak iframe modal — sized to fit viewport ────────────────── */
+.fiat-transak-modal {
+  max-width: 460px !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+.fiat-transak-header {
+  flex-shrink: 0;
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.fiat-transak-iframe {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: none;
+  display: block;
+}
