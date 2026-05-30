@@ -312,7 +312,7 @@ export default function LandingPage({ onNavigate }) {
           <div style={{textAlign:'center',marginTop:32}}>
             <button
               className="lp-btn-primary lp-btn-lg"
-              onClick={() => { setFormData({name:'',wallet:'',telegram:'',email:'',about:''}); setFormSent(false); setRequestModal(true) }}
+              onClick={() => { setFormData({name:'',wallet:'',telegram:'',email:'',about:''}); setFormSent(false); setRequestModal(true); window.turnstileToken=null; setTimeout(()=>{ if(window.turnstile){ window.turnstile.render('#turnstile-container',{ sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA', callback: t => { window.turnstileToken = t } }) } }, 300) }}
               style={{cursor:'pointer',border:'none'}}
             >
               {lang.howToJoin.requestBtn}
@@ -510,24 +510,28 @@ export default function LandingPage({ onNavigate }) {
                   </div>
                   <button
                     className="lp-btn-primary request-form-submit"
+                    {/* Cloudflare Turnstile widget */}
+                  <div id="turnstile-container" style={{display:'flex',justifyContent:'center',margin:'4px 0'}}></div>
+
+                  <button
+                    className="lp-btn-primary request-form-submit"
                     onClick={async () => {
-                      const { name, wallet, telegram, about } = formData
+                      const { name, wallet, telegram, email, about } = formData
                       if (!wallet || !telegram) return
+                      const tsToken = window.turnstileToken
+                      if (!tsToken) { alert('Please wait for the security check to complete.'); return }
                       try {
-                        const res = await fetch('https://poyrbkokdwjjnlcqgdpi.supabase.co/rest/v1/spot_requests', {
+                        const res = await fetch('/api/verify-turnstile', {
                           method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBveXJia29rZHdqam5sY3FnZHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTg0MjIsImV4cCI6MjA5NTYzNDQyMn0.ZOIIyeaHK_U5bMGzVCO5xlc7LQNi8oP86ume2VJrVBA',
-                            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBveXJia29rZHdqam5sY3FnZHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTg0MjIsImV4cCI6MjA5NTYzNDQyMn0.ZOIIyeaHK_U5bMGzVCO5xlc7LQNi8oP86ume2VJrVBA',
-                            'Prefer': 'return=minimal'
-                          },
-                          body: JSON.stringify({ name, wallet, telegram, email: formData.email, about })
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ token: tsToken, name, wallet, telegram, email, about })
                         })
-                        if (res.ok || res.status === 201) {
+                        if (res.ok) {
                           setFormSent(true)
+                          window.turnstileToken = null
                         } else {
-                          alert('Something went wrong. Please try again.')
+                          const err = await res.json()
+                          alert(err.error === 'Bot detected' ? 'Security check failed. Please try again.' : 'Something went wrong. Please try again.')
                         }
                       } catch(e) {
                         alert('Connection error. Please try again.')
