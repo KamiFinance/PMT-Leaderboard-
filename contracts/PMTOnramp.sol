@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.19;
+// ^^^ IMPORTANT: Use 0.8.19 (NOT 0.8.20+) to avoid PUSH0 opcodes unsupported by BSC
 
 /**
- * ╔══════════════════════════════════════════════════════════════╗
- * ║                        PMTOnramp                            ║
- * ║  Swaps USDT → PMT via PancakeSwap V3 on BSC in one tx.     ║
- * ╠══════════════════════════════════════════════════════════════╣
- * ║  DEPLOY IN REMIX:                                           ║
- * ║  1. Paste this file — Remix sees ONLY "PMTOnramp"           ║
- * ║  2. Compiler: 0.8.20, EVM: Paris                           ║
- * ║  3. Deploy & Run → Injected Provider → BSC Mainnet          ║
- * ║  4. Hit Deploy — no constructor args needed                 ║
- * ╚══════════════════════════════════════════════════════════════╝
+ * PMTOnramp — swaps USDT directly to PMT via PancakeSwap V3 on BSC.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  REMIX DEPLOY CHECKLIST — follow exactly or deployment fails:
+ *
+ *  COMPILER tab:
+ *    • Compiler version : 0.8.19
+ *    • EVM version      : paris     ← CRITICAL for BSC
+ *    • Optimization     : enabled, 200 runs
+ *
+ *  DEPLOY & RUN tab:
+ *    • Environment : Injected Provider - MetaMask
+ *    • MetaMask    : BSC Mainnet (chain ID 56)
+ *    • Contract    : PMTOnramp   ← select this (only one shown)
+ *    • No constructor arguments needed
+ *    • Click Deploy
+ * ═══════════════════════════════════════════════════════════════
  */
 contract PMTOnramp {
 
@@ -23,42 +31,40 @@ contract PMTOnramp {
     event Swapped(address indexed user, uint256 usdtIn, uint256 pmtOut);
 
     /**
-     * @notice Swap USDT → PMT. Caller must approve USDT first.
-     * @param usdtAmount  Amount of USDT (18 dec) to spend.
-     * @param minPMTOut   Minimum PMT to accept (slippage guard).
+     * @notice Swap USDT -> PMT in one transaction.
+     * Caller must first call: USDT.approve(thisContractAddress, usdtAmount)
+     *
+     * @param usdtAmount  USDT amount to swap (18 decimals on BSC).
+     * @param minPMTOut   Minimum PMT to receive (slippage protection).
      */
     function buyPMT(uint256 usdtAmount, uint256 minPMTOut) external {
         require(usdtAmount > 0, "PMTOnramp: zero amount");
 
-        // --- pull USDT from user ---
-        _call(USDT, abi.encodeWithSelector(
+        // Pull USDT from caller
+        _safeCall(USDT, abi.encodeWithSelector(
             bytes4(keccak256("transferFrom(address,address,uint256)")),
             msg.sender, address(this), usdtAmount
         ));
 
-        // --- approve router ---
-        _call(USDT, abi.encodeWithSelector(
+        // Approve router
+        _safeCall(USDT, abi.encodeWithSelector(
             bytes4(keccak256("approve(address,uint256)")),
             V3_ROUTER, usdtAmount
         ));
 
-        // --- exactInputSingle on PancakeSwap V3 ---
-        // Struct: (address tokenIn, address tokenOut, uint24 fee,
-        //          address recipient, uint256 amountIn,
-        //          uint256 amountOutMinimum, uint160 sqrtPriceLimitX96)
-        bytes memory swapCall = abi.encodeWithSelector(
+        // exactInputSingle: USDT -> PMT, PMT sent directly to caller
+        bytes memory callData = abi.encodeWithSelector(
             bytes4(keccak256("exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))")),
             USDT, PMT, POOL_FEE, msg.sender, usdtAmount, minPMTOut, uint160(0)
         );
-        (bool ok, bytes memory result) = V3_ROUTER.call(swapCall);
+        (bool ok, bytes memory ret) = V3_ROUTER.call(callData);
         require(ok, "PMTOnramp: swap failed");
 
-        uint256 pmtOut = abi.decode(result, (uint256));
+        uint256 pmtOut = abi.decode(ret, (uint256));
         emit Swapped(msg.sender, usdtAmount, pmtOut);
     }
 
-    // Internal helper — reverts on failure
-    function _call(address target, bytes memory data) private {
+    function _safeCall(address target, bytes memory data) private {
         (bool ok,) = target.call(data);
         require(ok, "PMTOnramp: call failed");
     }
