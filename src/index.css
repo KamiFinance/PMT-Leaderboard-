@@ -2727,7 +2727,7 @@ body{
 [dir="rtl"] .lp-hero-david {
   right: auto;
   left: 0%;
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 /* Mirror LTR: text fills right portion naturally, overlaps David the same way LTR does */
