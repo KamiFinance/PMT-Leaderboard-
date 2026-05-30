@@ -2,81 +2,66 @@
 pragma solidity ^0.8.20;
 
 /**
- * PMTOnramp — converts USDT directly to PMT via PancakeSwap V3 (BSC)
+ * PMTOnramp — swaps USDT directly to PMT via PancakeSwap V3 on BSC.
  *
- * Deploy this contract on BSC Mainnet.
- * After deploying, paste the contract address in Vercel as VITE_PMT_ONRAMP_CONTRACT.
+ * HOW TO DEPLOY IN REMIX:
+ *   1. Paste this file into Remix
+ *   2. Compile with Solidity 0.8.20
+ *   3. In "Deploy & Run": set Environment to "Injected Provider - MetaMask"
+ *   4. Make sure MetaMask is on BSC Mainnet (chainId 56)
+ *   5. Click Deploy  ← only ONE contract appears, no confusion
  *
- * Flow:
- *   1. User approves USDT to this contract address
- *   2. User calls buyPMT(usdtAmount, minPMT)
- *   3. Contract swaps USDT → PMT via PancakeSwap V3 pool (0.25% fee)
- *   4. PMT lands directly in user's wallet — zero custody
+ * After deploy: copy the contract address to Vercel as VITE_PMT_ONRAMP_CONTRACT
  */
-
-// ── Minimal ERC-20 interface ─────────────────────────────────────────────────
-interface IERC20 {
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function balanceOf(address account) external view returns (uint256);
-}
-
-// ── PancakeSwap V3 ExactInputSingle params (struct OUTSIDE interface) ─────────
-struct ExactInputSingleParams {
-    address tokenIn;
-    address tokenOut;
-    uint24  fee;
-    address recipient;
-    uint256 amountIn;
-    uint256 amountOutMinimum;
-    uint160 sqrtPriceLimitX96;
-}
-
-// ── PancakeSwap V3 Router interface ───────────────────────────────────────────
-interface IPancakeV3Router {
-    function exactInputSingle(ExactInputSingleParams calldata params)
-        external returns (uint256 amountOut);
-}
-
-// ── Main contract ─────────────────────────────────────────────────────────────
 contract PMTOnramp {
 
-    // BSC Mainnet addresses
-    address public constant USDT      = 0x55d398326f99059fF775485246999027B3197955;
-    address public constant PMT       = 0x68Ae2F202799be2008c89e2100257e66F77DA1f3;
-    address public constant V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
-    uint24  public constant POOL_FEE  = 2500; // 0.25% USDT/PMT pool
+    // ── BSC Mainnet addresses ──────────────────────────────────────────
+    address private constant USDT      = 0x55d398326f99059fF775485246999027B3197955;
+    address private constant PMT       = 0x68Ae2F202799be2008c89e2100257e66F77DA1f3;
+    address private constant V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
+    uint24  private constant POOL_FEE  = 2500; // 0.25%
 
     event Swapped(address indexed user, uint256 usdtIn, uint256 pmtOut);
 
     /**
-     * @notice Swap USDT → PMT in a single transaction.
-     * @param usdtAmount  Amount of USDT (18 decimals on BSC) to swap.
-     * @param minPMTOut   Minimum PMT to receive (slippage guard).
+     * @notice One-click USDT → PMT swap.
+     *
+     * Pre-condition: caller must have called USDT.approve(thisAddress, usdtAmount)
+     *
+     * @param usdtAmount  USDT to spend (18 decimals on BSC).
+     * @param minPMTOut   Minimum PMT to accept (slippage protection).
      */
-    function buyPMT(uint256 usdtAmount, uint256 minPMTOut) external returns (uint256 pmtOut) {
-        require(usdtAmount > 0, "PMTOnramp: zero amount");
+    function buyPMT(uint256 usdtAmount, uint256 minPMTOut) external {
+        require(usdtAmount > 0, "zero amount");
 
-        // 1. Pull USDT from caller
-        bool ok = IERC20(USDT).transferFrom(msg.sender, address(this), usdtAmount);
-        require(ok, "PMTOnramp: transferFrom failed");
-
-        // 2. Approve the V3 router to spend the USDT
-        IERC20(USDT).approve(V3_ROUTER, usdtAmount);
-
-        // 3. Swap and send PMT directly to caller
-        pmtOut = IPancakeV3Router(V3_ROUTER).exactInputSingle(
-            ExactInputSingleParams({
-                tokenIn:           USDT,
-                tokenOut:          PMT,
-                fee:               POOL_FEE,
-                recipient:         msg.sender,
-                amountIn:          usdtAmount,
-                amountOutMinimum:  minPMTOut,
-                sqrtPriceLimitX96: 0
-            })
+        // 1 — pull USDT from caller into this contract
+        (bool t,) = USDT.call(
+            abi.encodeWithSignature(
+                "transferFrom(address,address,uint256)",
+                msg.sender, address(this), usdtAmount
+            )
         );
+        require(t, "transferFrom failed");
 
+        // 2 — approve router to spend USDT
+        USDT.call(abi.encodeWithSignature("approve(address,uint256)", V3_ROUTER, usdtAmount));
+
+        // 3 — exactInputSingle: swap USDT → PMT, tokens go straight to caller
+        bytes memory params = abi.encode(
+            USDT,           // tokenIn
+            PMT,            // tokenOut
+            POOL_FEE,       // fee (2500 = 0.25%)
+            msg.sender,     // recipient
+            usdtAmount,     // amountIn
+            minPMTOut,      // amountOutMinimum
+            uint160(0)      // sqrtPriceLimitX96 (no limit)
+        );
+        (bool s, bytes memory ret) = V3_ROUTER.call(
+            abi.encodeWithSignature("exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))", params)
+        );
+        require(s, "swap failed");
+
+        uint256 pmtOut = abi.decode(ret, (uint256));
         emit Swapped(msg.sender, usdtAmount, pmtOut);
     }
 }
