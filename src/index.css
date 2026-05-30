@@ -2705,3 +2705,20 @@ body{
 
 /* Turnstile */
 #turnstile-container iframe { border-radius: 8px; }
+
+/* Request form overlay — aligns top so full form is reachable */
+.request-modal-overlay {
+  align-items: flex-start !important;
+  padding-top: 4vh !important;
+  padding-bottom: 4vh !important;
+}
+.request-modal-box::-webkit-scrollbar {
+  width: 4px;
+}
+.request-modal-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+.request-modal-box::-webkit-scrollbar-thumb {
+  background: rgba(255,215,0,0.2);
+  border-radius: 2px;
+}
