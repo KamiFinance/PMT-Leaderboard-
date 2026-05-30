@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAccount, useWalletClient } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
-import { USDT, BSC_CHAIN_ID } from './wagmi.js'
+import { USDT } from './wagmi.js'
 
-const TRANSAK_API_KEY  = import.meta.env.VITE_TRANSAK_API_KEY || ''
-const PMT_ONRAMP       = import.meta.env.VITE_PMT_ONRAMP_CONTRACT || ''
-const BSC_RPC          = 'https://bsc-dataseed.binance.org/'
+const PMT_ONRAMP = import.meta.env.VITE_PMT_ONRAMP_CONTRACT || ''
+const BSC_RPC    = 'https://bsc-dataseed.binance.org/'
 
 const ONRAMP_ABI = [
   { name: 'buyPMT', type: 'function', stateMutability: 'nonpayable',
@@ -36,27 +35,14 @@ const getUsdtBalance = async (addr) => {
 
 const SLIPPAGE = 0.05
 
-const buildTransakUrl = (walletAddress) => {
-  const params = new URLSearchParams({
-    apiKey: TRANSAK_API_KEY,
-    network: 'bsc',
-    cryptoCurrencyCode: 'USDT',
-    defaultCryptoCurrency: 'USDT',
-    walletAddress: walletAddress,
-    disableWalletAddressForm: 'true',
-    themeColor: 'FFD700',
-    backgroundColor: '0D0D12',
-    hideMenu: 'true',
-    exchangeScreenTitle: 'Buy USDT for PMT',
-  })
-  return `https://global.transak.com/?${params.toString()}`
-}
-
 export default function FiatModal({ onClose, onSwitchToCrypto }) {
   const { address, isConnected } = useAccount()
   const { data: walletClient } = useWalletClient()
 
   const [step, setStep] = useState('intro')
+  const [widgetUrl, setWidgetUrl] = useState(null)
+  const [loadingSession, setLoadingSession] = useState(false)
+  const [sessionError, setSessionError] = useState(null)
   const [usdtReceived, setUsdtReceived] = useState(0n)
   const [error, setError] = useState(null)
   const [txHash, setTxHash] = useState(null)
@@ -80,8 +66,23 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
   useEffect(() => () => clearInterval(pollingRef.current), [])
 
   const handleStartTransak = async () => {
-    await startPolling()
-    setStep('transak')
+    setLoadingSession(true)
+    setSessionError(null)
+    try {
+      const res = await fetch('/api/transak-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: address }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Session failed')
+      setWidgetUrl(data.widgetUrl)
+      await startPolling()
+      setStep('transak')
+    } catch (e) {
+      setSessionError(e.message)
+    }
+    setLoadingSession(false)
   }
 
   const handleConvert = async () => {
@@ -120,7 +121,10 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
 
   return (
     <div className="video-modal-overlay" onClick={onClose}>
-      <div className={`swap-modal-box${step === 'transak' ? ' fiat-transak-modal' : ''}`} onClick={e => e.stopPropagation()}>
+      <div
+        className={`swap-modal-box${step === 'transak' ? ' fiat-transak-modal' : ''}`}
+        onClick={e => e.stopPropagation()}
+      >
         <button className="video-modal-close" onClick={onClose}>✕</button>
 
         <div className="swap-modal-header">
@@ -165,9 +169,14 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
               </div>
             ) : (
               <>
-                <button className="lp-btn-primary swap-btn" onClick={handleStartTransak}
-                  style={{width:'100%',border:'none',cursor:'pointer'}}>
-                  💳 Continue to Payment
+                {sessionError && <div className="swap-error" style={{marginBottom:12}}>{sessionError}</div>}
+                <button
+                  className="lp-btn-primary swap-btn"
+                  onClick={handleStartTransak}
+                  disabled={loadingSession}
+                  style={{width:'100%',border:'none',cursor:'pointer'}}
+                >
+                  {loadingSession ? 'Loading…' : '💳 Continue to Payment'}
                 </button>
                 <p className="swap-disclaimer">KYC + payment handled by Transak · Powered by Public Masterpiece</p>
               </>
@@ -175,9 +184,9 @@ export default function FiatModal({ onClose, onSwitchToCrypto }) {
           </div>
         )}
 
-        {step === 'transak' && (
+        {step === 'transak' && widgetUrl && (
           <iframe
-            src={buildTransakUrl(address)}
+            src={widgetUrl}
             allow="camera;microphone;payment"
             className="fiat-transak-iframe"
             style={{borderRadius:'0 0 20px 20px'}}
