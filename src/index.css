@@ -2722,3 +2722,55 @@ body{
   background: rgba(255,215,0,0.2);
   border-radius: 2px;
 }
+
+/* ── RTL (Arabic) hero fixes ─────────────────────────────────────────── */
+[dir="rtl"] .lp-hero-david {
+  right: auto;
+  left: 0%;
+  justify-content: flex-start;
+}
+[dir="rtl"] .lp-hero-inner {
+  padding-left: 48vw;
+  padding-right: 40px;
+}
+[dir="rtl"] .lp-hero-badge {
+  margin-right: 0;
+  margin-left: auto;
+}
+[dir="rtl"] .lp-hero-cta {
+  justify-content: flex-end;
+}
+
+/* Fix header layout in RTL — keep logo on right, nav + buttons on left */
+[dir="rtl"] .lp-header-inner {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .lp-header-right {
+  flex-direction: row-reverse;
+}
+
+/* Fix section inner text in RTL */
+[dir="rtl"] .lp-section-inner {
+  text-align: right;
+}
+[dir="rtl"] .lp-badge {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Fix hero text alignment in RTL */
+[dir="rtl"] .lp-hero-title,
+[dir="rtl"] .lp-hero-sub {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  [dir="rtl"] .lp-hero-inner {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  [dir="rtl"] .lp-hero-david {
+    right: -30%;
+    left: auto;
+  }
+}
