@@ -454,28 +454,28 @@ export default function LandingPage({ onNavigate }) {
             {formSent ? (
               <div className="request-modal-success">
                 <div className="request-modal-success-icon">✓</div>
-                <h3>Request Sent!</h3>
-                <p>We'll review your application and get back to you via Telegram or email.</p>
-                <button className="lp-btn-primary" onClick={() => setRequestModal(false)}>Close</button>
+                <h3>{lang.howToJoin.formSuccessTitle}</h3>
+                <p>{lang.howToJoin.formSuccessMsg}</p>
+                <button className="lp-btn-primary" onClick={() => setRequestModal(false)}>{lang.howToJoin.formClose}</button>
               </div>
             ) : (
               <>
                 <div className="request-modal-header">
-                  <h2>Request a Spot</h2>
-                  <p>Fill in your details and we'll get back to you.</p>
+                  <h2>{lang.howToJoin.formTitle}</h2>
+                  <p>{lang.howToJoin.formSubtitle}</p>
                 </div>
                 <div className="request-modal-form">
                   <div className="request-form-group">
-                    <label>Your Name</label>
+                    <label>{lang.howToJoin.formName}</label>
                     <input
                       type="text"
-                      placeholder="John Smith"
+                      {...{placeholder: lang.howToJoin.formNamePh}}
                       value={formData.name}
                       onChange={e => setFormData(p => ({...p, name: e.target.value}))}
                     />
                   </div>
                   <div className="request-form-group">
-                    <label>Wallet Address</label>
+                    <label>{lang.howToJoin.formWallet}</label>
                     <input
                       type="text"
                       placeholder="0x..."
@@ -484,7 +484,7 @@ export default function LandingPage({ onNavigate }) {
                     />
                   </div>
                   <div className="request-form-group">
-                    <label>Telegram Username</label>
+                    <label>{lang.howToJoin.formTelegram}</label>
                     <input
                       type="text"
                       placeholder="@username"
@@ -493,7 +493,7 @@ export default function LandingPage({ onNavigate }) {
                     />
                   </div>
                   <div className="request-form-group">
-                    <label>Email Address</label>
+                    <label>{lang.howToJoin.formEmail}</label>
                     <input
                       type="email"
                       placeholder="you@example.com"
@@ -502,9 +502,9 @@ export default function LandingPage({ onNavigate }) {
                     />
                   </div>
                   <div className="request-form-group">
-                    <label>About You</label>
+                    <label>{lang.howToJoin.formAbout}</label>
                     <textarea
-                      placeholder="Tell us a bit about yourself — background, why you want to join..."
+                      {...{placeholder: lang.howToJoin.formAboutPh}}
                       value={formData.about}
                       onChange={e => setFormData(p => ({...p, about: e.target.value}))}
                       rows={3}
@@ -537,9 +537,9 @@ export default function LandingPage({ onNavigate }) {
                         alert('Connection error. Please try again.')
                       }
                     }}>
-                    Send Request
+                    {lang.howToJoin.formSend}
                   </button>
-                  <p className="request-form-note">Wallet + Telegram are required.</p>
+                  <p className="request-form-note">{lang.howToJoin.formNote}</p>
                 </div>
               </>
             )}
