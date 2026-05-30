@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import SwapModal from './SwapModal.jsx'
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
 import WalletModal from './WalletModal.jsx'
 import { detectLanguage, T } from './i18n.js'
 
@@ -312,7 +314,7 @@ export default function LandingPage({ onNavigate }) {
           <div style={{textAlign:'center',marginTop:32}}>
             <button
               className="lp-btn-primary lp-btn-lg"
-              onClick={() => { setFormData({name:'',wallet:'',telegram:'',email:'',about:''}); setFormSent(false); setRequestModal(true); window.turnstileToken=null; setTimeout(()=>{ if(window.turnstile){ window.turnstile.render('#turnstile-container',{ sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA', callback: t => { window.turnstileToken = t } }) } }, 300) }}
+              onClick={() => { setFormData({name:'',wallet:'',telegram:'',email:'',about:''}); setFormSent(false); setRequestModal(true); window.turnstileToken=null; setTimeout(()=>{ if(window.turnstile){ window.turnstile.render('#turnstile-container',{ sitekey: TURNSTILE_SITE_KEY, callback: t => { window.turnstileToken = t } }) } }, 300) }}
               style={{cursor:'pointer',border:'none'}}
             >
               {lang.howToJoin.requestBtn}
