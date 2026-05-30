@@ -510,9 +510,7 @@ export default function LandingPage({ onNavigate }) {
                       rows={4}
                     />
                   </div>
-                  <button
-                    className="lp-btn-primary request-form-submit"
-                    {/* Cloudflare Turnstile widget */}
+                  {/* Cloudflare Turnstile widget */}
                   <div id="turnstile-container" style={{display:'flex',justifyContent:'center',margin:'4px 0'}}></div>
 
                   <button
