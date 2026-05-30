@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import SwapModal from './SwapModal.jsx'
+import FiatModal from './FiatModal.jsx'
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
 import WalletModal from './WalletModal.jsx'
@@ -24,6 +25,8 @@ export default function LandingPage({ onNavigate }) {
   const [langOpen, setLangOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(null)
   const [showSwap, setShowSwap] = useState(false)
+  const [showFiat, setShowFiat] = useState(false)
+  const [showBuyChoice, setShowBuyChoice] = useState(false)
   const [showWallet, setShowWallet] = useState(() => !!sessionStorage.getItem('pmt_wc_pending'))
   const [scrolled, setScrolled] = useState(false)
 
@@ -120,7 +123,7 @@ export default function LandingPage({ onNavigate }) {
 
   // TODO: replace with internal swap function when PMT Chain is live
   const handleBuyPmt = () => {
-    setShowSwap(true)
+    setShowBuyChoice(true)
   }
 
   const switchLang = (code) => {
@@ -445,6 +448,31 @@ export default function LandingPage({ onNavigate }) {
       </footer>
 
       {showSwap && <SwapModal onClose={() => setShowSwap(false)} />}
+      {/* ── Buy PMT Chooser ──────────────────────────────────────────────── */}
+      {showBuyChoice && (
+        <div className="video-modal-overlay" onClick={() => setShowBuyChoice(false)}>
+          <div className="buy-choice-box" onClick={e => e.stopPropagation()}>
+            <button className="video-modal-close" onClick={() => setShowBuyChoice(false)}>✕</button>
+            <div className="buy-choice-title">Buy PMT</div>
+            <div className="buy-choice-subtitle">Choose how you want to pay</div>
+            <div className="buy-choice-options">
+              <button className="buy-choice-btn" onClick={() => { setShowBuyChoice(false); setShowSwap(true) }}>
+                <span className="buy-choice-icon">⟳</span>
+                <span className="buy-choice-label">With Crypto</span>
+                <span className="buy-choice-desc">Swap BNB or USDT → PMT</span>
+              </button>
+              <button className="buy-choice-btn buy-choice-btn--fiat" onClick={() => { setShowBuyChoice(false); setShowFiat(true) }}>
+                <span className="buy-choice-icon">💳</span>
+                <span className="buy-choice-label">With Card / Bank</span>
+                <span className="buy-choice-desc">Credit card, bank transfer, Apple Pay</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFiat && <FiatModal onClose={() => setShowFiat(false)} onSwitchToCrypto={() => { setShowFiat(false); setShowSwap(true) }} />}
+
 
       {/* ── Request a Spot Modal ──────────────────────────────────────── */}
       {requestModal && (
