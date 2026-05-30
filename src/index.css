@@ -2769,3 +2769,11 @@ body{
     opacity: 0.5;
   }
 }
+
+/* RTL: give text container breathing room from right edge */
+[dir="rtl"] .lp-hero-content {
+  padding-right: 48px;
+  padding-left: 8px;
+  align-items: flex-end;
+  text-align: right;
+}
