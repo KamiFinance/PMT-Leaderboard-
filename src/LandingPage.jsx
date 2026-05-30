@@ -448,7 +448,7 @@ export default function LandingPage({ onNavigate }) {
 
       {/* ── Request a Spot Modal ──────────────────────────────────────── */}
       {requestModal && (
-        <div className="video-modal-overlay" onClick={() => setRequestModal(false)}>
+        <div className="video-modal-overlay request-modal-overlay" onClick={() => setRequestModal(false)}>
           <div className="request-modal-box" onClick={e => e.stopPropagation()}>
             <button className="video-modal-close" onClick={() => setRequestModal(false)}>✕</button>
             {formSent ? (
