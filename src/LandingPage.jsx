@@ -130,14 +130,14 @@ export default function LandingPage({ onNavigate }) {
   }
 
   const LANGS = [
-    { code:'en', flag:'🇬🇧', label:'EN' },
-    { code:'de', flag:'🇩🇪', label:'DE' },
-    { code:'ar', flag:'🇦🇪', label:'AR' },
-    { code:'tr', flag:'🇹🇷', label:'TR' },
-    { code:'fr', flag:'🇫🇷', label:'FR' },
-    { code:'es', flag:'🇪🇸', label:'ES' },
-    { code:'ru', flag:'🇷🇺', label:'RU' },
-    { code:'zh', flag:'🇨🇳', label:'ZH' },
+    { code:'en', flag:'🇬🇧', cc:'gb', label:'EN' },
+    { code:'de', flag:'🇩🇪', cc:'de', label:'DE' },
+    { code:'ar', flag:'🇦🇪', cc:'ae', label:'AR' },
+    { code:'tr', flag:'🇹🇷', cc:'tr', label:'TR' },
+    { code:'fr', flag:'🇫🇷', cc:'fr', label:'FR' },
+    { code:'es', flag:'🇪🇸', cc:'es', label:'ES' },
+    { code:'ru', flag:'🇷🇺', cc:'ru', label:'RU' },
+    { code:'zh', flag:'🇨🇳', cc:'cn', label:'ZH' },
   ]
 
   const currentLang = LANGS.find(l => l.label === Object.keys(T).find(k => T[k] === lang)?.toUpperCase()) || LANGS[0]
@@ -173,14 +173,14 @@ export default function LandingPage({ onNavigate }) {
                 onClick={()=>setLangOpen(o=>!o)}
                 style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.12)',borderRadius:8,padding:'6px 10px',color:'rgba(255,255,255,.8)',fontSize:13,cursor:'pointer',display:'flex',alignItems:'center',gap:5,transition:'all .15s',whiteSpace:'nowrap'}}
               >
-                {LANGS.find(l=>T[l.code]===lang)?.flag || '🌐'} {Object.keys(T).find(k=>T[k]===lang)?.toUpperCase()||'EN'}
+                {(()=>{const l=LANGS.find(l=>T[l.code]===lang)||LANGS[0];return <><img src={`https://flagcdn.com/w20/${l.cc}.png`} srcSet={`https://flagcdn.com/w40/${l.cc}.png 2x`} alt={l.label} width={20} height={15} style={{borderRadius:2,objectFit:'cover',flexShrink:0}}/><span>{l.label}</span></>;})()}
               </button>
               {langOpen&&(
                 <div style={{position:'absolute',top:'calc(100% + 6px)',left:0,background:'#0e0d09',border:'1px solid rgba(255,215,0,.2)',borderRadius:10,overflow:'hidden',zIndex:9999,minWidth:110,boxShadow:'0 8px 24px rgba(0,0,0,.6)'}}>
                   {LANGS.map(l=>(
                     <button key={l.code} onClick={()=>switchLang(l.code)}
                       style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'9px 14px',background:T[l.code]===lang?'rgba(255,215,0,.08)':'transparent',border:'none',color:T[l.code]===lang?'#FFD700':'rgba(255,255,255,.7)',fontSize:13,cursor:'pointer',transition:'background .1s',whiteSpace:'nowrap'}}>
-                      {l.flag} {l.label}
+                      <><img src={`https://flagcdn.com/w20/${l.cc}.png`} srcSet={`https://flagcdn.com/w40/${l.cc}.png 2x`} alt={l.label} width={20} height={15} style={{borderRadius:2,objectFit:'cover',flexShrink:0}}/><span>{l.label}</span></>
                     </button>
                   ))}
                 </div>
