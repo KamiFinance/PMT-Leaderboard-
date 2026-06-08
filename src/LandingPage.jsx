@@ -203,7 +203,7 @@ export default function LandingPage({ onNavigate }) {
 
       {/* ── HERO ── */}
       <section className="lp-hero" id="hero">
-        <div className="lp-hero-david"><img src={`${BASE}david.png`} alt="" aria-hidden="true"/></div>
+        <div className="lp-hero-david"><img src={`${BASE}david.webp`} alt="" aria-hidden="true"/></div>
         <div className="lp-hero-content">
           <p className="lp-hero-eyebrow" data-anim="fade-up" data-delay="0">Public Masterpiece</p>
           <h1 className="lp-hero-h" data-anim="fade-up" data-delay="1"><span className="gold">PMT</span> Millionaires Club</h1>
