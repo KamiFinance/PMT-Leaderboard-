@@ -46,11 +46,6 @@ export default function LandingPage({ onNavigate }) {
       .catch(()=>{})
   }, [])
 
-  // Ensure the David video reliably autoplays inline (esp. iOS Safari)
-  useEffect(() => {
-    const v = document.querySelector('.lp-hero-david img')
-    if (v) { v.muted = true; v.play().catch(()=>{}) }
-  }, [])
 
   useEffect(() => {
     let wasDown = false
