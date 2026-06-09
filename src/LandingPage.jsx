@@ -210,7 +210,7 @@ export default function LandingPage({ onNavigate }) {
       {/* ── HERO ── */}
       <section className="lp-hero" id="hero">
         <div className="lp-hero-david"><video autoPlay muted loop playsInline aria-hidden="true">
-          <source src={`${BASE}david.mp4`} type="video/mp4" />
+          <source src={`${BASE}david.mp4?v=2`} type="video/mp4" />
         </video></div>
         <div className="lp-hero-content">
           <p className="lp-hero-eyebrow" data-anim="fade-up" data-delay="0">Public Masterpiece</p>
