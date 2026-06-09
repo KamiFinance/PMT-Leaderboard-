@@ -46,6 +46,12 @@ export default function LandingPage({ onNavigate }) {
       .catch(()=>{})
   }, [])
 
+  // Ensure the David video reliably autoplays inline (esp. iOS Safari)
+  useEffect(() => {
+    const v = document.querySelector('.lp-hero-david video')
+    if (v) { v.muted = true; v.play().catch(()=>{}) }
+  }, [])
+
   useEffect(() => {
     let wasDown = false
     const fn = () => {
@@ -53,7 +59,7 @@ export default function LandingPage({ onNavigate }) {
       setScrolled(y > 40)
       // Re-trigger David zoom when scrolling back to near top
       if (wasDown && y < 60) {
-        const img = document.querySelector('.lp-hero-david img')
+        const img = document.querySelector('.lp-hero-david video')
         if (img) {
           img.style.animation = 'none'
           void img.offsetWidth
@@ -85,7 +91,7 @@ export default function LandingPage({ onNavigate }) {
   // ── Parallax: shift only the image inside the David container ────────
   useEffect(() => {
     const onScroll = () => {
-      const img = document.querySelector('.lp-hero-david img')
+      const img = document.querySelector('.lp-hero-david video')
       if (img) img.style.transform = `translateY(${window.scrollY * 0.12}px)`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -203,7 +209,10 @@ export default function LandingPage({ onNavigate }) {
 
       {/* ── HERO ── */}
       <section className="lp-hero" id="hero">
-        <div className="lp-hero-david"><img src={`${BASE}david.webp?v=4`} alt="" aria-hidden="true"/></div>
+        <div className="lp-hero-david"><video autoPlay muted loop playsInline aria-hidden="true">
+          <source src={`${BASE}david.webm`} type="video/webm" />
+          <source src={`${BASE}david.mp4`} type="video/mp4" />
+        </video></div>
         <div className="lp-hero-content">
           <p className="lp-hero-eyebrow" data-anim="fade-up" data-delay="0">Public Masterpiece</p>
           <h1 className="lp-hero-h" data-anim="fade-up" data-delay="1"><span className="gold">PMT</span> Millionaires Club</h1>

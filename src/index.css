@@ -837,7 +837,8 @@ body{
   z-index: 1;
   overflow: visible;
 }
-.lp-hero-david img {
+.lp-hero-david img,
+.lp-hero-david video {
   height: 62%;
   width: auto;
   max-width: none;
@@ -1847,7 +1848,7 @@ body{
     opacity: 0.6;
     z-index: 0;
   }
-  .lp-hero-david img { height: 56%; }  /* a little smaller than desktop (62%) on mobile */
+  .lp-hero-david img, .lp-hero-david video { height: 56%; }  /* a little smaller than desktop (62%) on mobile */
   .lp-hero-content { order: 1; z-index: 2; position: relative; }
   .lp-hero-content { order: 1; }
   .lp-hero-h {
