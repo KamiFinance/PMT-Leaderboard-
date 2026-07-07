@@ -2,7 +2,7 @@ import { createConfig, http } from 'wagmi'
 import { bsc } from 'viem/chains'
 import { walletConnect, metaMask, injected } from 'wagmi/connectors'
 
-export const WC_PROJECT_ID = '68140be0602e8677013cb0cf750294bc'
+export const WC_PROJECT_ID = 'c2dba76201be08a0906f59f4d416129b'
 
 export const PMT_TOKEN   = '0x68Ae2F202799be2008c89e2100257e66F77DA1f3'
 export const WBNB        = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
