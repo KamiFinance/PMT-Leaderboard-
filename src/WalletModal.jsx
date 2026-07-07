@@ -254,38 +254,56 @@ export default function WalletModal({ onSuccess, onClose, t: tProp }) {
     connectWC(walletId)
   }
 
-  const connect = (walletId) => {
-    if(walletId==='walletconnect'){ connectWC(walletId); return }
+  // Find a SPECIFIC injected provider by flag (handles multi-wallet window.ethereum.providers)
+  const findInjected = (flag) => {
+    const eth = window.ethereum
+    if(!eth) return null
+    if(Array.isArray(eth.providers)) return eth.providers.find(p=>p && p[flag]) || null
+    return eth[flag] ? eth : null
+  }
 
-    // On mobile: use MetaMask SDK for MetaMask (it handles deep link + WC URI natively)
-    // For other wallets on mobile without window.ethereum: use WalletConnect
-    if(isMobile()){
-      if(walletId==='metamask' && mmRef.current){
-        setStatus('connecting')
-        mmRef.current.connect()
-          .then(accounts => {
-            const addr = Array.isArray(accounts) ? accounts[0] : accounts
-            if(addr) return finish(addr)
-            throw new Error('No account')
-          })
-          .catch(handleError)
-        return
-      }
-      // Other mobile wallets: use WalletConnect pre-selecting that wallet
-      if(!window.ethereum){ connectWC(walletId); return }
-    }
-
-    // Desktop / inside wallet browser
-    const provider = walletId==='metamask' ? (provRef.current||window.ethereum) : window.ethereum
-    if(!provider){
-      const DOWNLOAD={metamask:'https://metamask.io/download/',trust:'https://trustwallet.com/download',coinbase:'https://www.coinbase.com/wallet/downloads'}
-      window.open(DOWNLOAD[walletId]||DOWNLOAD.metamask,'_blank')
-      setStatus('noWallet'); return
-    }
+  const requestAccounts = (provider) => {
     setStatus('connecting')
     provider.request({method:'eth_requestAccounts'})
       .then(accounts=>{ if(!accounts?.[0]) throw new Error('No account'); return finish(accounts[0]) })
       .catch(handleError)
+  }
+
+  const connect = (walletId) => {
+    if(walletId==='walletconnect'){ connectWC(walletId); return }
+
+    // Trust / Coinbase: use their OWN injected provider if present, otherwise WalletConnect.
+    // Never fall back to a generic window.ethereum — that is usually MetaMask, which is
+    // why clicking "Trust" used to open MetaMask instead of Trust.
+    if(walletId==='trust'){
+      const p = findInjected('isTrust') || window.trustwallet || null
+      if(p) return requestAccounts(p)
+      connectWC('trust'); return
+    }
+    if(walletId==='coinbase'){
+      const p = findInjected('isCoinbaseWallet') || window.coinbaseWalletExtension || null
+      if(p) return requestAccounts(p)
+      connectWC('coinbase'); return
+    }
+
+    // MetaMask — SDK handles deep link + WC URI natively on mobile
+    if(isMobile() && mmRef.current){
+      setStatus('connecting')
+      mmRef.current.connect()
+        .then(accounts => {
+          const addr = Array.isArray(accounts) ? accounts[0] : accounts
+          if(addr) return finish(addr)
+          throw new Error('No account')
+        })
+        .catch(handleError)
+      return
+    }
+    const provider = findInjected('isMetaMask') || provRef.current || window.ethereum
+    if(!provider){
+      window.open('https://metamask.io/download/','_blank')
+      setStatus('noWallet'); return
+    }
+    requestAccounts(provider)
   }
 
   const hideOverlay = isWC && status==='connecting'
