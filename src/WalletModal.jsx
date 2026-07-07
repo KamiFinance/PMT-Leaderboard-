@@ -181,12 +181,14 @@ export default function WalletModal({ onSuccess, onClose, t: tProp }) {
         trust:'4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
         coinbase:'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
       }
+      // Tangem is mobile-only and not in the modal's default set — surface it explicitly
+      const TANGEM_ID = '21030f20fba1a77115858ee3a8bc5841c739ab4537441316e2f4b1d0a8d218af'
       const p = await EthereumProvider.init({
         projectId:PROJECT_ID, chains:[1], optionalChains:[56,137,42161], showQrModal:true,
         qrModalOptions:{
           themeMode:'dark',
           themeVariables:{'--wcm-accent-color':'#FFD700','--wcm-background-color':'#0e0d09','--wcm-z-index':'99999'},
-          explorerRecommendedWalletIds:WC_IDS[walletId]?[WC_IDS[walletId]]:undefined,
+          explorerRecommendedWalletIds:[WC_IDS[walletId], TANGEM_ID].filter(Boolean),
           enableExplorer:true,
         },
         metadata:{name:'PMT Millionaires Club',description:'The elite holders of the PMT ecosystem.',url:window.location.origin,icons:[window.location.origin+'/PMT-logo.png']}
